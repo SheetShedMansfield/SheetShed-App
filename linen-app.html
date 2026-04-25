@@ -1,0 +1,2902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sheet Shed — Mansfield</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800;900&family=Nunito+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a18;
+  --ink2: #4a4a44;
+  --ink3: #8a8a80;
+  --bg: #f5f2ec;
+  --bg2: #ede9e0;
+  --bg3: #e2ddd3;
+  --white: #fdfcf9;
+  --accent: #2d5a3d;
+  --accent2: #4a8c62;
+  --accent-light: #e8f2ec;
+  --amber: #c4690a;
+  --amber-light: #fef3e2;
+  --red: #b03030;
+  --red-light: #fdeaea;
+  --blue: #1e4a7a;
+  --blue-light: #e8f0fa;
+  --border: rgba(26,26,24,0.12);
+  --radius: 10px;
+  --shadow: 0 2px 12px rgba(26,26,24,0.08);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Nunito Sans', sans-serif; background: var(--bg); color: var(--ink); font-size: 14px; line-height: 1.6; min-height: 100vh; }
+h1,h2,h3 { font-family: 'Nunito', sans-serif; font-weight: 800; }
+
+/* NAV */
+nav { background: var(--ink); color: var(--white); display: flex; align-items: center; gap: 0; height: 52px; padding: 0 24px; position: sticky; top: 0; z-index: 100; }
+.nav-logo { font-family: 'Nunito', sans-serif; font-size: 20px; font-weight: 900; letter-spacing: -0.5px; color: var(--white); margin-right: 32px; }
+.nav-logo span { color: #c8c8c4; font-weight: 400; font-style: italic; }
+.nav-tabs { display: flex; gap: 2px; flex: 1; }
+.nav-tab { padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; font-family: 'Nunito Sans', sans-serif; color: rgba(255,255,255,0.6); transition: all 0.15s; border: none; background: none; }
+.nav-tab:hover { color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.08); }
+.nav-tab.active { color: var(--white); background: rgba(255,255,255,0.15); }
+.nav-right { font-size: 12px; color: rgba(255,255,255,0.45); }
+
+/* PAGES */
+.page { display: none; padding: 28px 28px; max-width: 1100px; margin: 0 auto; }
+.page.active { display: block; }
+
+/* DASHBOARD */
+.day-header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 24px; }
+.day-header h1 { font-size: 26px; font-weight: 800; color: var(--ink); }
+.day-header .date { font-size: 14px; color: var(--ink3); }
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
+.stat-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; }
+.stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink3); margin-bottom: 6px; }
+.stat-val { font-family: 'Nunito', sans-serif; font-size: 30px; font-weight: 800; color: var(--ink); line-height: 1; }
+.stat-sub { font-size: 12px; color: var(--ink3); margin-top: 4px; }
+
+.section-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink3); margin-bottom: 12px; }
+
+.order-list { display: flex; flex-direction: column; gap: 8px; }
+.order-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; display: flex; align-items: center; gap: 16px; transition: box-shadow 0.15s; }
+.order-card:hover { box-shadow: var(--shadow); }
+.order-prop { font-weight: 600; font-size: 14px; min-width: 180px; }
+.order-prop span { display: block; font-size: 12px; font-weight: 400; color: var(--ink3); margin-top: 1px; }
+.order-beds { display: flex; gap: 6px; flex-wrap: wrap; min-width: 160px; }
+.bed-pill { font-size: 11px; padding: 3px 9px; border-radius: 20px; font-weight: 500; }
+.bed-queen { background: var(--blue-light); color: var(--blue); }
+.bed-king { background: var(--amber-light); color: var(--amber); }
+.bed-single { background: var(--accent-light); color: var(--accent); }
+.bed-twin { background: #f0eafa; color: #5a3a8a; }
+.order-time { font-size: 12px; color: var(--ink3); min-width: 80px; }
+.order-status { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.status-pill { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+.status-packed { background: var(--accent-light); color: var(--accent); }
+.status-pending { background: var(--amber-light); color: var(--amber); }
+.status-collected { background: var(--bg2); color: var(--ink3); }
+
+.packing-section { margin-top: 28px; }
+.pack-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-top: 12px; }
+.pack-item { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.15s; }
+.pack-item.checked { background: var(--accent-light); border-color: var(--accent2); }
+.pack-check { width: 18px; height: 18px; border: 1.5px solid var(--border); border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.pack-item.checked .pack-check { background: var(--accent); border-color: var(--accent); }
+.pack-check svg { display: none; }
+.pack-item.checked .pack-check svg { display: block; }
+.pack-name { font-size: 13px; font-weight: 500; }
+.pack-count { font-size: 12px; color: var(--ink3); }
+
+/* PROPERTIES */
+.toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; }
+.search-box { flex: 1; max-width: 340px; position: relative; }
+.search-box input { width: 100%; padding: 8px 12px 8px 34px; border: 1px solid var(--border); border-radius: 8px; background: var(--white); font-family: inherit; font-size: 13px; color: var(--ink); outline: none; }
+.search-box input:focus { border-color: var(--accent2); }
+.search-box svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--ink3); }
+.btn { padding: 8px 16px; border-radius: 8px; font-family: 'Nunito Sans', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; border: none; transition: all 0.15s; }
+.btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover { background: var(--accent2); }
+.btn-outline { background: var(--white); color: var(--ink); border: 1px solid var(--border); }
+.btn-outline:hover { background: var(--bg2); }
+.btn-sm { padding: 5px 11px; font-size: 12px; }
+
+.prop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.prop-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; transition: box-shadow 0.15s; }
+.prop-card:hover { box-shadow: var(--shadow); }
+.prop-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.prop-name { font-weight: 600; font-size: 14px; }
+.prop-owner { font-size: 12px; color: var(--ink3); margin-top: 2px; }
+.platform-badge { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.04em; }
+.plat-homhero { background: #e8f0fa; color: #1e4a7a; }
+.plat-airbnb { background: #fdeaea; color: #b03030; }
+.plat-guesty { background: #f0eafa; color: #5a3a8a; }
+.plat-stayz { background: #fef3e2; color: #c4690a; }
+.plat-manual { background: var(--bg2); color: var(--ink3); }
+.prop-beds { display: flex; gap: 5px; flex-wrap: wrap; margin: 8px 0; }
+.prop-ical { font-size: 11px; color: var(--ink3); display: flex; align-items: center; gap: 5px; margin-top: 8px; overflow: hidden; }
+.prop-ical-url { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
+.prop-status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.dot-green { background: #2d5a3d; }
+.dot-amber { background: #c4690a; }
+.prop-actions { display: flex; gap: 6px; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; }
+
+/* MODAL */
+.modal-bg { display: none; position: fixed; inset: 0; background: rgba(26,26,24,0.5); z-index: 200; align-items: center; justify-content: center; }
+.modal-bg.open { display: flex; }
+.modal { background: var(--white); border-radius: 14px; padding: 28px; width: 560px; max-width: 95vw; max-height: 90vh; overflow-y: auto; }
+.modal h2 { font-size: 22px; margin-bottom: 6px; }
+.modal-sub { font-size: 13px; color: var(--ink3); margin-bottom: 22px; }
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink2); margin-bottom: 6px; }
+.form-input { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 13px; color: var(--ink); background: var(--bg); outline: none; transition: border-color 0.15s; }
+.form-input:focus { border-color: var(--accent2); background: var(--white); }
+.form-input.textarea { min-height: 90px; resize: vertical; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-select { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 13px; color: var(--ink); background: var(--bg); outline: none; cursor: pointer; }
+.beds-builder { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.bed-type-btn { padding: 8px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--bg); font-family: inherit; font-size: 12px; font-weight: 500; cursor: pointer; text-align: center; transition: all 0.15s; }
+.bed-type-btn.active { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+.bed-count-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; font-size: 13px; }
+.bed-count-row .btype { min-width: 80px; font-weight: 500; }
+.count-ctrl { display: flex; align-items: center; gap: 8px; }
+.count-btn { width: 26px; height: 26px; border: 1px solid var(--border); border-radius: 6px; background: var(--white); cursor: pointer; font-size: 16px; line-height: 1; display: flex; align-items: center; justify-content: center; font-family: inherit; }
+.count-val { min-width: 20px; text-align: center; font-weight: 600; }
+.modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--border); }
+
+/* BULK IMPORT */
+.import-box { border: 2px dashed var(--border); border-radius: var(--radius); padding: 20px; background: var(--bg); }
+.import-box textarea { width: 100%; border: none; background: transparent; font-family: 'DM Sans', monospace; font-size: 12px; color: var(--ink2); resize: vertical; outline: none; min-height: 120px; }
+
+/* CUSTOMERS */
+.customer-list { display: flex; flex-direction: column; gap: 8px; }
+.customer-row { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; display: flex; align-items: center; gap: 16px; }
+.cust-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-light); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; color: var(--accent); flex-shrink: 0; }
+.cust-name { font-weight: 600; font-size: 14px; }
+.cust-sub { font-size: 12px; color: var(--ink3); }
+.cust-props { margin-left: auto; font-size: 12px; color: var(--ink3); text-align: right; }
+.cust-props strong { display: block; font-size: 18px; font-family: 'Nunito', sans-serif; font-weight: 800; color: var(--ink); }
+
+/* SETTINGS / iCal info */
+.info-box { background: var(--accent-light); border: 1px solid rgba(45,90,61,0.2); border-radius: var(--radius); padding: 14px 18px; margin-bottom: 20px; font-size: 13px; color: var(--accent); }
+.platform-list { display: flex; flex-direction: column; gap: 10px; }
+.plat-row { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; display: flex; align-items: center; gap: 14px; }
+.plat-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.plat-desc { flex: 1; }
+.plat-name { font-weight: 600; font-size: 13px; }
+.plat-path { font-size: 12px; color: var(--ink3); font-family: monospace; margin-top: 2px; }
+
+/* EMPTY STATE */
+.empty { text-align: center; padding: 60px 20px; color: var(--ink3); }
+.empty h3 { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--ink2); margin-bottom: 8px; }
+
+/* PRICING */
+.pricing-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+.pricing-left, .pricing-right { display: flex; flex-direction: column; gap: 0; }
+.price-setting-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 0; }
+.psc-row { display: flex; align-items: center; gap: 16px; padding: 13px 18px; border-bottom: 1px solid var(--border); }
+.psc-row:last-child { border-bottom: none; }
+.psc-label { flex: 1; font-size: 13px; font-weight: 500; }
+.psc-label span { display: block; font-size: 11px; font-weight: 400; color: var(--ink3); margin-top: 1px; }
+.psc-control { display: flex; align-items: center; gap: 10px; min-width: 160px; }
+.psc-control input { flex: 1; }
+.psc-val { font-size: 13px; font-weight: 600; min-width: 38px; text-align: right; color: var(--accent); }
+.pricing-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; margin-bottom: 18px; }
+.loss-note { background: var(--amber-light); border: 1px solid rgba(196,105,10,0.2); border-radius: var(--radius); padding: 14px 18px; font-size: 12px; color: var(--ink2); line-height: 1.6; margin-top: 4px; }
+.loss-note-title { font-weight: 600; font-size: 12px; color: var(--amber); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.05em; }
+.price-table-wrap { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-top: 12px; }
+.price-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.price-table th { background: var(--bg2); padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink3); border-bottom: 1px solid var(--border); }
+.price-table td { padding: 11px 14px; border-bottom: 1px solid var(--border); }
+.price-table tr:last-child td { border-bottom: none; }
+.price-table tr:hover td { background: var(--bg); }
+.price-table .charge { font-weight: 600; color: var(--accent); }
+.spare-toggle { position: relative; display: inline-block; width: 36px; height: 20px; cursor: pointer; }
+.spare-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+.spare-track { position: absolute; inset: 0; background: var(--bg3); border-radius: 20px; transition: background 0.2s; }
+.spare-track::after { content: ''; position: absolute; width: 14px; height: 14px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.2s; }
+.spare-toggle input:checked + .spare-track { background: var(--accent); }
+.spare-toggle input:checked + .spare-track::after { transform: translateX(16px); }
+/* INVOICING */
+.inv-layout { display: grid; grid-template-columns: 300px 1fr; gap: 24px; align-items: start; }
+.inv-list { display: flex; flex-direction: column; gap: 8px; }
+.inv-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px 16px; cursor: pointer; transition: box-shadow 0.15s; }
+.inv-card:hover { box-shadow: var(--shadow); }
+.inv-card.selected { border-color: var(--accent2); background: var(--accent-light); }
+.inv-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+.inv-card-name { font-weight: 600; font-size: 13px; }
+.inv-card-period { font-size: 11px; color: var(--ink3); margin-top: 2px; }
+.inv-amount { font-size: 16px; font-weight: 800; font-family: 'Nunito', sans-serif; }
+.inv-status { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; margin-top: 4px; display: inline-block; }
+.inv-draft { background: var(--bg2); color: var(--ink3); }
+.inv-sent { background: var(--blue-light); color: var(--blue); }
+.inv-paid { background: var(--accent-light); color: var(--accent); }
+.inv-overdue { background: var(--red-light); color: var(--red); }
+.invoice-preview { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.inv-preview-toolbar { display: flex; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--bg); align-items: center; }
+.inv-preview-title { font-size: 13px; font-weight: 500; flex: 1; }
+.invoice-doc { padding: 32px 36px; }
+.inv-doc-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; }
+.inv-doc-logo { font-family: 'Nunito', sans-serif; font-size: 24px; font-weight: 900; color: var(--ink); letter-spacing: -0.5px; }
+.inv-doc-logo span { font-style: italic; color: var(--ink3); font-weight: 400; }
+.inv-doc-meta { text-align: right; font-size: 12px; color: var(--ink3); line-height: 1.8; }
+.inv-doc-meta strong { color: var(--ink); font-size: 14px; display: block; }
+.inv-parties { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+.inv-party-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink3); margin-bottom: 6px; }
+.inv-party-name { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+.inv-party-detail { font-size: 12px; color: var(--ink3); line-height: 1.7; }
+.inv-line-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 20px; }
+.inv-line-table th { background: var(--ink); color: var(--white); padding: 9px 12px; text-align: left; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+.inv-line-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.inv-line-table tr:last-child td { border-bottom: none; }
+.inv-line-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.inv-totals { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; margin-bottom: 24px; }
+.inv-total-row { display: flex; gap: 40px; font-size: 13px; }
+.inv-total-row .tlabel { color: var(--ink3); min-width: 80px; text-align: right; }
+.inv-total-row .tval { min-width: 80px; text-align: right; font-variant-numeric: tabular-nums; }
+.inv-total-row.grand { font-weight: 600; font-size: 15px; border-top: 2px solid var(--ink); padding-top: 8px; margin-top: 4px; }
+.inv-footer { font-size: 11px; color: var(--ink3); border-top: 1px solid var(--border); padding-top: 16px; line-height: 1.8; }
+.inv-generate-box { background: var(--accent-light); border: 1px solid rgba(45,90,61,0.2); border-radius: var(--radius); padding: 16px 18px; margin-bottom: 16px; }
+.inv-generate-title { font-weight: 600; font-size: 13px; color: var(--accent); margin-bottom: 10px; }
+.inv-generate-row { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+.inv-generate-row label { font-size: 12px; color: var(--ink2); min-width: 80px; }
+.inv-generate-row select, .inv-generate-row input { flex: 1; padding: 7px 10px; border: 1px solid var(--border); border-radius: 7px; font-family: inherit; font-size: 12px; background: var(--white); color: var(--ink); outline: none; }
+.cal-day-header { text-align:center; font-size:11px; font-weight:700; color:var(--ink3); padding:6px 0; text-transform:uppercase; letter-spacing:0.06em; }
+.cal-day { min-height:76px; border-radius:10px; background:var(--white); border:1px solid var(--border); padding:6px 8px; cursor:pointer; transition:all 0.15s; }
+.cal-day:hover { border-color:var(--ink); }
+.cal-day.today { border:2px solid var(--ink); }
+.cal-day.other-month { background:var(--bg2); opacity:0.45; pointer-events:none; }
+.cal-day.selected { border:2px solid var(--ink); background:var(--accent-light); }
+.cal-day-num { font-size:12px; font-weight:700; color:var(--ink); line-height:1; }
+.cal-total-badge { font-size:11px; font-weight:800; font-family:'Nunito',sans-serif; color:var(--ink3); background:var(--bg2); border-radius:10px; padding:1px 6px; line-height:1.4; }
+.cal-dot-row { display:flex; align-items:center; gap:5px; margin-top:4px; }
+.cal-dot { width:8px; height:8px; border-radius:2px; flex-shrink:0; }
+.cal-dot-count { font-size:11px; font-weight:800; font-family:'Nunito',sans-serif; color:var(--ink); min-width:12px; }
+.cal-dot-label { font-size:10px; color:var(--ink3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:68px; }
+.cal-legend-item { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink2); }
+.cal-detail-order { background:var(--white); border:1px solid var(--border); border-radius:10px; padding:12px 14px; margin-bottom:8px; }
+.cal-detail-order-name { font-family:'Nunito',sans-serif; font-size:14px; font-weight:700; color:var(--ink); margin-bottom:2px; }
+.cal-detail-order-meta { font-size:12px; color:var(--ink3); margin-bottom:6px; }
+.cal-detail-pack-item { display:flex; justify-content:space-between; align-items:center; padding:7px 12px; border-radius:8px; margin-bottom:4px; background:var(--white); border:1px solid var(--border); }
+.cal-detail-pack-name { font-size:13px; color:var(--ink2); }
+.cal-detail-pack-count { font-family:'Nunito',sans-serif; font-size:15px; font-weight:800; color:var(--ink); }
+.kit-status-none { background: var(--bg2); color: var(--ink3); }
+.kit-status-needed { background: var(--amber-light); color: var(--amber); }
+.kit-item-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+.kit-item-row:last-child { border-bottom: none; }
+.kit-item-name { flex: 1; font-size: 13px; }
+.kit-item-qty { width: 60px; padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 13px; text-align: center; background: var(--bg); color: var(--ink); }
+.kit-summary { font-size: 12px; color: var(--ink3); margin-top: 4px; }
+/* ALERTS */
+.alert-banner { background:#fff0f0; border:1.5px solid #e03030; border-radius:12px; padding:16px 20px; margin-bottom:18px; display:none; }
+.alert-banner.show { display:block; }
+.alert-banner-title { font-family:'Nunito',sans-serif; font-size:15px; font-weight:800; color:#c02020; display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+.alert-item { background:white; border:1.5px solid #f0a0a0; border-radius:10px; padding:12px 14px; margin-bottom:8px; display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+.alert-item:last-child { margin-bottom:0; }
+.alert-item-left { flex:1; }
+.alert-item-prop { font-family:'Nunito',sans-serif; font-size:14px; font-weight:800; color:#c02020; }
+.alert-item-meta { font-size:12px; color:#7a3030; margin-top:2px; line-height:1.6; }
+.alert-item-kit { font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; margin-top:6px; display:inline-block; }
+.alert-dismiss { font-size:11px; font-weight:700; color:#c02020; cursor:pointer; background:none; border:1px solid #f0a0a0; border-radius:6px; padding:4px 10px; flex-shrink:0; white-space:nowrap; }
+.trip-calc { background:#fff8f8; border:1px solid #f0c0c0; border-radius:8px; padding:10px 12px; margin-top:10px; }
+.trip-calc-title { font-family:'Nunito',sans-serif; font-size:11px; font-weight:800; color:#c02020; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.05em; }
+.trip-calc-row { display:flex; justify-content:space-between; align-items:center; font-size:12px; color:#7a3030; padding:3px 0; }
+.trip-linen-title { font-size:11px; font-weight:700; color:#c02020; margin-top:10px; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em; }
+.trip-linen-grid { display:flex; gap:8px; flex-wrap:wrap; }
+.trip-linen-item { background:white; border:1px solid #f0a0a0; border-radius:7px; padding:5px 10px; text-align:center; font-size:11px; color:#7a3030; }
+.trip-linen-item span { display:block; font-family:'Nunito',sans-serif; font-size:18px; font-weight:900; color:#c02020; line-height:1; margin-bottom:2px; }
+.late-pack-section { margin-top:18px; background:#fff8f8; border:1.5px solid #e03030; border-radius:12px; padding:16px 20px; }
+.late-pack-title { font-family:'Nunito',sans-serif; font-size:14px; font-weight:800; color:#c02020; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+.late-pack-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:8px; }
+/* Urgent order cards */
+.order-card.urgent { border:2px solid #e03030; background:#fff8f8; }
+.order-card.urgent .order-prop { color:#c02020; }
+.urgent-tag { display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:800; background:#e03030; color:white; padding:2px 8px; border-radius:10px; margin-left:8px; letter-spacing:0.04em; }
+/* Nav alert dot */
+.nav-alert-dot { display:inline-block; width:7px; height:7px; background:#e03030; border-radius:50%; margin-left:5px; vertical-align:middle; animation: pulse-dot 1.5s ease-in-out infinite; }
+@keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(1.3)} }
+.quote-doc { padding: 36px 40px; background: white; font-family: 'Nunito Sans', sans-serif; }
+.quote-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px; padding-bottom:20px; border-bottom:2px solid var(--ink); }
+.quote-logo { font-family:'Nunito',sans-serif; font-size:22px; font-weight:900; color:var(--ink); letter-spacing:-0.5px; }
+.quote-logo span { font-style:italic; color:var(--ink3); font-weight:300; }
+.quote-meta { text-align:right; font-size:12px; color:var(--ink3); line-height:1.8; }
+.quote-title { font-family:'Nunito',sans-serif; font-size:26px; font-weight:800; color:var(--ink); margin-bottom:4px; }
+.quote-to { font-size:13px; color:var(--ink2); margin-bottom:20px; line-height:1.6; }
+.quote-table { width:100%; border-collapse:collapse; margin-bottom:20px; font-size:13px; }
+.quote-table th { background:var(--ink); color:white; padding:10px 14px; text-align:left; font-family:'Nunito',sans-serif; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; }
+.quote-table th:last-child { text-align:right; }
+.quote-table td { padding:12px 14px; border-bottom:1px solid var(--border); vertical-align:top; }
+.quote-table td:last-child { text-align:right; font-weight:700; white-space:nowrap; }
+.quote-table tr:last-child td { border-bottom:none; }
+.quote-table .q-item-name { font-weight:700; color:var(--ink); margin-bottom:3px; }
+.quote-table .q-item-desc { font-size:11px; color:var(--ink3); line-height:1.5; }
+.quote-total-row { display:flex; justify-content:space-between; align-items:center; padding:14px 14px; border-top:2px solid var(--ink); }
+.quote-total-label { font-family:'Nunito',sans-serif; font-size:15px; font-weight:800; }
+.quote-total-val { font-family:'Nunito',sans-serif; font-size:22px; font-weight:900; }
+.quote-monthly { background:var(--bg2); border-radius:10px; padding:12px 14px; font-size:12px; color:var(--ink3); margin-bottom:18px; line-height:1.7; }
+.quote-terms { font-size:11px; color:var(--ink3); line-height:1.7; border-top:1px solid var(--border); padding-top:14px; }
+@media print { nav, .day-header, #page-quote > div > div:first-child, .section-title + div > div:first-child { display:none !important; } }
+.toast { position: fixed; bottom: 24px; right: 24px; background: var(--ink); color: var(--white); padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 500; z-index: 999; opacity: 0; transform: translateY(8px); transition: all 0.25s; pointer-events: none; }
+.toast.show { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Sheet<span>Shed</span></div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('dashboard')">Today's orders<span class="nav-alert-dot" id="nav-alert-dot" style="display:none;"></span></button>
+    <button class="nav-tab" onclick="showPage('properties')">Properties</button>
+    <button class="nav-tab" onclick="showPage('customers')">Customers</button>
+    <button class="nav-tab" onclick="showPage('pricing')">Pricing</button>
+    <button class="nav-tab" onclick="showPage('costs')">Costs</button>
+    <button class="nav-tab" onclick="showPage('quote')">Quote</button>
+    <button class="nav-tab" onclick="showPage('invoicing')">Invoicing</button>
+    <button class="nav-tab" onclick="showPage('platforms')">Platforms</button>
+  </div>
+  <div class="nav-right">Sheet Shed — Mansfield</div>
+</nav>
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="day-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <div>
+      <h1 id="dashboard-heading">Today's packing list</h1>
+      <span class="date" id="today-date"></span>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="btn btn-outline btn-sm" style="font-size:11px;color:var(--ink3);" onclick="simulateNewBooking()">Simulate booking</button>
+      <div style="display:flex;gap:6px;background:var(--bg2);border-radius:10px;padding:4px;">
+        <button class="btn btn-sm" id="view-list-btn" onclick="setDashView('list')" style="background:var(--ink);color:white;border:none;">List</button>
+        <button class="btn btn-sm" id="view-cal-btn"  onclick="setDashView('calendar')" style="background:none;color:var(--ink3);border:none;">Calendar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIST VIEW -->
+  <div id="dash-list-view">
+    <!-- Alert banner — shown when urgent orders exist -->
+    <div class="alert-banner" id="alert-banner">
+      <div class="alert-banner-title">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Last-minute bookings detected
+      </div>
+      <div id="alert-items"></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Orders today</div>
+        <div class="stat-val" id="stat-orders">0</div>
+        <div class="stat-sub">across all properties</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Beds to service</div>
+        <div class="stat-val" id="stat-beds">0</div>
+        <div class="stat-sub">sets of linen needed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Bags packed</div>
+        <div class="stat-val" id="stat-collected">0</div>
+        <div class="stat-sub">ready for collection</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Still to pack</div>
+        <div class="stat-val" id="stat-pending">0</div>
+        <div class="stat-sub">bags remaining</div>
+      </div>
+    </div>
+    <div class="section-title">Orders — mark each bag as packed when ready</div>
+    <div class="order-list" id="order-list"></div>
+    <div class="packing-section">
+      <div class="section-title">Linen to pack (total — all bags)</div>
+      <div class="pack-grid" id="pack-grid"></div>
+    </div>
+    <div class="late-pack-section" id="late-pack-section" style="display:none;"></div>
+  </div>
+
+  <!-- CALENDAR VIEW -->
+  <div id="dash-cal-view" style="display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <button class="btn btn-outline btn-sm" onclick="calNav(-1)">← Prev</button>
+      <div style="font-family:'Nunito',sans-serif;font-size:18px;font-weight:800;" id="cal-month-label"></div>
+      <button class="btn btn-outline btn-sm" onclick="calNav(1)">Next →</button>
+    </div>
+    <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;"></div>
+    <div id="cal-legend" style="display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;"></div>
+
+    <!-- Day detail panel -->
+    <div id="cal-detail" style="display:none;margin-top:24px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div>
+          <div style="font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;" id="cal-detail-title"></div>
+          <div style="font-size:12px;color:var(--ink3);" id="cal-detail-sub"></div>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="closeCalDetail()">✕ Close</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
+        <div>
+          <div class="section-title" style="margin-bottom:10px;">Orders</div>
+          <div id="cal-detail-orders"></div>
+        </div>
+        <div>
+          <div class="section-title" style="margin-bottom:10px;">Linen to pack</div>
+          <div id="cal-detail-pack"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROPERTIES -->
+<div class="page" id="page-properties">
+  <div class="toolbar">
+    <div class="search-box">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search properties…" oninput="filterProps(this.value)" id="prop-search">
+    </div>
+    <button class="btn btn-outline btn-sm" onclick="openBulkImport()">Bulk import</button>
+    <button class="btn btn-primary btn-sm" onclick="openAddProp()">+ Add property</button>
+  </div>
+  <div class="prop-grid" id="prop-grid"></div>
+</div>
+
+<!-- CUSTOMERS -->
+<div class="page" id="page-customers">
+  <div class="toolbar">
+    <h2 style="font-size:22px;flex:1">Customers</h2>
+    <button class="btn btn-primary btn-sm" onclick="openAddCustomer()">+ Add customer</button>
+  </div>
+  <div class="customer-list" id="customer-list"></div>
+</div>
+
+<!-- PRICING -->
+<div class="page" id="page-pricing">
+  <div class="day-header">
+    <h1>Pricing settings</h1>
+    <span class="date">Your charge rate, markup &amp; loss buffer</span>
+  </div>
+
+  <div class="pricing-layout">
+    <div class="pricing-left">
+      <div class="section-title">Your rate settings</div>
+
+      <div class="price-setting-card">
+        <div class="psc-row">
+          <div class="psc-label">Markup on linen cost<span>Applied on top of what the hire company charges you</span></div>
+          <div class="psc-control">
+            <input type="range" min="10" max="100" step="5" id="p-markup" oninput="updatePricing()">
+            <span class="psc-val" id="pv-markup">40%</span>
+          </div>
+        </div>
+        <div class="psc-row">
+          <div class="psc-label">Monthly loss buffer<span>% of stock expected to go missing per month</span></div>
+          <div class="psc-control">
+            <input type="range" min="0" max="10" step="1" id="p-loss" oninput="updatePricing()">
+            <span class="psc-val" id="pv-loss">3%</span>
+          </div>
+        </div>
+        <div class="psc-row">
+          <div class="psc-label">Active properties<span>Used to spread loss cost across changeovers</span></div>
+          <div class="psc-control">
+            <input type="range" min="1" max="60" step="1" id="p-props" oninput="updatePricing()">
+            <span class="psc-val" id="pv-props">20</span>
+          </div>
+        </div>
+        <div class="psc-row">
+          <div class="psc-label">Weekly changeovers<span>Estimated across all properties</span></div>
+          <div class="psc-control">
+            <input type="range" min="1" max="80" step="1" id="p-cos" oninput="updatePricing()">
+            <span class="psc-val" id="pv-cos">25</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top:22px">Spare items per bag</div>
+      <div class="price-setting-card" style="margin-bottom:0">
+        <div class="psc-row">
+          <div class="psc-label">Spare sheet<span>1 flat sheet per bag — covers stains &amp; tears</span></div>
+          <div class="psc-control" style="min-width:auto;gap:8px">
+            <label class="spare-toggle">
+              <input type="checkbox" id="spare-sheet" checked onchange="toggleSpare('sheet',this.checked)">
+              <span class="spare-track"></span>
+            </label>
+            <span class="psc-val" id="spare-sheet-cost" style="color:var(--amber)"></span>
+          </div>
+        </div>
+        <div class="psc-row">
+          <div class="psc-label">Spare towels<span>1 bath towel + 1 hand towel per bag</span></div>
+          <div class="psc-control" style="min-width:auto;gap:8px">
+            <label class="spare-toggle">
+              <input type="checkbox" id="spare-towel" checked onchange="toggleSpare('towel',this.checked)">
+              <span class="spare-track"></span>
+            </label>
+            <span class="psc-val" id="spare-towel-cost" style="color:var(--amber)"></span>
+          </div>
+        </div>
+        <div class="psc-row">
+          <div class="psc-label">Spare pillow cases<span>2 spare pillow cases per bag</span></div>
+          <div class="psc-control" style="min-width:auto;gap:8px">
+            <label class="spare-toggle">
+              <input type="checkbox" id="spare-pillowcase" checked onchange="toggleSpare('pillowcase',this.checked)">
+              <span class="spare-track"></span>
+            </label>
+            <span class="psc-val" id="spare-pillowcase-cost" style="color:var(--amber)"></span>
+          </div>
+        </div>
+        <div class="psc-row" style="background:var(--bg);border-radius:0 0 var(--radius) var(--radius)">
+          <div class="psc-label">Total spare cost per bag<span>Added to your charge automatically</span></div>
+          <div class="psc-control" style="min-width:auto">
+            <span class="psc-val" id="spare-total-cost"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top:22px">Weekly revenue estimate</div>
+      <div class="pricing-stats" id="pricing-stats"></div>
+
+      <div class="loss-note">
+        <div class="loss-note-title">How the loss buffer works</div>
+        Your monthly stock loss cost is calculated across all active properties, then divided evenly across your weekly changeovers. This tiny amount is added to each charge — making losses invisible to customers and harmless to you. You never count bags, never chase missing towels.
+      </div>
+    </div>
+
+    <div class="pricing-right">
+      <div class="section-title">Charge per changeover — by bed count</div>
+      <div class="price-table-wrap">
+        <table class="price-table" id="price-table">
+          <thead>
+            <tr>
+              <th>Beds</th>
+              <th>Linen cost</th>
+              <th>Buffer + spares</th>
+              <th>Your charge</th>
+              <th>Your profit</th>
+            </tr>
+          </thead>
+          <tbody id="price-table-body"></tbody>
+        </table>
+      </div>
+      <p style="font-size:11px;color:var(--ink3);margin-top:8px;margin-bottom:18px">Hover a linen cost to see the item breakdown. Queen bed average used for all rows.</p>
+
+      <div class="section-title">Hire company rate card</div>
+      <div class="price-table-wrap">
+        <table class="price-table">
+          <thead>
+            <tr><th>Item</th><th>Unit rate</th><th>Qty per bed</th><th>Cost per bed</th></tr>
+          </thead>
+          <tbody id="item-rate-table"></tbody>
+        </table>
+      </div>
+      <p style="font-size:11px;color:var(--ink3);margin-top:8px">Fitted single sheet ($2.45) only applies to bunk beds. King single and single sheets are both $1.85 — listed separately for clarity.</p>
+
+      <div class="section-title" style="margin-top:22px">Partial occupancy — extra profit potential</div>
+      <div class="price-setting-card" style="margin-bottom:12px">
+        <div class="psc-row">
+          <div class="psc-label">Property bed count<span>What you charge the customer for</span></div>
+          <div class="psc-control">
+            <input type="range" min="1" max="12" value="4" step="1" id="occ-total" oninput="updateOccupancy()">
+            <span class="psc-val" id="occ-total-out">4 beds</span>
+          </div>
+        </div>
+        <div class="psc-row">
+          <div class="psc-label">Beds actually used<span>What gets sent to the laundry</span></div>
+          <div class="psc-control">
+            <input type="range" min="1" max="12" value="3" step="1" id="occ-used" oninput="updateOccupancy()">
+            <span class="psc-val" id="occ-used-out">3 beds</span>
+          </div>
+        </div>
+        <div class="psc-row">
+          <div class="psc-label">% of changeovers with unused beds<span>Estimate how often this happens</span></div>
+          <div class="psc-control">
+            <input type="range" min="5" max="80" value="30" step="5" id="occ-freq" oninput="updateOccupancy()">
+            <span class="psc-val" id="occ-freq-out">30%</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="occ-results" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px;"></div>
+      <div id="occ-note" style="font-size:12px;color:var(--ink3);line-height:1.7;background:var(--accent-light);border-radius:var(--radius);padding:12px 16px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- COSTS -->
+<div class="page" id="page-costs">
+  <div class="day-header">
+    <h1>Cost calculator</h1>
+    <span class="date">Your true net profit after labour &amp; travel</span>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;">
+
+    <!-- LEFT: inputs -->
+    <div>
+      <div class="section-title">Labour — packing</div>
+      <div class="price-setting-card" style="margin-bottom:18px;">
+        <div class="psc-row">
+          <div class="psc-label">Your hourly rate<span>What you value your time at</span></div>
+          <div class="psc-control">
+            <input type="range" min="20" max="100" value="35" step="5" id="c-rate" oninput="updateCosts()">
+            <span class="psc-val" id="cv-rate">$35</span>
+          </div>
+        </div>
+        <div class="psc-row">
+          <div class="psc-label">Mins to pack one bag<span>Including labelling &amp; checking</span></div>
+          <div class="psc-control">
+            <input type="range" min="2" max="20" value="6" step="1" id="c-pack" oninput="updateCosts()">
+            <span class="psc-val" id="cv-pack">6 min</span>
+          </div>
+        </div>
+        <div class="psc-row">
+          <div class="psc-label">Daily changeovers<span>Average bags packed per morning</span></div>
+          <div class="psc-control">
+            <input type="range" min="1" max="30" value="8" step="1" id="c-daily" oninput="updateCosts()">
+            <span class="psc-val" id="cv-daily">8 bags</span>
+          </div>
+        </div>
+        <div class="psc-row">
+          <div class="psc-label">Operating days per week<span>Days you pack linen</span></div>
+          <div class="psc-control">
+            <input type="range" min="1" max="7" value="5" step="1" id="c-days" oninput="updateCosts()">
+            <span class="psc-val" id="cv-days">5 days</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">Travel — linen collection &amp; drop-off</div>
+      <div class="price-setting-card" style="margin-bottom:18px;">
+        <div class="psc-row">
+          <div class="psc-label">One-way drive time<span>To/from linen supplier</span></div>
+          <div class="psc-control">
+            <input type="range" min="5" max="90" value="35" step="5" id="c-drive" oninput="updateCosts()">
+            <span class="psc-val" id="cv-drive">35 min</span>
+          </div>
+        </div>
+        <div class="psc-row">
+          <div class="psc-label">Trips per week<span>Collection + drop-off runs</span></div>
+          <div class="psc-control">
+            <input type="range" min="1" max="5" value="1" step="1" id="c-trips" oninput="updateCosts()">
+            <span class="psc-val" id="cv-trips">1 trip</span>
+          </div>
+        </div>
+        <div class="psc-row">
+          <div class="psc-label">Fuel cost per km<span>ATO rate is $0.88/km</span></div>
+          <div class="psc-control">
+            <input type="range" min="0.20" max="1.20" value="0.88" step="0.02" id="c-fuel" oninput="updateCosts()">
+            <span class="psc-val" id="cv-fuel">$0.88</span>
+          </div>
+        </div>
+        <div class="psc-row">
+          <div class="psc-label">Avg speed on drive (km/h)<span>Used to estimate km from mins</span></div>
+          <div class="psc-control">
+            <input type="range" min="40" max="100" value="70" step="5" id="c-speed" oninput="updateCosts()">
+            <span class="psc-val" id="cv-speed">70 km/h</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">Other fixed costs</div>
+      <div class="price-setting-card">
+        <div class="psc-row">
+          <div class="psc-label">Storage unit rent<span>Weekly cost</span></div>
+          <div class="psc-control" style="min-width:auto;gap:8px;">
+            <span style="font-size:13px;color:var(--ink3);">$</span>
+            <input type="number" id="c-storage" value="70" min="0" max="500" oninput="updateCosts()" style="width:80px;padding:6px 8px;border:1px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;background:var(--bg);color:var(--ink);text-align:right;">
+            <span style="font-size:12px;color:var(--ink3);">/week</span>
+          </div>
+        </div>
+        <div class="psc-row">
+          <div class="psc-label">Phone / admin costs<span>Weekly estimate</span></div>
+          <div class="psc-control" style="min-width:auto;gap:8px;">
+            <span style="font-size:13px;color:var(--ink3);">$</span>
+            <input type="number" id="c-admin" value="10" min="0" max="200" oninput="updateCosts()" style="width:80px;padding:6px 8px;border:1px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;background:var(--bg);color:var(--ink);text-align:right;">
+            <span style="font-size:12px;color:var(--ink3);">/week</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: results -->
+    <div>
+      <div class="section-title">Weekly cost breakdown</div>
+      <div class="price-table-wrap" style="margin-bottom:18px;">
+        <table class="price-table" id="cost-breakdown-table">
+          <thead><tr><th>Cost item</th><th style="text-align:right">Weekly cost</th></tr></thead>
+          <tbody id="cost-breakdown-body"></tbody>
+        </table>
+      </div>
+
+      <div class="section-title">Net profit summary</div>
+      <div class="pricing-stats" id="cost-summary" style="grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;"></div>
+
+      <div class="section-title">Annual picture</div>
+      <div class="price-table-wrap" style="margin-bottom:18px;">
+        <table class="price-table" id="annual-table">
+          <thead><tr><th>Scenario</th><th style="text-align:right">Weekly</th><th style="text-align:right">Annual</th></tr></thead>
+          <tbody id="annual-body"></tbody>
+        </table>
+      </div>
+
+      <div id="cost-note" style="font-size:12px;color:var(--ink2);line-height:1.7;background:var(--amber-light);border:1px solid rgba(196,105,10,0.2);border-radius:var(--radius);padding:14px 18px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- QUOTE -->
+<div class="page" id="page-quote">
+  <div class="day-header">
+    <h1>Quote builder</h1>
+    <span class="date">Select a property to generate an instant quote</span>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;">
+
+    <!-- LEFT -->
+    <div>
+      <div class="section-title">Select property</div>
+      <div class="price-setting-card" style="margin-bottom:18px;">
+        <div class="psc-row">
+          <div class="psc-label">Customer<span>Filter by customer</span></div>
+          <div class="psc-control" style="min-width:auto;">
+            <select class="form-select" id="q-customer" onchange="quoteFilterProps()" style="width:200px;">
+              <option value="">All customers</option>
+            </select>
+          </div>
+        </div>
+        <div class="psc-row">
+          <div class="psc-label">Property<span>Quote is built from saved property details</span></div>
+          <div class="psc-control" style="min-width:auto;">
+            <select class="form-select" id="q-property" onchange="quoteSelectProp()" style="width:200px;">
+              <option value="">Select a property…</option>
+            </select>
+          </div>
+        </div>
+        <div class="psc-row">
+          <div class="psc-label">Owner email<span>For sending the quote</span></div>
+          <div class="psc-control" style="min-width:auto;">
+            <input type="email" id="q-email" class="form-input" placeholder="owner@email.com" oninput="updateQuote()" style="width:200px;">
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">Linen summary</div>
+      <div id="q-linen-summary" style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:18px;font-size:13px;color:var(--ink3);">
+        Select a property to see linen breakdown
+      </div>
+
+      <div class="section-title">Your fees</div>
+      <div class="price-setting-card" style="margin-bottom:18px;">
+        <div class="psc-row">
+          <div class="psc-label">Markup on linen hire<span>Applied on top of hire cost</span></div>
+          <div class="psc-control">
+            <input type="range" min="0" max="100" value="40" step="5" id="q-markup" oninput="updateQuote()">
+            <span class="psc-val" id="qv-markup">40%</span>
+          </div>
+        </div>
+        <div class="psc-row">
+          <div class="psc-label">Packing & preparation fee<span>Your labour charge per bag</span></div>
+          <div class="psc-control" style="min-width:auto;gap:8px;">
+            <span style="font-size:13px;color:var(--ink3);">$</span>
+            <input type="number" id="q-packing" value="12" min="0" max="100" oninput="updateQuote()" style="width:70px;padding:6px 8px;border:1px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;background:var(--bg);color:var(--ink);text-align:right;">
+            <span style="font-size:12px;color:var(--ink3);">per changeover</span>
+          </div>
+        </div>
+        <div class="psc-row">
+          <div class="psc-label">Delivery fee<span>Only if property requires delivery</span></div>
+          <div class="psc-control" style="min-width:auto;gap:8px;">
+            <span style="font-size:13px;color:var(--ink3);">$</span>
+            <input type="number" id="q-delivery" value="25" min="0" max="200" oninput="updateQuote()" style="width:70px;padding:6px 8px;border:1px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;background:var(--bg);color:var(--ink);text-align:right;">
+            <span style="font-size:12px;color:var(--ink3);">per delivery</span>
+          </div>
+        </div>
+        <div class="psc-row">
+          <div class="psc-label">Quote valid for<span></span></div>
+          <div class="psc-control" style="min-width:auto;">
+            <select class="form-select" id="q-validity" onchange="updateQuote()" style="width:160px;">
+              <option value="14">14 days</option>
+              <option value="30" selected>30 days</option>
+              <option value="60">60 days</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="pricing-stats" id="quote-summary" style="grid-template-columns:1fr 1fr;gap:10px;"></div>
+    </div>
+
+    <!-- RIGHT: preview -->
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="section-title" style="margin:0;">Quote preview</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-outline btn-sm" onclick="emailQuote()">✉ Email</button>
+          <button class="btn btn-primary btn-sm" onclick="printQuote()">↓ Save PDF</button>
+        </div>
+      </div>
+      <div id="quote-doc" class="invoice-preview">
+        <div style="padding:40px;text-align:center;color:var(--ink3);font-size:13px;">
+          Select a property on the left to generate a quote
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INVOICING -->
+<div class="page" id="page-invoicing">
+  <div class="day-header">
+    <h1>Invoicing</h1>
+    <span class="date">Generate &amp; send weekly invoices per customer</span>
+  </div>
+  <div class="inv-layout">
+    <div>
+      <div class="inv-generate-box">
+        <div class="inv-generate-title">Generate invoice</div>
+        <div class="inv-generate-row">
+          <label>Customer</label>
+          <select id="inv-customer-sel" onchange="previewInvoice()"></select>
+        </div>
+        <div class="inv-generate-row">
+          <label>Period</label>
+          <select id="inv-period-sel" onchange="previewInvoice()">
+            <option value="this-week">This week</option>
+            <option value="last-week">Last week</option>
+            <option value="this-month">This month</option>
+            <option value="last-month">Last month</option>
+          </select>
+        </div>
+        <div class="inv-generate-row">
+          <label>Due date</label>
+          <input type="date" id="inv-due-date">
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn btn-primary btn-sm" style="flex:1" onclick="generateInvoice()">Generate &amp; save</button>
+          <button class="btn btn-outline btn-sm" onclick="printInvoice()">Print / PDF</button>
+        </div>
+      </div>
+      <div class="section-title">Saved invoices</div>
+      <div class="inv-list" id="inv-list"></div>
+    </div>
+    <div class="invoice-preview" id="invoice-preview-panel">
+      <div class="inv-preview-toolbar">
+        <span class="inv-preview-title" id="inv-preview-label">Select a customer to preview invoice</span>
+        <button class="btn btn-outline btn-sm" onclick="printInvoice()">Print / PDF</button>
+        <button class="btn btn-primary btn-sm" onclick="markInvoicePaid()">Mark paid</button>
+      </div>
+      <div class="invoice-doc" id="invoice-doc">
+        <div style="text-align:center;padding:60px 0;color:var(--ink3);font-size:13px">
+          Select a customer and period above to preview their invoice.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PLATFORMS -->
+<div class="page" id="page-platforms">
+  <h2 style="font-size:22px;margin-bottom:16px">Supported platforms</h2>
+  <div class="info-box">
+    Every platform below publishes a free iCal calendar feed. When a customer adds their property, they paste their iCal URL once — your system then monitors it automatically. No API keys, no integrations, no ongoing setup.
+  </div>
+  <div class="section-title" style="margin-bottom:12px">How to find the iCal URL</div>
+  <div class="platform-list">
+    <div class="plat-row">
+      <div class="plat-icon plat-homhero" style="font-size:10px">HH</div>
+      <div class="plat-desc"><div class="plat-name">HomHero</div><div class="plat-path">Settings → Calendar → Export → iCal link</div></div>
+      <span class="platform-badge plat-homhero">Supported</span>
+    </div>
+    <div class="plat-row">
+      <div class="plat-icon plat-airbnb" style="font-size:10px">AB</div>
+      <div class="plat-desc"><div class="plat-name">Airbnb</div><div class="plat-path">Calendar → Availability settings → Export calendar (.ics link)</div></div>
+      <span class="platform-badge plat-airbnb">Supported</span>
+    </div>
+    <div class="plat-row">
+      <div class="plat-icon plat-guesty" style="font-size:10px">GY</div>
+      <div class="plat-desc"><div class="plat-name">Guesty</div><div class="plat-path">Listings → Select listing → Calendar → Export iCal</div></div>
+      <span class="platform-badge plat-guesty">Supported</span>
+    </div>
+    <div class="plat-row">
+      <div class="plat-icon plat-stayz" style="font-size:10px">SZ</div>
+      <div class="plat-desc"><div class="plat-name">Stayz / Vrbo</div><div class="plat-path">Calendar → Sync calendars → Export iCal URL</div></div>
+      <span class="platform-badge plat-stayz">Supported</span>
+    </div>
+    <div class="plat-row">
+      <div class="plat-icon" style="background:var(--bg2);color:var(--ink3);font-size:10px">BC</div>
+      <div class="plat-desc"><div class="plat-name">Booking.com</div><div class="plat-path">Extranet → Calendar → iCal → Export link</div></div>
+      <span class="platform-badge plat-manual">Supported</span>
+    </div>
+    <div class="plat-row">
+      <div class="plat-icon plat-manual" style="font-size:10px">MN</div>
+      <div class="plat-desc"><div class="plat-name">Manual / no platform</div><div class="plat-path">Customer emails bookings — you create orders manually from the dashboard</div></div>
+      <span class="platform-badge plat-manual">Manual</span>
+    </div>
+  </div>
+</div>
+
+<!-- ADD PROPERTY MODAL -->
+<div class="modal-bg" id="modal-add-prop">
+  <div class="modal">
+    <h2>Add property</h2>
+    <p class="modal-sub">Enter the property details and paste the iCal URL from their booking platform.</p>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Property name</label>
+        <input class="form-input" id="prop-name-input" placeholder="e.g. Mountain View Chalet">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Customer</label>
+        <select class="form-select" id="prop-customer-select"></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Platform</label>
+        <select class="form-select" id="prop-platform-select">
+          <option value="homhero">HomHero</option>
+          <option value="airbnb">Airbnb</option>
+          <option value="guesty">Guesty</option>
+          <option value="stayz">Stayz / Vrbo</option>
+          <option value="booking">Booking.com</option>
+          <option value="manual">Manual</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Address</label>
+        <input class="form-input" id="prop-address-input" placeholder="e.g. 14 High St, Mansfield">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">iCal URL <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">(paste from platform)</span></label>
+      <input class="form-input" id="prop-ical-input" placeholder="https://www.airbnb.com/calendar/ical/XXXXX.ics">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Beds</label>
+      <div id="beds-rows" style="display:flex;flex-direction:column;gap:8px;margin-top:4px"></div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <button class="bed-type-btn" onclick="addBedType('King')">+ King</button>
+        <button class="bed-type-btn" onclick="addBedType('Queen')">+ Queen</button>
+        <button class="bed-type-btn" onclick="addBedType('Double')">+ Double</button>
+        <button class="bed-type-btn" onclick="addBedType('King Single')">+ King Single</button>
+        <button class="bed-type-btn" onclick="addBedType('Single')">+ Single</button>
+        <button class="bed-type-btn" onclick="addBedType('Bunk')">+ Bunk</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Extra linen items <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">Override defaults if property needs more</span></label>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:4px;">
+        <div>
+          <label style="font-size:11px;color:var(--ink3);font-weight:600;display:block;margin-bottom:3px;">Extra bath towels</label>
+          <input type="number" class="form-input" id="prop-extra-bath" value="0" min="0" max="20" style="padding:6px 8px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--ink3);font-weight:600;display:block;margin-bottom:3px;">Extra hand towels</label>
+          <input type="number" class="form-input" id="prop-extra-hand" value="0" min="0" max="20" style="padding:6px 8px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--ink3);font-weight:600;display:block;margin-bottom:3px;">Extra pillow cases</label>
+          <input type="number" class="form-input" id="prop-extra-pillow" value="0" min="0" max="20" style="padding:6px 8px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--ink3);font-weight:600;display:block;margin-bottom:3px;">Extra bathmats</label>
+          <input type="number" class="form-input" id="prop-extra-bathmat" value="0" min="0" max="10" style="padding:6px 8px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--ink3);font-weight:600;display:block;margin-bottom:3px;">Extra tea towels</label>
+          <input type="number" class="form-input" id="prop-extra-tea" value="0" min="0" max="10" style="padding:6px 8px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--ink3);font-weight:600;display:block;margin-bottom:3px;">Est. changeovers/month</label>
+          <input type="number" class="form-input" id="prop-freq" value="6" min="1" max="30" style="padding:6px 8px;">
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Delivery required?</label>
+      <select class="form-select" id="prop-delivery">
+        <option value="none">No — cleaner collects from shed</option>
+        <option value="property">Yes — deliver to property</option>
+        <option value="cleaner">Yes — deliver to cleaner</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-add-prop')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProperty()">Save property</button>
+    </div>
+  </div>
+</div>
+
+<!-- BULK IMPORT MODAL -->
+<div class="modal-bg" id="modal-bulk">
+  <div class="modal">
+    <h2>Bulk import properties</h2>
+    <p class="modal-sub">Paste one property per line in the format below. Great for onboarding a whole portfolio at once.</p>
+    <div class="form-group">
+      <label class="form-label">Customer</label>
+      <select class="form-select" id="bulk-customer-select"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Platform</label>
+      <select class="form-select" id="bulk-platform-select">
+        <option value="homhero">HomHero</option>
+        <option value="airbnb">Airbnb</option>
+        <option value="guesty">Guesty</option>
+        <option value="stayz">Stayz</option>
+        <option value="manual">Manual</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Property list <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">— one per line: Name, iCal URL, Beds</span></label>
+      <div class="import-box">
+        <textarea id="bulk-text" placeholder="Mountain View Chalet, https://airbnb.com/calendar/ical/abc.ics, 2 Queen 2 Single&#10;Ski Lodge, https://airbnb.com/calendar/ical/def.ics, 1 King 1 Double&#10;The Barn, https://airbnb.com/calendar/ical/ghi.ics, 3 Queen"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-bulk')">Cancel</button>
+      <button class="btn btn-primary" onclick="doBulkImport()">Import properties</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD CUSTOMER MODAL -->
+<div class="modal-bg" id="modal-add-customer">
+  <div class="modal">
+    <h2>Add customer</h2>
+    <p class="modal-sub">Customers are property owners or management companies you service.</p>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Name</label>
+        <input class="form-input" id="cust-name-input" placeholder="e.g. Joan Smith or Alpine Stays Pty Ltd">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contact phone</label>
+        <input class="form-input" id="cust-phone-input" placeholder="04XX XXX XXX">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input class="form-input" id="cust-email-input" placeholder="joan@example.com">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Primary platform</label>
+        <select class="form-select" id="cust-platform-select">
+          <option value="homhero">HomHero</option>
+          <option value="airbnb">Airbnb</option>
+          <option value="guesty">Guesty</option>
+          <option value="stayz">Stayz</option>
+          <option value="manual">Manual</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Type</label>
+        <select class="form-select" id="cust-type-select">
+          <option value="individual">Individual owner</option>
+          <option value="company">Management company</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-add-customer')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCustomer()">Save customer</button>
+    </div>
+  </div>
+</div>
+
+<!-- EMERGENCY KIT MODAL -->
+<div class="modal-bg" id="modal-kit">
+  <div class="modal">
+    <h2 id="kit-modal-title">Emergency kit</h2>
+    <p class="modal-sub">Customise this customer's emergency linen kit. Charged on first invoice, replenished on request.</p>
+    <div id="kit-items-list" style="margin-bottom:14px;"></div>
+    <button class="btn btn-outline btn-sm" onclick="addKitItem()" style="margin-bottom:16px;">+ Add item</button>
+    <div class="form-group">
+      <label class="form-label">Kit status</label>
+      <select class="form-select" id="kit-status-sel">
+        <option value="active">Active — kit held by customer</option>
+        <option value="needed">Replenishment requested</option>
+        <option value="none">No kit yet</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Invoiced</label>
+      <select class="form-select" id="kit-invoiced-sel">
+        <option value="true">Yes — charged on first invoice</option>
+        <option value="false">No — not yet invoiced</option>
+      </select>
+    </div>
+    <div id="kit-cost-preview" style="background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-size:13px;margin-bottom:6px;"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-kit')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveKit()">Save kit</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DATA ──
+let customers = [
+  { id: 1, name: 'Alpine Stays Pty Ltd', email: 'info@alpinestays.com.au', phone: '0357 123 456', platform: 'homhero', type: 'company',
+    kit: { items: [{item:'Queen sheet',qty:12},{item:'King sheet',qty:12},{item:'Bath towel',qty:12},{item:'Hand towel',qty:12},{item:'Pillow case',qty:24},{item:'Bathmat',qty:6},{item:'Tea towel',qty:12}], status: 'active', invoiced: true } },
+  { id: 2, name: 'Joan Williams', email: 'joan@gmail.com', phone: '0412 345 678', platform: 'airbnb', type: 'individual',
+    kit: { items: [{item:'Queen sheet',qty:3},{item:'Bath towel',qty:2},{item:'Hand towel',qty:2},{item:'Pillow case',qty:4},{item:'Bathmat',qty:1},{item:'Tea towel',qty:2}], status: 'active', invoiced: true } },
+  { id: 3, name: 'Summit Rentals', email: 'bookings@summitrentals.com.au', phone: '0357 987 654', platform: 'guesty', type: 'company',
+    kit: null },
+];
+
+let properties = [
+  { id: 1, name: 'Mountain View Chalet', address: '14 High St, Mansfield', customerId: 1, platform: 'homhero', ical: 'https://homhero.com/ical/mv-chalet-123.ics', beds: [{type:'King',n:1},{type:'Queen',n:2}], extras:{bathTowels:0,handTowels:0,pillowCases:0,bathmats:0,teaTowels:0}, freq:8, delivery:'none' },
+  { id: 2, name: 'The Ski Retreat', address: '7 Snow Gum Rd, Mansfield', customerId: 1, platform: 'homhero', ical: 'https://homhero.com/ical/ski-retreat-456.ics', beds: [{type:'King',n:2},{type:'Single',n:2}], extras:{bathTowels:2,handTowels:0,pillowCases:0,bathmats:1,teaTowels:0}, freq:6, delivery:'property' },
+  { id: 3, name: 'Wren Cottage', address: '3 Wren Lane, Mansfield', customerId: 2, platform: 'airbnb', ical: 'https://airbnb.com/calendar/ical/wren-cottage.ics', beds: [{type:'Queen',n:1}], extras:{bathTowels:0,handTowels:0,pillowCases:0,bathmats:0,teaTowels:2}, freq:4, delivery:'none' },
+  { id: 4, name: 'Billabong Lodge', address: '22 River Rd, Mansfield', customerId: 3, platform: 'guesty', ical: 'https://guesty.com/ical/billabong-lodge.ics', beds: [{type:'King',n:1},{type:'Queen',n:1},{type:'Single',n:2}], extras:{bathTowels:0,handTowels:0,pillowCases:4,bathmats:0,teaTowels:0}, freq:5, delivery:'cleaner' },
+  { id: 5, name: 'Eagle\'s Nest', address: '88 Ridgeline Dr, Mansfield', customerId: 1, platform: 'homhero', ical: 'https://homhero.com/ical/eagles-nest.ics', beds: [{type:'Queen',n:3}], extras:{bathTowels:0,handTowels:0,pillowCases:0,bathmats:0,teaTowels:0}, freq:7, delivery:'none' },
+];
+
+let orders = [
+  { id: 1, propId: 1, date: 'today', status: 'packed',    urgent: false },
+  { id: 2, propId: 3, date: 'today', status: 'collected', urgent: false },
+  { id: 3, propId: 4, date: 'today', status: 'pending',   urgent: false },
+  { id: 4, propId: 5, date: 'today', status: 'pending',   urgent: true, detectedAt: new Date(Date.now() - 25*60000), alertDismissed: false },
+  { id: 5, propId: 2, date: 'today', status: 'pending',   urgent: true, detectedAt: new Date(Date.now() - 8*60000),  alertDismissed: false },
+];
+
+let bedRows = [];
+let editingPropId = null;
+
+// ── NAV ──
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'properties') renderProperties();
+  if (name === 'customers') renderCustomers();
+  if (name === 'pricing') { updatePricing(); updateOccupancy(); }
+  if (name === 'quote') { initQuote(); }
+  if (name === 'invoicing') initInvoicing();
+}
+
+// ── DASHBOARD ──
+function renderDashboard() {
+  const d = new Date();
+  document.getElementById('today-date').textContent = d.toLocaleDateString('en-AU', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+
+  const todayOrders = orders;
+
+  // ── ALERTS ──
+  const urgentUndismissed = todayOrders.filter(o => o.urgent && !o.alertDismissed);
+  const alertBanner = document.getElementById('alert-banner');
+  const navDot = document.getElementById('nav-alert-dot');
+  navDot.style.display = urgentUndismissed.length ? '' : 'none';
+  if (urgentUndismissed.length > 0) {
+    alertBanner.classList.add('show');
+    document.getElementById('alert-items').innerHTML = urgentUndismissed.map(o => {
+      const p   = properties.find(x => x.id === o.propId);
+      const c   = customers.find(x => x.id === p?.customerId);
+      const beds = (p?.beds || []).reduce((s,b) => s+b.n, 0);
+      const minsAgo = Math.round((Date.now() - new Date(o.detectedAt)) / 60000);
+      const timeStr = minsAgo < 60 ? `${minsAgo} min ago` : `${Math.round(minsAgo/60)}h ago`;
+
+      // Revenue from this bag
+      const r = chargePerChangeover(p?.beds || [], pricingSettings);
+      const revenue = r.charge;
+      const profit  = r.profit;
+
+      // Trip cost: 15 min each way = 30 min round trip
+      const tripMins = 30;
+      const driveKm  = (tripMins / 60) * 70;
+      const tripCost = (tripMins / 60) * 35 + driveKm * 0.88;
+      const netAfterTrip = profit - tripCost;
+      const worthIt = netAfterTrip > 0;
+
+      // Linen needed for this one bag
+      let lSheets=0, lPillows=0, lBath=0, lHand=0, lBathmats=0;
+      (p?.beds||[]).forEach(b => {
+        lSheets   += b.n * 3;
+        lPillows  += b.n * ((b.type==='Single'||b.type==='King Single'||b.type==='Bunk') ? 2 : 4);
+        lBath     += b.n * 2;
+        lHand     += b.n * 2;
+        lBathmats += Math.ceil(b.n / 2);
+      });
+
+      return `<div class="alert-item">
+        <div class="alert-item-left">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;">
+            <div class="alert-item-prop">${p?.name || 'Unknown property'}</div>
+            <span style="font-size:10px;color:#c02020;font-weight:700;background:#fff0f0;padding:2px 7px;border-radius:10px;">${timeStr}</span>
+          </div>
+          <div class="alert-item-meta">${c?.name || ''} · ${p?.address || ''} · ${(p?.beds||[]).map(b=>`${b.n} ${b.type}`).join(', ')}</div>
+
+          <div class="trip-calc">
+            <div class="trip-calc-title">Is the trip worth it?</div>
+            <div class="trip-calc-row">
+              <span>Revenue from this bag</span>
+              <span style="font-weight:700;color:var(--accent);">+$${revenue.toFixed(2)}</span>
+            </div>
+            <div class="trip-calc-row">
+              <span>Trip cost (30 min round trip + fuel)</span>
+              <span style="font-weight:700;color:var(--red);">−$${tripCost.toFixed(2)}</span>
+            </div>
+            <div class="trip-calc-row" style="border-top:1px solid rgba(192,32,32,0.15);padding-top:6px;margin-top:2px;">
+              <span style="font-weight:700;">Net after trip</span>
+              <span style="font-weight:800;font-family:'Nunito',sans-serif;font-size:15px;color:${worthIt?'#1a5c32':'#c02020'};">${worthIt?'+':''}$${netAfterTrip.toFixed(2)}</span>
+            </div>
+            <div class="trip-linen-title">Pack for this run</div>
+            <div class="trip-linen-grid">
+              <div class="trip-linen-item"><span>${lSheets}</span>Sheets</div>
+              <div class="trip-linen-item"><span>${lPillows}</span>Pillow cases</div>
+              <div class="trip-linen-item"><span>${lBath}</span>Bath towels</div>
+              <div class="trip-linen-item"><span>${lHand}</span>Hand towels</div>
+              <div class="trip-linen-item"><span>${lBathmats}</span>Bathmats</div>
+              <div class="trip-linen-item"><span>2</span>Tea towels</div>
+            </div>
+          </div>
+        </div>
+        <button class="alert-dismiss" onclick="dismissAlert(${o.id})">Dismiss</button>
+      </div>`;
+    }).join('');
+  } else {
+    alertBanner.classList.remove('show');
+  }
+  const totalBeds = todayOrders.reduce((sum, o) => {
+    const p = properties.find(x => x.id === o.propId);
+    return sum + (p ? p.beds.reduce((s,b) => s + b.n, 0) : 0);
+  }, 0);
+  const packed = todayOrders.filter(o => o.status === 'packed' || o.status === 'collected').length;
+
+  document.getElementById('stat-orders').textContent = todayOrders.length;
+  document.getElementById('stat-beds').textContent = totalBeds;
+  document.getElementById('stat-collected').textContent = packed;
+  document.getElementById('stat-pending').textContent = todayOrders.filter(o => o.status === 'pending').length;
+
+  // Order cards
+  const ol = document.getElementById('order-list');
+  if (todayOrders.length === 0) {
+    ol.innerHTML = '<div class="empty"><h3>No orders today</h3><p>Orders are generated automatically when checkouts are detected.</p></div>';
+    return;
+  }
+  ol.innerHTML = todayOrders.map(o => {
+    const p = properties.find(x => x.id === o.propId);
+    const c = customers.find(x => x.id === p?.customerId);
+    const bedHtml = (p?.beds || []).map(b => `<span class="bed-pill bed-${b.type.toLowerCase()}">${b.n} ${b.type}</span>`).join('');
+    const totalBeds = (p?.beds || []).reduce((s,b) => s+b.n, 0);
+    const statusMap = { packed: ['status-packed','Packed'], pending: ['status-pending','To pack'], collected: ['status-collected','Dirty returned'] };
+    const [sc, sl] = statusMap[o.status] || ['status-pending','To pack'];
+    const nextLabel = o.status === 'pending' ? 'Mark packed' : o.status === 'packed' ? 'Mark returned' : 'Reset';
+    const urgentTag = o.urgent ? `<span class="urgent-tag">NEW</span>` : '';
+    return `<div class="order-card${o.urgent ? ' urgent' : ''}" id="order-${o.id}">
+      <div class="order-prop">${p?.name || 'Unknown'}${urgentTag}<span>${c?.name || ''} · ${p?.address || ''}</span></div>
+      <div class="order-beds">${bedHtml}</div>
+      <div style="font-size:12px;color:var(--ink3);min-width:90px">${totalBeds} bed${totalBeds!==1?'s':''} · ${totalBeds*3} sheets</div>
+      <div class="order-status">
+        <span class="status-pill ${sc}">${sl}</span>
+        <button class="btn btn-outline btn-sm" onclick="cycleStatus(${o.id})">${nextLabel}</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Packing totals — all real item types
+  const bagCount = todayOrders.length;
+  let totalSheets = 0, totalPillowcases = 0, totalBathTowels = 0;
+  let totalHandTowels = 0, totalBathmats = 0;
+  const totalTeaTowels = bagCount * 2;
+  const bedTypeCounts = {};
+
+  todayOrders.forEach(o => {
+    const p = properties.find(x => x.id === o.propId);
+    (p?.beds || []).forEach(b => {
+      bedTypeCounts[b.type] = (bedTypeCounts[b.type] || 0) + b.n;
+      totalSheets      += b.n * 3;
+      const pillows     = (b.type === 'Single' || b.type === 'King Single' || b.type === 'Bunk') ? 2 : 4;
+      totalPillowcases += b.n * pillows;
+      totalBathTowels  += b.n * 2;
+      totalHandTowels  += b.n * 2;
+      totalBathmats    += Math.ceil(b.n / 2);
+    });
+  });
+
+  const spares = pricingSettings.spares || { sheet: true, towel: true, pillowcase: true };
+  const spareSheets  = spares.sheet      ? bagCount : 0;
+  const spareTowels  = spares.towel      ? bagCount : 0;
+  const sparePillows = spares.pillowcase ? bagCount * 2 : 0;
+
+  const packItems = [
+    ...Object.entries(bedTypeCounts).map(([t,n]) => ({ name: `${t} bed sets`, total: n, sub: `${n} sets`, amber: false })),
+    { name: 'Sheets',       total: totalSheets + spareSheets,       sub: `${totalSheets} std${spareSheets ? ` + ${spareSheets} spare` : ''}`,    amber: !!spareSheets },
+    { name: 'Pillow cases', total: totalPillowcases + sparePillows, sub: `${totalPillowcases} std${sparePillows ? ` + ${sparePillows} spare` : ''}`, amber: !!sparePillows },
+    { name: 'Bath towels',  total: totalBathTowels + spareTowels,   sub: `${totalBathTowels} std${spareTowels ? ` + ${spareTowels} spare` : ''}`, amber: !!spareTowels },
+    { name: 'Hand towels',  total: totalHandTowels + spareTowels,   sub: `${totalHandTowels} std${spareTowels ? ` + ${spareTowels} spare` : ''}`, amber: !!spareTowels },
+    { name: 'Bathmats',     total: totalBathmats,    sub: `1 per 2 beds`, amber: false },
+    { name: 'Tea towels',   total: totalTeaTowels,   sub: `2 per property`, amber: false },
+  ];
+
+  document.getElementById('pack-grid').innerHTML = packItems.map((item, i) => {
+    const spareTag = item.amber ? `<span style="font-size:10px;background:var(--amber-light);color:var(--amber);padding:1px 6px;border-radius:10px;margin-left:5px;font-weight:500">incl. spare</span>` : '';
+    return `<div class="pack-item" id="pack-${i}" onclick="togglePack(${i})">
+      <div class="pack-check"><svg width="10" height="8" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1"/></svg></div>
+      <div style="flex:1">
+        <div class="pack-name">${item.name}${spareTag}</div>
+        <div class="pack-count"><strong>${item.total}</strong> — ${item.sub}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Late additions — separate packing summary for urgent orders
+  const urgentOrders = todayOrders.filter(o => o.urgent);
+  const lateSection = document.getElementById('late-pack-section');
+  if (urgentOrders.length > 0 && lateSection) {
+    let lSheets=0, lPillows=0, lBath=0, lHand=0, lBathmats=0;
+    urgentOrders.forEach(o => {
+      const p = properties.find(x => x.id === o.propId);
+      (p?.beds||[]).forEach(b => {
+        lSheets   += b.n * 3;
+        lPillows  += b.n * ((b.type==='Single'||b.type==='King Single'||b.type==='Bunk') ? 2 : 4);
+        lBath     += b.n * 2;
+        lHand     += b.n * 2;
+        lBathmats += Math.ceil(b.n / 2);
+      });
+    });
+    const lTea = urgentOrders.length * 2;
+    lateSection.style.display = '';
+    lateSection.innerHTML = `
+      <div class="late-pack-title">
+        <svg width="14" height="14" fill="none" stroke="#c02020" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Late additions — extra trip packing list (${urgentOrders.length} bag${urgentOrders.length!==1?'s':''})
+      </div>
+      <div style="font-size:12px;color:#7a3030;margin-bottom:12px;">These items are in addition to Monday's pack. Grab only these for your extra run.</div>
+      <div class="late-pack-grid">
+        <div class="trip-linen-item"><span>${lSheets}</span>Sheets</div>
+        <div class="trip-linen-item"><span>${lPillows}</span>Pillow cases</div>
+        <div class="trip-linen-item"><span>${lBath}</span>Bath towels</div>
+        <div class="trip-linen-item"><span>${lHand}</span>Hand towels</div>
+        <div class="trip-linen-item"><span>${lBathmats}</span>Bathmats</div>
+        <div class="trip-linen-item"><span>${lTea}</span>Tea towels</div>
+      </div>`;
+  } else if (lateSection) {
+    lateSection.style.display = 'none';
+  }
+}
+
+function dismissAlert(orderId) {
+  const o = orders.find(x => x.id === orderId);
+  if (o) o.alertDismissed = true;
+  renderDashboard();
+  showToast('Alert dismissed');
+}
+
+// Simulate a new last-minute booking coming in via iCal
+// In production this would be triggered by the iCal polling function
+function simulateNewBooking() {
+  const randomProp = properties[Math.floor(Math.random() * properties.length)];
+  const newOrder = {
+    id: Date.now(),
+    propId: randomProp.id,
+    date: 'today',
+    status: 'pending',
+    urgent: true,
+    detectedAt: new Date(),
+    alertDismissed: false,
+  };
+  orders.push(newOrder);
+  renderDashboard();
+  // Browser notification if permitted
+  if (Notification.permission === 'granted') {
+    new Notification('Sheet Shed — New last-minute booking', {
+      body: `${randomProp.name} just came through. Check the packing list.`,
+      icon: '',
+    });
+  }
+  showToast('⚠ New last-minute booking detected');
+}
+
+function cycleStatus(id) {
+  const o = orders.find(x => x.id === id);
+  if (!o) return;
+  const cycle = { pending: 'packed', packed: 'collected', collected: 'pending' };
+  o.status = cycle[o.status] || 'pending';
+  const msgs = { packed: 'Bag marked as packed', collected: 'Dirty linen returned', pending: 'Status reset' };
+  renderDashboard();
+  showToast(msgs[o.status]);
+}
+
+function togglePack(i) {
+  document.getElementById('pack-' + i)?.classList.toggle('checked');
+}
+
+// ── PROPERTIES ──
+function renderProperties(filter = '') {
+  const grid = document.getElementById('prop-grid');
+  const filtered = properties.filter(p => !filter || p.name.toLowerCase().includes(filter.toLowerCase()) || customers.find(c=>c.id===p.customerId)?.name.toLowerCase().includes(filter.toLowerCase()));
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><h3>No properties yet</h3><p>Add a property or use bulk import to get started.</p></div>';
+    return;
+  }
+  grid.innerHTML = filtered.map(p => {
+    const c = customers.find(x => x.id === p.customerId);
+    const bedHtml = p.beds.map(b => `<span class="bed-pill bed-${b.type.toLowerCase()}">${b.n} ${b.type}</span>`).join('');
+    const platformLabels = { homhero:'HomHero', airbnb:'Airbnb', guesty:'Guesty', stayz:'Stayz', manual:'Manual', booking:'Booking.com' };
+    return `<div class="prop-card">
+      <div class="prop-header">
+        <div><div class="prop-name">${p.name}</div><div class="prop-owner">${c?.name || 'No customer'}</div></div>
+        <span class="platform-badge plat-${p.platform}">${platformLabels[p.platform]||p.platform}</span>
+      </div>
+      <div class="prop-beds">${bedHtml}</div>
+      <div class="prop-ical">
+        <div class="prop-status-dot ${p.ical ? 'dot-green' : 'dot-amber'}"></div>
+        <span class="prop-ical-url">${p.ical || 'No iCal URL — manual orders only'}</span>
+      </div>
+      <div class="prop-actions">
+        <button class="btn btn-outline btn-sm" onclick="editProp(${p.id})">Edit</button>
+        <button class="btn btn-outline btn-sm" onclick="addOrderForProp(${p.id})">+ Order today</button>
+        <button class="btn btn-outline btn-sm" style="margin-left:auto;color:var(--red)" onclick="deleteProp(${p.id})">Remove</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterProps(val) { renderProperties(val); }
+
+function addOrderForProp(propId) {
+  const exists = orders.find(o => o.propId === propId);
+  if (exists) { showToast('Order already exists for today'); return; }
+  orders.push({ id: Date.now(), propId, date: 'today', status: 'pending' });
+  showToast('Manual order added');
+}
+
+function deleteProp(id) {
+  properties = properties.filter(p => p.id !== id);
+  renderProperties(document.getElementById('prop-search')?.value || '');
+  showToast('Property removed');
+}
+
+function editProp(id) {
+  const p = properties.find(x => x.id === id);
+  if (!p) return;
+  editingPropId = id;
+  document.getElementById('prop-name-input').value = p.name;
+  document.getElementById('prop-address-input').value = p.address || '';
+  document.getElementById('prop-ical-input').value = p.ical || '';
+  document.getElementById('prop-platform-select').value = p.platform;
+  populateCustomerSelects();
+  document.getElementById('prop-customer-select').value = p.customerId;
+  bedRows = p.beds.map(b => ({...b}));
+  renderBedRows();
+  openModal('modal-add-prop');
+}
+
+// ── BED BUILDER ──
+function addBedType(type) {
+  const existing = bedRows.find(b => b.type === type);
+  if (existing) existing.n++;
+  else bedRows.push({ type, n: 1 });
+  renderBedRows();
+}
+
+function renderBedRows() {
+  document.getElementById('beds-rows').innerHTML = bedRows.map((b, i) => `
+    <div class="bed-count-row">
+      <span class="btype">${b.type}</span>
+      <div class="count-ctrl">
+        <button class="count-btn" onclick="adjustBed(${i},-1)">−</button>
+        <span class="count-val">${b.n}</span>
+        <button class="count-btn" onclick="adjustBed(${i},1)">+</button>
+      </div>
+      <button class="btn btn-outline btn-sm" style="margin-left:8px" onclick="removeBed(${i})">Remove</button>
+    </div>`).join('');
+}
+
+function adjustBed(i, d) {
+  bedRows[i].n = Math.max(1, bedRows[i].n + d);
+  renderBedRows();
+}
+
+function removeBed(i) {
+  bedRows.splice(i, 1);
+  renderBedRows();
+}
+
+// ── SAVE PROPERTY ──
+function saveProperty() {
+  const name       = document.getElementById('prop-name-input').value.trim();
+  const customerId = +document.getElementById('prop-customer-select').value;
+  const platform   = document.getElementById('prop-platform-select').value;
+  const address    = document.getElementById('prop-address-input').value.trim();
+  const ical       = document.getElementById('prop-ical-input').value.trim();
+  const extras = {
+    bathTowels: +document.getElementById('prop-extra-bath').value || 0,
+    handTowels: +document.getElementById('prop-extra-hand').value || 0,
+    pillowCases: +document.getElementById('prop-extra-pillow').value || 0,
+    bathmats:   +document.getElementById('prop-extra-bathmat').value || 0,
+    teaTowels:  +document.getElementById('prop-extra-tea').value || 0,
+  };
+  const freq     = +document.getElementById('prop-freq').value || 6;
+  const delivery = document.getElementById('prop-delivery').value;
+  if (!name) { showToast('Please enter a property name'); return; }
+  if (editingPropId) {
+    const p = properties.find(x => x.id === editingPropId);
+    Object.assign(p, { name, customerId, platform, address, ical, beds: [...bedRows], extras, freq, delivery });
+    showToast('Property updated');
+  } else {
+    properties.push({ id: Date.now(), name, customerId, platform, address, ical, beds: [...bedRows], extras, freq, delivery });
+    showToast('Property added');
+  }
+  closeModal('modal-add-prop');
+  renderProperties();
+}
+
+// ── BULK IMPORT ──
+function doBulkImport() {
+  const text = document.getElementById('bulk-text').value.trim();
+  const customerId = +document.getElementById('bulk-customer-select').value;
+  const platform = document.getElementById('bulk-platform-select').value;
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  let count = 0;
+  lines.forEach(line => {
+    const parts = line.split(',').map(s => s.trim());
+    if (parts.length < 1) return;
+    const name = parts[0];
+    const ical = parts[1] || '';
+    const bedStr = parts[2] || '';
+    const beds = parseBedString(bedStr);
+    properties.push({ id: Date.now() + Math.random(), name, customerId, platform, address: '', ical, beds });
+    count++;
+  });
+  closeModal('modal-bulk');
+  renderProperties();
+  showToast(`Imported ${count} propert${count === 1 ? 'y' : 'ies'}`);
+}
+
+function parseBedString(str) {
+  const beds = [];
+  const matches = str.matchAll(/(\d+)\s*(king|queen|double|single|bunk)/gi);
+  for (const m of matches) beds.push({ n: +m[1], type: m[2].charAt(0).toUpperCase() + m[2].slice(1).toLowerCase() });
+  return beds.length ? beds : [{type:'Queen', n:1}];
+}
+
+// ── CUSTOMERS ──
+function renderCustomers() {
+  const list = document.getElementById('customer-list');
+  const platformLabels = { homhero:'HomHero', airbnb:'Airbnb', guesty:'Guesty', stayz:'Stayz', manual:'Manual' };
+  list.innerHTML = customers.map(c => {
+    const propCount = properties.filter(p => p.customerId === c.id).length;
+    const initials = c.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const kit = c.kit;
+    const kitLabel = kit
+      ? kit.status === 'needed' ? 'Replenishment needed' : 'Kit active'
+      : 'No kit';
+    const kitClass = kit
+      ? kit.status === 'needed' ? 'kit-status-needed' : 'kit-status-active'
+      : 'kit-status-none';
+    const kitDetail = kit
+      ? kit.items.map(i => `${i.qty} ${i.item}`).join(' · ')
+      : 'No emergency kit assigned';
+    const kitInvoiced = kit && kit.invoiced
+      ? '<span style="font-size:11px;color:var(--accent);font-weight:600;margin-left:6px;">✓ invoiced</span>'
+      : kit ? '<span style="font-size:11px;color:var(--amber);font-weight:600;margin-left:6px;">not yet invoiced</span>' : '';
+    return `<div class="customer-row" style="flex-wrap:wrap;gap:12px;">
+      <div class="cust-avatar">${initials}</div>
+      <div style="flex:1;min-width:200px;">
+        <div class="cust-name">${c.name}</div>
+        <div class="cust-sub">${c.email} · ${c.phone} · ${platformLabels[c.platform]||c.platform} · ${c.type==='company'?'Management co.':'Individual owner'}</div>
+        <div style="margin-top:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span class="inv-status ${kitClass}" style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;">${kitLabel}</span>
+          ${kitInvoiced}
+          <span style="font-size:11px;color:var(--ink3);">${kitDetail}</span>
+        </div>
+      </div>
+      <div class="cust-props"><strong>${propCount}</strong>propert${propCount===1?'y':'ies'}</div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-outline btn-sm" onclick="openKitModal(${c.id})">
+          ${kit ? 'Edit kit' : '+ Add kit'}
+        </button>
+        ${kit && kit.status === 'active' ? `<button class="btn btn-outline btn-sm" style="color:var(--amber)" onclick="requestReplenishment(${c.id})">Request replenishment</button>` : ''}
+        <button class="btn btn-outline btn-sm" onclick="deleteCustomer(${c.id})" style="color:var(--red)">Remove</button>
+      </div>
+    </div>`;
+  }).join('') || '<div class="empty"><h3>No customers yet</h3><p>Add a customer first, then properties under them.</p></div>';
+}
+
+function deleteCustomer(id) {
+  customers = customers.filter(c => c.id !== id);
+  renderCustomers();
+  showToast('Customer removed');
+}
+
+function saveCustomer() {
+  const name = document.getElementById('cust-name-input').value.trim();
+  if (!name) { showToast('Please enter a name'); return; }
+  customers.push({
+    id: Date.now(),
+    name,
+    email: document.getElementById('cust-email-input').value.trim(),
+    phone: document.getElementById('cust-phone-input').value.trim(),
+    platform: document.getElementById('cust-platform-select').value,
+    type: document.getElementById('cust-type-select').value,
+  });
+  closeModal('modal-add-customer');
+  renderCustomers();
+  populateCustomerSelects();
+  showToast('Customer added');
+}
+
+// ── MODALS ──
+function populateCustomerSelects() {
+  ['prop-customer-select','bulk-customer-select'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  });
+}
+
+function openAddProp() {
+  editingPropId = null;
+  bedRows = [];
+  document.getElementById('prop-name-input').value = '';
+  document.getElementById('prop-address-input').value = '';
+  document.getElementById('prop-ical-input').value = '';
+  renderBedRows();
+  populateCustomerSelects();
+  openModal('modal-add-prop');
+}
+
+function openBulkImport() {
+  populateCustomerSelects();
+  openModal('modal-bulk');
+}
+
+function openAddCustomer() { openModal('modal-add-customer'); }
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-bg').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// ── TOAST ──
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+// ── PRICING ──
+// Real hire company prices (ex GST)
+const RATES = {
+  sheetKing:        1.95,
+  sheetQueen:       1.95,
+  sheetKingSingle:  1.85,  // king single & single
+  sheetSingleFitted:2.45,  // fitted standard single
+  pillowcase:       0.95,
+  bathTowel:        1.15,
+  faceWasher:       0,
+  handTowel:        0.95,
+  bathmat:          0.95,
+  teaTowel:         0.90,
+};
+
+// Items per bed by type
+// sheets: 1 fitted + 1 flat + 1 doona cover = 3 sheets per bed
+// pillowcases: king=2, queen=2, single=1, double=2
+// towels: 1 bath + 1 hand per person (assume 2 per bed)
+// bathmat: 1 per bathroom (approx 1 per 2 beds, handled as fixed per changeover in packing)
+// tea towel: 2 per changeover (kitchen, fixed not per-bed)
+function sheetCostForBedType(type) {
+  if (type === 'King')        return RATES.sheetKing * 3;
+  if (type === 'Queen')       return RATES.sheetQueen * 3;
+  if (type === 'Double')      return RATES.sheetQueen * 3;
+  if (type === 'King Single') return RATES.sheetKingSingle * 3;
+  if (type === 'Single')      return RATES.sheetKingSingle * 3;
+  if (type === 'Bunk')        return RATES.sheetSingleFitted * 3;
+  return RATES.sheetQueen * 3;
+}
+
+function pillowcasesForBedType(type) {
+  if (type === 'King') return 4;  // 2 pillows each side
+  if (type === 'Bunk') return 2;
+  if (type === 'Single' || type === 'King Single') return 2;
+  return 4; // queen, double
+}
+
+function linenCostForBeds(beds) {
+  // beds = array of {type, n}
+  let cost = 0;
+  let totalBedCount = 0;
+  beds.forEach(b => {
+    totalBedCount += b.n;
+    cost += b.n * sheetCostForBedType(b.type);
+    cost += b.n * pillowcasesForBedType(b.type) * RATES.pillowcase;
+    // Towels: bath + hand + face washer × 2 people per bed
+    cost += b.n * 2 * (RATES.bathTowel + RATES.handTowel);
+  });
+  // Fixed per changeover: 1 bathmat per 2 beds (rounded up) + 2 tea towels
+  cost += Math.ceil(totalBedCount / 2) * RATES.bathmat;
+  cost += 2 * RATES.teaTowel;
+  return cost;
+}
+
+// For pricing table (per-bed average, using queen as default)
+function linenCostPerBed(bedCount, type='Queen') {
+  const beds = [{ type, n: bedCount }];
+  return linenCostForBeds(beds);
+}
+
+let pricingSettings = { markup: 40, lossRate: 3, activeProps: 20, weeklyChangeovers: 25, spares: { sheet: true, towel: true, pillowcase: true } };
+
+function lossBufferPerChangeover(settings) {
+  const totalBeds = settings.activeProps * 4;
+  const totalItems = totalBeds * 9; // approx items per bed
+  const monthlyLostItems = totalItems * (settings.lossRate / 100);
+  const avgItemCost = (RATES.sheetQueen + RATES.bathTowel + RATES.pillowcase) / 3;
+  const monthlyLossCost = monthlyLostItems * avgItemCost;
+  const weeklyLossCost = monthlyLossCost / 4.33;
+  return weeklyLossCost / Math.max(settings.weeklyChangeovers, 1);
+}
+
+function spareCostPerBag() {
+  const s = pricingSettings.spares;
+  let cost = 0;
+  if (s.sheet)      cost += RATES.sheetQueen; // 1 spare flat sheet
+  if (s.towel)      cost += RATES.bathTowel + RATES.handTowel; // 1 spare bath + 1 hand
+  if (s.pillowcase) cost += RATES.pillowcase * 2; // 2 spare pillow cases
+  return cost;
+}
+
+function toggleSpare(type, on) {
+  pricingSettings.spares[type] = on;
+  updatePricing();
+}
+
+function chargePerChangeover(beds, settings) {
+  const cost = linenCostForBeds(beds);
+  const buffer = lossBufferPerChangeover(settings);
+  const spare = spareCostPerBag();
+  const total = (cost + buffer + spare) * (1 + settings.markup / 100);
+  return { cost, buffer, spare, charge: total, profit: total - cost - buffer - spare };
+}
+
+// For rate table — standard queen beds
+function chargePerBeds(bedCount, settings) {
+  const beds = [{ type: 'Queen', n: bedCount }];
+  return chargePerChangeover(beds, settings);
+}
+
+function updatePricing() {
+  pricingSettings.markup     = +document.getElementById('p-markup').value;
+  pricingSettings.lossRate   = +document.getElementById('p-loss').value;
+  pricingSettings.activeProps = +document.getElementById('p-props').value;
+  pricingSettings.weeklyChangeovers = +document.getElementById('p-cos').value;
+
+  document.getElementById('pv-markup').textContent = pricingSettings.markup + '%';
+  document.getElementById('pv-loss').textContent   = pricingSettings.lossRate + '%';
+  document.getElementById('pv-props').textContent  = pricingSettings.activeProps;
+  document.getElementById('pv-cos').textContent    = pricingSettings.weeklyChangeovers;
+
+  const sheetCost  = pricingSettings.spares.sheet      ? RATES.sheetQueen : 0;
+  const towelCost  = pricingSettings.spares.towel      ? RATES.bathTowel + RATES.handTowel : 0;
+  const pillowCost = pricingSettings.spares.pillowcase ? RATES.pillowcase * 2 : 0;
+  const totalSpare = sheetCost + towelCost + pillowCost;
+
+  const el = id => document.getElementById(id);
+  if (el('spare-sheet-cost'))      el('spare-sheet-cost').textContent      = pricingSettings.spares.sheet      ? `$${sheetCost.toFixed(2)}`  : '—';
+  if (el('spare-towel-cost'))      el('spare-towel-cost').textContent      = pricingSettings.spares.towel      ? `$${towelCost.toFixed(2)}`  : '—';
+  if (el('spare-pillowcase-cost')) el('spare-pillowcase-cost').textContent = pricingSettings.spares.pillowcase ? `$${pillowCost.toFixed(2)}` : '—';
+  if (el('spare-total-cost'))      el('spare-total-cost').textContent      = `$${totalSpare.toFixed(2)} hire cost`;
+
+  const avgBeds = [{ type: 'Queen', n: 4 }];
+  const r4 = chargePerChangeover(avgBeds, pricingSettings);
+  const weeklyRev    = r4.charge * pricingSettings.weeklyChangeovers;
+  const weeklyProfit = r4.profit * pricingSettings.weeklyChangeovers - 70;
+
+  const statsEl = el('pricing-stats');
+  if (statsEl) statsEl.innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Charge per changeover</div>
+      <div class="stat-val">$${r4.charge.toFixed(2)}</div>
+      <div class="stat-sub">4-bed queen avg, all-in</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Spares + buffer per bag</div>
+      <div class="stat-val" style="color:var(--amber)">$${(r4.spare + r4.buffer).toFixed(2)}</div>
+      <div class="stat-sub">invisible to customer</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Weekly revenue</div>
+      <div class="stat-val">$${Math.round(weeklyRev).toLocaleString()}</div>
+      <div class="stat-sub">${pricingSettings.weeklyChangeovers} changeovers</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Weekly profit</div>
+      <div class="stat-val" style="color:var(--accent)">$${Math.round(weeklyProfit).toLocaleString()}</div>
+      <div class="stat-sub">after $70 storage</div>
+    </div>`;
+
+  const tbody = el('price-table-body');
+  if (tbody) tbody.innerHTML = [1,2,3,4,5,6,7,8,9,10,11,12].map(n => {
+    const beds = [{ type: 'Queen', n }];
+    const r = chargePerChangeover(beds, pricingSettings);
+    // break down cost components for tooltip
+    const sheets = n * RATES.sheetQueen * 3;
+    const pillows = n * 4 * RATES.pillowcase;
+    const towels = n * 2 * (RATES.bathTowel + RATES.handTowel);
+    const bathmats = Math.ceil(n/2) * RATES.bathmat;
+    const teaTowels = 2 * RATES.teaTowel;
+    return `<tr>
+      <td><strong>${n} bed${n>1?'s':''}</strong><div style="font-size:11px;color:var(--ink3);margin-top:2px">Queen avg</div></td>
+      <td><span title="Sheets $${sheets.toFixed(2)} · Pillows $${pillows.toFixed(2)} · Towels $${towels.toFixed(2)} · Bathmats $${bathmats.toFixed(2)} · Tea towels $${teaTowels.toFixed(2)}">$${r.cost.toFixed(2)}</span></td>
+      <td class="buffer">+$${(r.buffer + r.spare).toFixed(2)}</td>
+      <td class="charge">$${r.charge.toFixed(2)}</td>
+      <td class="profit">$${r.profit.toFixed(2)}</td>
+    </tr>`;
+  }).join('');
+
+  // Item reference table
+  const refEl = el('item-rate-table');
+  if (refEl) refEl.innerHTML = `
+    <tr><td>King sheet</td><td>$${RATES.sheetKing.toFixed(2)}</td><td>3 per king bed</td><td>$${(RATES.sheetKing*3).toFixed(2)}</td></tr>
+    <tr><td>Queen / double sheet</td><td>$${RATES.sheetQueen.toFixed(2)}</td><td>3 per queen bed</td><td>$${(RATES.sheetQueen*3).toFixed(2)}</td></tr>
+    <tr><td>King single sheet</td><td>$${RATES.sheetKingSingle.toFixed(2)}</td><td>3 per king single bed</td><td>$${(RATES.sheetKingSingle*3).toFixed(2)}</td></tr>
+    <tr><td>Single sheet</td><td>$${RATES.sheetKingSingle.toFixed(2)}</td><td>3 per single bed</td><td>$${(RATES.sheetKingSingle*3).toFixed(2)}</td></tr>
+    <tr><td>Fitted standard single</td><td>$${RATES.sheetSingleFitted.toFixed(2)}</td><td>3 per bunk bed</td><td>$${(RATES.sheetSingleFitted*3).toFixed(2)}</td></tr>
+    <tr style="background:var(--bg)"><td>Pillow case</td><td>$${RATES.pillowcase.toFixed(2)}</td><td>4 per queen/king, 2 per single</td><td>—</td></tr>
+    <tr style="background:var(--bg)"><td>Premium bath towel</td><td>$${RATES.bathTowel.toFixed(2)}</td><td>2 per bed</td><td>—</td></tr>
+    <tr style="background:var(--bg)"><td>Hand towel</td><td>$${RATES.handTowel.toFixed(2)}</td><td>2 per bed</td><td>—</td></tr>
+    <tr style="background:var(--bg)"><td>Bathmat</td><td>$${RATES.bathmat.toFixed(2)}</td><td>1 per 2 beds</td><td>—</td></tr>
+    <tr style="background:var(--bg)"><td>Tea towel</td><td>$${RATES.teaTowel.toFixed(2)}</td><td>2 per changeover</td><td>—</td></tr>
+  `;
+}
+
+function initPricing() {
+  document.getElementById('p-markup').value = pricingSettings.markup;
+  document.getElementById('p-loss').value = pricingSettings.lossRate;
+  document.getElementById('p-props').value = pricingSettings.activeProps;
+  document.getElementById('p-cos').value = pricingSettings.weeklyChangeovers;
+  updatePricing();
+}
+
+// ── INVOICING ──
+let invoices = [
+  { id: 1, customerId: 1, period: 'Week of 17 Mar 2026', dueDate: '2026-03-31', status: 'paid',    lines: [] },
+  { id: 2, customerId: 2, period: 'Week of 17 Mar 2026', dueDate: '2026-03-31', status: 'sent',    lines: [] },
+  { id: 3, customerId: 3, period: 'Week of 17 Mar 2026', dueDate: '2026-03-31', status: 'overdue', lines: [] },
+];
+let selectedInvoiceId = null;
+
+function initInvoicing() {
+  const sel = document.getElementById('inv-customer-sel');
+  if (sel) sel.innerHTML = customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  const due = document.getElementById('inv-due-date');
+  if (due) {
+    const d = new Date(); d.setDate(d.getDate() + 14);
+    due.value = d.toISOString().split('T')[0];
+  }
+  renderInvoiceList();
+  previewInvoice();
+}
+
+function buildInvoiceLines(customerId, periodLabel) {
+  const custProps = properties.filter(p => p.customerId === customerId);
+  const lines = [];
+  custProps.forEach(p => {
+    const totalBeds = p.beds.reduce((s, b) => s + b.n, 0);
+    const propOrders = orders.filter(o => o.propId === p.id);
+    const changeovers = propOrders.length || Math.floor(Math.random() * 3) + 1;
+    if (changeovers === 0) return;
+    const fakeBeds = p.beds.map(b => ({...b}));
+    const { charge } = chargePerChangeover(fakeBeds, pricingSettings);
+    lines.push({
+      property: p.name,
+      address: p.address,
+      beds: p.beds.map(b => `${b.n} ${b.type}`).join(', '),
+      changeovers,
+      ratePerCo: charge,
+      total: charge * changeovers,
+    });
+  });
+  // Check for emergency kit charges
+  const cust = customers.find(c => c.id === customerId);
+  if (cust?.kit) {
+    const markup = pricingSettings.markup / 100;
+    const kitCost = cust.kit.items.reduce((s, i) => s + (KIT_ITEM_RATES[i.item] || 0) * i.qty, 0);
+    const kitCharge = kitCost * (1 + markup);
+    const kitDesc = cust.kit.items.map(i => `${i.qty}× ${i.item}`).join(', ');
+    if (!cust.kit.invoiced || cust.kit.status === 'needed') {
+      lines.push({
+        property: cust.kit.status === 'needed' ? 'Emergency kit — replenishment' : 'Emergency kit — initial supply',
+        address: 'Held at customer office for on-site emergencies',
+        beds: kitDesc,
+        changeovers: 1,
+        ratePerCo: kitCharge,
+        total: kitCharge,
+        isKit: true,
+      });
+      // Mark as invoiced
+      cust.kit.invoiced = true;
+      cust.kit.status = 'active';
+    }
+  }
+  return lines;
+}
+
+function periodLabel(val) {
+  const now = new Date();
+  if (val === 'this-week') {
+    const mon = new Date(now); mon.setDate(now.getDate() - now.getDay() + 1);
+    return 'Week of ' + mon.toLocaleDateString('en-AU', {day:'numeric',month:'short',year:'numeric'});
+  }
+  if (val === 'last-week') {
+    const mon = new Date(now); mon.setDate(now.getDate() - now.getDay() - 6);
+    return 'Week of ' + mon.toLocaleDateString('en-AU', {day:'numeric',month:'short',year:'numeric'});
+  }
+  if (val === 'this-month') return now.toLocaleDateString('en-AU', {month:'long',year:'numeric'});
+  if (val === 'last-month') {
+    const lm = new Date(now.getFullYear(), now.getMonth()-1, 1);
+    return lm.toLocaleDateString('en-AU', {month:'long',year:'numeric'});
+  }
+  return val;
+}
+
+function previewInvoice() {
+  const custId = +document.getElementById('inv-customer-sel')?.value;
+  const period = document.getElementById('inv-period-sel')?.value;
+  const dueDate = document.getElementById('inv-due-date')?.value;
+  if (!custId) return;
+  const cust = customers.find(c => c.id === custId);
+  const lines = buildInvoiceLines(custId, period);
+  renderInvoiceDoc('invoice-doc', cust, lines, periodLabel(period), dueDate, 'PREVIEW', 'draft');
+  document.getElementById('inv-preview-label').textContent = `${cust?.name} — ${periodLabel(period)}`;
+}
+
+function renderInvoiceDoc(elId, cust, lines, period, dueDate, invNum, status) {
+  const subtotal = lines.reduce((s, l) => s + l.total, 0);
+  const gst = subtotal * 0.1;
+  const total = subtotal + gst;
+  const today = new Date().toLocaleDateString('en-AU', {day:'numeric',month:'long',year:'numeric'});
+  const dueFmt = dueDate ? new Date(dueDate).toLocaleDateString('en-AU', {day:'numeric',month:'long',year:'numeric'}) : '—';
+  const statusColors = { draft:'var(--ink3)', sent:'var(--blue)', paid:'var(--accent)', overdue:'var(--red)' };
+
+  document.getElementById(elId).innerHTML = `
+    <div class="inv-doc-header">
+      <div>
+        <div class="inv-doc-logo">Sheet<span>Shed</span></div>
+        <div style="font-size:12px;color:var(--ink3);margin-top:4px;line-height:1.7">
+          Sheet Shed — Your Local Linen Service<br>
+          Mansfield VIC 3722<br>
+          ABN: XX XXX XXX XXX
+        </div>
+      </div>
+      <div class="inv-doc-meta">
+        <strong>TAX INVOICE</strong>
+        Invoice #${invNum}<br>
+        Issued: ${today}<br>
+        Due: ${dueFmt}<br>
+        Period: ${period}<br>
+        <span style="font-weight:600;color:${statusColors[status]||'var(--ink3)'};text-transform:uppercase;font-size:11px;letter-spacing:0.05em">${status}</span>
+      </div>
+    </div>
+    <div class="inv-parties">
+      <div>
+        <div class="inv-party-label">From</div>
+        <div class="inv-party-name">Sheet Shed</div>
+        <div class="inv-party-detail">hello@sheetshed.com.au<br>0XXX XXX XXX</div>
+      </div>
+      <div>
+        <div class="inv-party-label">To</div>
+        <div class="inv-party-name">${cust?.name || '—'}</div>
+        <div class="inv-party-detail">${cust?.email || ''}<br>${cust?.phone || ''}</div>
+      </div>
+    </div>
+    ${lines.length === 0
+      ? '<div style="text-align:center;padding:30px;color:var(--ink3);font-size:13px">No orders found for this customer in this period.</div>'
+      : `<table class="inv-line-table">
+          <thead><tr><th>Property</th><th>Beds</th><th>Changeovers</th><th class="num">Rate</th><th class="num">Amount</th></tr></thead>
+          <tbody>
+            ${lines.map(l => `<tr${l.isKit ? ' style="background:#fef3e2;"' : ''}>
+              <td><strong>${l.property}</strong>${l.isKit ? ' <span style="font-size:10px;background:#fde8b0;color:#8a4a10;padding:2px 7px;border-radius:10px;font-weight:700;">EMERGENCY KIT</span>' : ''}<div style="font-size:11px;color:var(--ink3)">${l.address}</div></td>
+              <td style="font-size:12px">${l.beds}</td>
+              <td style="text-align:center">${l.isKit ? '—' : l.changeovers}</td>
+              <td class="num">${l.isKit ? '—' : '$'+l.ratePerCo.toFixed(2)}</td>
+              <td class="num"><strong>$${l.total.toFixed(2)}</strong></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+        <div class="inv-totals">
+          <div class="inv-total-row"><span class="tlabel">Subtotal</span><span class="tval">$${subtotal.toFixed(2)}</span></div>
+          <div class="inv-total-row"><span class="tlabel">GST (10%)</span><span class="tval">$${gst.toFixed(2)}</span></div>
+          <div class="inv-total-row grand"><span class="tlabel">Total AUD</span><span class="tval">$${total.toFixed(2)}</span></div>
+        </div>`
+    }
+    <div class="inv-footer">
+      Payment: Direct deposit to BSB XXX-XXX · Account XXXXXXXXX · Ref: INV-${invNum}<br>
+    Please remit within 14 days. For queries contact hello@sheetshed.com.au<br>
+    Sheet Shed is a trading name of [Your Company Pty Ltd] · ABN: XX XXX XXX XXX
+    </div>`;
+}
+
+function generateInvoice() {
+  const custId = +document.getElementById('inv-customer-sel')?.value;
+  const period = document.getElementById('inv-period-sel')?.value;
+  const dueDate = document.getElementById('inv-due-date')?.value;
+  if (!custId) { showToast('Select a customer first'); return; }
+  const lines = buildInvoiceLines(custId, period);
+  const id = Date.now();
+  invoices.unshift({ id, customerId: custId, period: periodLabel(period), dueDate, status: 'draft', lines });
+  selectedInvoiceId = id;
+  renderInvoiceList();
+  showToast('Invoice saved as draft');
+}
+
+function renderInvoiceList() {
+  const el = document.getElementById('inv-list');
+  if (!el) return;
+  if (invoices.length === 0) { el.innerHTML = '<div class="empty" style="padding:30px 0"><p>No invoices yet.</p></div>'; return; }
+  el.innerHTML = invoices.map(inv => {
+    const c = customers.find(x => x.id === inv.customerId);
+    const lines = inv.lines.length ? inv.lines : buildInvoiceLines(inv.customerId, inv.period);
+    const total = lines.reduce((s,l) => s+l.total, 0) * 1.1;
+    const statusClass = { draft:'inv-draft', sent:'inv-sent', paid:'inv-paid', overdue:'inv-overdue' }[inv.status] || 'inv-draft';
+    return `<div class="inv-card ${selectedInvoiceId===inv.id?'selected':''}" onclick="selectInvoice(${inv.id})">
+      <div class="inv-card-top">
+        <div>
+          <div class="inv-card-name">${c?.name || 'Unknown'}</div>
+          <div class="inv-card-period">${inv.period}</div>
+          <span class="inv-status ${statusClass}">${inv.status}</span>
+        </div>
+        <div class="inv-amount">$${total.toFixed(2)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function selectInvoice(id) {
+  selectedInvoiceId = id;
+  const inv = invoices.find(x => x.id === id);
+  if (!inv) return;
+  const cust = customers.find(c => c.id === inv.customerId);
+  const lines = inv.lines.length ? inv.lines : buildInvoiceLines(inv.customerId, inv.period);
+  renderInvoiceDoc('invoice-doc', cust, lines, inv.period, inv.dueDate, id, inv.status);
+  document.getElementById('inv-preview-label').textContent = `${cust?.name} — ${inv.period}`;
+  renderInvoiceList();
+}
+
+function markInvoicePaid() {
+  const inv = invoices.find(x => x.id === selectedInvoiceId);
+  if (!inv) { showToast('Select an invoice first'); return; }
+  inv.status = inv.status === 'paid' ? 'sent' : 'paid';
+  selectInvoice(inv.id);
+  showToast(inv.status === 'paid' ? 'Marked as paid' : 'Marked as sent');
+}
+
+function printInvoice() {
+  window.print();
+}
+
+function updateOccupancy() {
+  const total  = +document.getElementById('occ-total').value;
+  const used   = Math.min(+document.getElementById('occ-used').value, total);
+  const freqPct = +document.getElementById('occ-freq').value;
+
+  // clamp used slider to total
+  document.getElementById('occ-used').max = total;
+  if (used > total) document.getElementById('occ-used').value = total;
+
+  document.getElementById('occ-total-out').textContent = total + ' beds';
+  document.getElementById('occ-used-out').textContent  = used  + ' beds';
+  document.getElementById('occ-freq-out').textContent  = freqPct + '%';
+
+  const unused = total - used;
+  const markup = pricingSettings.markup;
+
+  // Cost saved per changeover when beds go unused (hire cost not incurred)
+  const savedCostPerUnusedBed = linenCostPerBed(1); // cost per 1 queen bed
+  const savedCostPerOcc = unused * savedCostPerUnusedBed;
+
+  // You still charged the customer for full property — so saved cost = extra profit
+  const extraProfitPerOcc = savedCostPerOcc; // full hire saving, already inside the charge
+
+  // Weekly figures based on current changeover settings
+  const weeklyChangeovers = pricingSettings.weeklyChangeovers;
+  const occChangeovers = weeklyChangeovers * (freqPct / 100);
+  const weeklyExtraProfit = occChangeovers * extraProfitPerOcc;
+  const annualExtraProfit = weeklyExtraProfit * 52;
+
+  // Base weekly profit without occupancy bonus
+  const r = chargePerChangeover([{type:'Queen',n:total}], pricingSettings);
+  const baseWeeklyProfit = r.profit * weeklyChangeovers - 70;
+
+  const el = id => document.getElementById(id);
+  el('occ-results').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Hire cost saved per unused bed</div>
+      <div class="stat-val" style="color:var(--accent)">$${savedCostPerUnusedBed.toFixed(2)}</div>
+      <div class="stat-sub">${unused} unused bed${unused!==1?'s':''} = $${savedCostPerOcc.toFixed(2)} saved</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Extra profit per partial changeover</div>
+      <div class="stat-val" style="color:var(--accent)">$${extraProfitPerOcc.toFixed(2)}</div>
+      <div class="stat-sub">you charged full rate, paid less to laundry</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Extra weekly profit</div>
+      <div class="stat-val" style="color:var(--accent)">$${weeklyExtraProfit.toFixed(2)}</div>
+      <div class="stat-sub">${Math.round(occChangeovers)} of ${weeklyChangeovers} changeovers partial</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Extra annual profit</div>
+      <div class="stat-val" style="color:var(--accent)">$${Math.round(annualExtraProfit).toLocaleString()}</div>
+      <div class="stat-sub">on top of your base margin</div>
+    </div>`;
+
+  el('occ-note').innerHTML = `
+    <strong style="color:var(--accent)">How this works:</strong> You charge the customer for a ${total}-bed property every changeover — that's your agreed rate. When only ${used} bed${used!==1?'s are':' is'} used, the cleaner returns ${unused} set${unused!==1?'s':''} of unlaundered linen. The hire company only charges you for what comes back dirty, so you save $${savedCostPerOcc.toFixed(2)} in hire cost on that changeover — which goes straight to your profit. At ${freqPct}% of changeovers being partially occupied, that's an estimated <strong style="color:var(--accent)">$${Math.round(annualExtraProfit).toLocaleString()} extra per year</strong> you wouldn't otherwise account for.`;
+}
+
+// ── DASHBOARD VIEW TOGGLE ──
+let dashView = 'list';
+let calViewDate = new Date();
+
+// Scalable colour system — generates a unique hue for any number of customers
+// Uses HSL so colours stay visually distinct even at 30+ clients
+const CAL_COLORS = [
+  { dot:'#3b7dd8', light:'#e8f0fc' },
+  { dot:'#d84b6b', light:'#fce8ed' },
+  { dot:'#2ea86e', light:'#e5f7ee' },
+  { dot:'#c47c1a', light:'#fdf3e0' },
+  { dot:'#8b44c4', light:'#f3eafc' },
+  { dot:'#d85a2a', light:'#fceee8' },
+  { dot:'#1a9ab0', light:'#e5f6fa' },
+  { dot:'#b03a8a', light:'#fce8f4' },
+  { dot:'#5a8a2a', light:'#edf7e5' },
+  { dot:'#c4341a', light:'#fce8e5' },
+  { dot:'#2a5ab0', light:'#e5ecfc' },
+  { dot:'#b08a1a', light:'#fdf7e0' },
+];
+
+function customerColor(custId) {
+  const idx = customers.findIndex(c => c.id === custId);
+  if (idx === -1) return CAL_COLORS[0];
+  // For clients beyond 12, generate a hue from their index
+  if (idx < CAL_COLORS.length) return CAL_COLORS[idx];
+  const hue = (idx * 47) % 360; // golden-angle-ish spread
+  const dot   = `hsl(${hue}, 62%, 40%)`;
+  const light  = `hsl(${hue}, 62%, 94%)`;
+  return { dot, light };
+}
+
+function setDashView(view) {
+  dashView = view;
+  document.getElementById('dash-list-view').style.display = view === 'list' ? '' : 'none';
+  document.getElementById('dash-cal-view').style.display  = view === 'calendar' ? '' : 'none';
+  document.getElementById('view-list-btn').style.cssText = view === 'list'     ? 'background:var(--ink);color:white;border:none;' : 'background:none;color:var(--ink3);border:none;';
+  document.getElementById('view-cal-btn').style.cssText  = view === 'calendar' ? 'background:var(--ink);color:white;border:none;' : 'background:none;color:var(--ink3);border:none;';
+  document.getElementById('dashboard-heading').textContent = view === 'list' ? "Today's packing list" : 'Calendar view';
+  if (view === 'calendar') renderCalendar();
+}
+
+function calNav(dir) {
+  calViewDate = new Date(calViewDate.getFullYear(), calViewDate.getMonth() + dir, 1);
+  closeCalDetail();
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const year  = calViewDate.getFullYear();
+  const month = calViewDate.getMonth();
+  const today = new Date();
+
+  document.getElementById('cal-month-label').textContent =
+    calViewDate.toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
+
+  const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+  // Build order map: date string → orders[]
+  const orderMap = {};
+  orders.forEach(o => {
+    // Use order date — for demo, spread across the month plausibly
+    const key = o.date === 'today'
+      ? `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`
+      : o.date;
+    if (!orderMap[key]) orderMap[key] = [];
+    orderMap[key].push(o);
+  });
+
+  // Day headers
+  const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  let html = dayNames.map(d => `<div class="cal-day-header">${d}</div>`).join('');
+
+  // Pad start
+  for (let i = 0; i < firstDay; i++) {
+    const dayNum = daysInPrevMonth - firstDay + i + 1;
+    html += `<div class="cal-day other-month"><div class="cal-day-num">${dayNum}</div></div>`;
+  }
+
+  // Days
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+    const dayOrders = orderMap[dateStr] || [];
+    const hasOrders = dayOrders.length > 0;
+
+    const dayNumHtml = isToday
+      ? `<div class="cal-day-num"><div style="background:var(--ink);color:white;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;">${d}</div></div>`
+      : `<div class="cal-day-num">${d}</div>`;
+
+    // Group orders by customer → dot + count per customer, max 4 rows
+    const custOrderMap = {};
+    dayOrders.forEach(o => {
+      const p = properties.find(x => x.id === o.propId);
+      const custId = p?.customerId;
+      if (!custOrderMap[custId]) custOrderMap[custId] = 0;
+      custOrderMap[custId]++;
+    });
+
+    const dotRows = Object.entries(custOrderMap).slice(0, 4).map(([custId, count]) => {
+      const c   = customers.find(x => x.id === +custId);
+      const col = customerColor(+custId);
+      const initials = c ? c.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase() : '??';
+      return `<div class="cal-dot-row">
+        <div class="cal-dot" style="background:${col.dot};" title="${c?.name || 'Customer'}"></div>
+        <span class="cal-dot-count">${count}</span>
+        <span class="cal-dot-label">${c?.name?.split(' ')[0] || 'Customer'}</span>
+      </div>`;
+    }).join('');
+
+    const moreClients = Object.keys(custOrderMap).length > 4
+      ? `<div style="font-size:10px;color:var(--ink3);margin-top:2px;">+${Object.keys(custOrderMap).length - 4} more</div>` : '';
+
+    const totalBadge = hasOrders
+      ? `<div class="cal-total-badge">${dayOrders.length}</div>` : '';
+
+    html += `<div class="cal-day ${isToday ? 'today' : ''} ${hasOrders ? 'has-orders' : ''}"
+      onclick="calDayClick('${dateStr}', ${d})"
+      title="${dayOrders.length} order${dayOrders.length!==1?'s':''}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        ${dayNumHtml}
+        ${totalBadge}
+      </div>
+      ${dotRows}
+      ${moreClients}
+    </div>`;
+  }
+
+  // Pad end
+  const totalCells = firstDay + daysInMonth;
+  const remainder  = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for (let i = 1; i <= remainder; i++) {
+    html += `<div class="cal-day other-month"><div class="cal-day-num">${i}</div></div>`;
+  }
+
+  document.getElementById('cal-grid').innerHTML = html;
+
+  // Legend — dot per customer, orders this month
+  const todayStr2 = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+  const legendHtml = customers.map(c => {
+    const col = customerColor(c.id);
+    const monthOrders = orders.filter(o => {
+      const p = properties.find(x => x.id === o.propId);
+      if (p?.customerId !== c.id) return false;
+      const key = o.date === 'today'
+        ? `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`
+        : o.date;
+      return key.startsWith(`${year}-${String(month+1).padStart(2,'0')}`);
+    }).length;
+    return `<div class="cal-legend-item">
+      <div style="width:10px;height:10px;border-radius:3px;background:${col.dot};flex-shrink:0;"></div>
+      <span>${c.name}</span>
+      ${monthOrders > 0 ? `<span style="font-size:11px;background:var(--bg2);border-radius:10px;padding:1px 7px;font-weight:700;">${monthOrders}</span>` : ''}
+    </div>`;
+  }).join('');
+  document.getElementById('cal-legend').innerHTML = legendHtml || '<span style="font-size:12px;color:var(--ink3);">No customers yet</span>';
+}
+
+let selectedCalDate = null;
+
+function calDayClick(dateStr, dayNum, monthName) {
+  // Deselect previous
+  document.querySelectorAll('.cal-day.selected').forEach(el => el.classList.remove('selected'));
+  // Select clicked
+  event.currentTarget.classList.add('selected');
+  selectedCalDate = dateStr;
+
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+  const dayOrders = orders.filter(o => {
+    const key = o.date === 'today' ? todayStr : o.date;
+    return key === dateStr;
+  });
+
+  const detail = document.getElementById('cal-detail');
+  const [y, m, d] = dateStr.split('-');
+  const dateObj = new Date(+y, +m - 1, +d);
+  const dayLabel = dateObj.toLocaleDateString('en-AU', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  const isToday  = dateStr === todayStr;
+  const isPast   = dateObj < today && !isToday;
+
+  document.getElementById('cal-detail-title').textContent = dayLabel;
+  document.getElementById('cal-detail-sub').textContent =
+    dayOrders.length === 0 ? 'No orders on this day'
+    : `${dayOrders.length} order${dayOrders.length!==1?'s':''} · ${dayOrders.reduce((s,o)=>{const p=properties.find(x=>x.id===o.propId);return s+(p?.beds.reduce((a,b)=>a+b.n,0)||0);},0)} beds to service`;
+
+  // Orders list
+  if (dayOrders.length === 0) {
+    document.getElementById('cal-detail-orders').innerHTML =
+      `<div style="font-size:13px;color:var(--ink3);padding:16px;background:var(--bg2);border-radius:10px;text-align:center;">No orders scheduled</div>`;
+    document.getElementById('cal-detail-pack').innerHTML =
+      `<div style="font-size:13px;color:var(--ink3);padding:16px;background:var(--bg2);border-radius:10px;text-align:center;">Nothing to pack</div>`;
+  } else {
+    document.getElementById('cal-detail-orders').innerHTML = dayOrders.map(o => {
+      const p  = properties.find(x => x.id === o.propId);
+      const c  = customers.find(x => x.id === p?.customerId);
+      const col = customerColor(c?.id);
+      const bedHtml = (p?.beds || []).map(b => `<span class="bed-pill bed-${b.type.toLowerCase()}">${b.n} ${b.type}</span>`).join(' ');
+      const totalBeds = (p?.beds||[]).reduce((s,b)=>s+b.n,0);
+      const statusMap = { packed:['status-packed','Packed'], pending:['status-pending','To pack'], collected:['status-collected','Returned'] };
+      const [sc, sl] = statusMap[o.status] || statusMap.pending;
+      return `<div class="cal-detail-order" style="border-left:3px solid ${col.dot};">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <div class="cal-detail-order-name">${p?.name || 'Unknown'}</div>
+            <div class="cal-detail-order-meta">${c?.name || ''} · ${p?.address || ''}</div>
+            <div style="margin-bottom:4px;">${bedHtml}</div>
+            <div style="font-size:11px;color:var(--ink3);">${totalBeds} beds · ${totalBeds*3} sheets · ${totalBeds*2} bath towels</div>
+          </div>
+          <span class="status-pill ${sc}" style="flex-shrink:0;">${sl}</span>
+        </div>
+        ${isToday ? `<div style="margin-top:8px;"><button class="btn btn-outline btn-sm" onclick="cycleStatusFromCal(${o.id}, '${dateStr}')">Update status</button></div>` : ''}
+      </div>`;
+    }).join('');
+
+    // Build packing totals for this day
+    let sheets=0, pillowcases=0, bathTowels=0, handTowels=0, bathmats=0;
+    const teaTowels = dayOrders.length * 2;
+    const bedTypeCounts = {};
+    dayOrders.forEach(o => {
+      const p = properties.find(x => x.id === o.propId);
+      (p?.beds || []).forEach(b => {
+        bedTypeCounts[b.type] = (bedTypeCounts[b.type]||0) + b.n;
+        sheets      += b.n * 3;
+        pillowcases += b.n * ((b.type==='Single'||b.type==='King Single'||b.type==='Bunk') ? 2 : 4);
+        bathTowels  += b.n * 2;
+        handTowels  += b.n * 2;
+        bathmats    += Math.ceil(b.n / 2);
+      });
+    });
+
+    const packItems = [
+      ...Object.entries(bedTypeCounts).map(([t,n])=>({ name:`${t} bed sets`, count:n, highlight:false })),
+      { name:'Sheets',       count:sheets,      highlight:false },
+      { name:'Pillow cases', count:pillowcases, highlight:false },
+      { name:'Bath towels',  count:bathTowels,  highlight:false },
+      { name:'Hand towels',  count:handTowels,  highlight:false },
+      { name:'Bathmats',     count:bathmats,    highlight:false },
+      { name:'Tea towels',   count:teaTowels,   highlight:false },
+    ];
+
+    document.getElementById('cal-detail-pack').innerHTML = packItems.map(item =>
+      `<div class="cal-detail-pack-item">
+        <span class="cal-detail-pack-name">${item.name}</span>
+        <span class="cal-detail-pack-count">${item.count}</span>
+      </div>`
+    ).join('');
+  }
+
+  detail.style.display = '';
+  // Smooth scroll to detail panel
+  setTimeout(() => detail.scrollIntoView({ behavior:'smooth', block:'nearest' }), 50);
+}
+
+function closeCalDetail() {
+  document.getElementById('cal-detail').style.display = 'none';
+  document.querySelectorAll('.cal-day.selected').forEach(el => el.classList.remove('selected'));
+  selectedCalDate = null;
+}
+
+function cycleStatusFromCal(orderId, dateStr) {
+  cycleStatus(orderId);
+  // Re-render the detail panel for the same day
+  const el = document.querySelector(`.cal-day[onclick*="'${dateStr}'"]`);
+  const parts = dateStr.split('-');
+  calDayClick(dateStr, +parts[2]);
+}
+
+
+// ── QUOTE BUILDER ──
+let selectedQuotePropId = null;
+
+function initQuote() {
+  // Populate customer filter
+  const cSel = document.getElementById('q-customer');
+  cSel.innerHTML = '<option value="">All customers</option>' +
+    customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  quoteFilterProps();
+}
+
+function quoteFilterProps() {
+  const custId = +document.getElementById('q-customer').value || null;
+  const pSel   = document.getElementById('q-property');
+  const filtered = custId ? properties.filter(p => p.customerId === custId) : properties;
+  pSel.innerHTML = '<option value="">Select a property…</option>' +
+    filtered.map(p => {
+      const c = customers.find(x => x.id === p.customerId);
+      return `<option value="${p.id}">${p.name}${c ? ' — ' + c.name : ''}</option>`;
+    }).join('');
+  selectedQuotePropId = null;
+  document.getElementById('q-linen-summary').innerHTML = 'Select a property to see linen breakdown';
+  document.getElementById('quote-summary').innerHTML = '';
+  document.getElementById('quote-doc').innerHTML = '<div style="padding:40px;text-align:center;color:var(--ink3);font-size:13px;">Select a property on the left to generate a quote</div>';
+}
+
+function quoteSelectProp() {
+  const id = +document.getElementById('q-property').value;
+  selectedQuotePropId = id || null;
+  if (!id) return quoteFilterProps();
+  const p = properties.find(x => x.id === id);
+  const c = customers.find(x => x.id === p?.customerId);
+  // Pre-fill email
+  if (c?.email) document.getElementById('q-email').value = c.email;
+  updateQuote();
+}
+
+function quoteExactLinen(p) {
+  // Calculate exact linen per item for this property
+  const extras = p.extras || {};
+  let sheets=0, pillowCases=0, bathTowels=0, handTowels=0, bathmats=0, teaTowels=2;
+  const bedLines = [];
+
+  p.beds.forEach(b => {
+    let sheetRate;
+    if      (b.type==='King')        sheetRate = RATES.sheetKing;
+    else if (b.type==='King Single') sheetRate = RATES.sheetKingSingle;
+    else if (b.type==='Single')      sheetRate = RATES.sheetKingSingle;
+    else if (b.type==='Bunk')        sheetRate = RATES.sheetSingleFitted;
+    else                             sheetRate = RATES.sheetQueen;
+    const pillows = (b.type==='Single'||b.type==='King Single'||b.type==='Bunk') ? 2 : 4;
+    sheets      += b.n * 3;
+    pillowCases += b.n * pillows;
+    bathTowels  += b.n * 2;
+    handTowels  += b.n * 2;
+    bedLines.push({ type:b.type, n:b.n, sheets:b.n*3, pillows:b.n*pillows, bath:b.n*2, hand:b.n*2, sheetRate });
+  });
+
+  const totalBeds = p.beds.reduce((s,b)=>s+b.n,0);
+  bathmats  = Math.ceil(totalBeds/2);
+  // Apply extras
+  bathTowels  += extras.bathTowels  || 0;
+  handTowels  += extras.handTowels  || 0;
+  pillowCases += extras.pillowCases || 0;
+  bathmats    += extras.bathmats    || 0;
+  teaTowels   += extras.teaTowels   || 0;
+
+  // Hire cost
+  let hireCost = 0;
+  bedLines.forEach(b => { hireCost += b.n * (b.sheetRate*3 + (b.pillows/b.n)*RATES.pillowcase + 2*RATES.bathTowel + 2*RATES.handTowel); });
+  hireCost += bathmats * RATES.bathmat + teaTowels * RATES.teaTowel;
+  // Extras cost
+  hireCost += (extras.bathTowels||0)*RATES.bathTowel + (extras.handTowels||0)*RATES.handTowel +
+              (extras.pillowCases||0)*RATES.pillowcase + (extras.bathmats||0)*RATES.bathmat +
+              (extras.teaTowels||0)*RATES.teaTowel;
+
+  return { sheets, pillowCases, bathTowels, handTowels, bathmats, teaTowels, bedLines, hireCost, totalBeds };
+}
+
+function updateQuote() {
+  if (!selectedQuotePropId) return;
+  const p = properties.find(x => x.id === selectedQuotePropId);
+  if (!p) return;
+  const c        = customers.find(x => x.id === p.customerId);
+  const email    = document.getElementById('q-email').value || c?.email || '';
+  const markup   = +document.getElementById('q-markup').value;
+  const packFee  = +document.getElementById('q-packing').value;
+  const delFee   = +document.getElementById('q-delivery').value;
+  const validity = +document.getElementById('q-validity').value;
+  const freq     = p.freq || 6;
+  const needsDel = p.delivery && p.delivery !== 'none';
+
+  document.getElementById('qv-markup').textContent = markup + '%';
+
+  const linen     = quoteExactLinen(p);
+  const linenFee  = +(linen.hireCost * (1 + markup / 100)).toFixed(2);
+  const total     = linenFee + packFee + (needsDel ? delFee : 0);
+  const monthly   = total * freq;
+
+  // Linen summary panel
+  const hasBedExtras = p.extras && Object.values(p.extras).some(v=>v>0);
+  document.getElementById('q-linen-summary').innerHTML = `
+    <div style="margin-bottom:10px;">
+      ${linen.bedLines.map(b=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:13px;">
+        <span style="color:var(--ink2);font-weight:600;">${b.n}× ${b.type}</span>
+        <span style="color:var(--ink3);">${b.sheets} sheets · ${b.pillows} pillow cases · ${b.bath} bath · ${b.hand} hand towels</span>
+      </div>`).join('')}
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:12px;">
+      <div style="background:var(--bg2);border-radius:7px;padding:7px 10px;"><span style="font-weight:700;color:var(--ink);display:block;font-size:15px;">${linen.sheets}</span>Sheets total</div>
+      <div style="background:var(--bg2);border-radius:7px;padding:7px 10px;"><span style="font-weight:700;color:var(--ink);display:block;font-size:15px;">${linen.pillowCases}</span>Pillow cases</div>
+      <div style="background:var(--bg2);border-radius:7px;padding:7px 10px;"><span style="font-weight:700;color:var(--ink);display:block;font-size:15px;">${linen.bathTowels}</span>Bath towels</div>
+      <div style="background:var(--bg2);border-radius:7px;padding:7px 10px;"><span style="font-weight:700;color:var(--ink);display:block;font-size:15px;">${linen.handTowels}</span>Hand towels</div>
+      <div style="background:var(--bg2);border-radius:7px;padding:7px 10px;"><span style="font-weight:700;color:var(--ink);display:block;font-size:15px;">${linen.bathmats}</span>Bathmats</div>
+      <div style="background:var(--bg2);border-radius:7px;padding:7px 10px;"><span style="font-weight:700;color:var(--ink);display:block;font-size:15px;">${linen.teaTowels}</span>Tea towels</div>
+    </div>
+    ${hasBedExtras ? `<div style="font-size:11px;color:var(--amber);margin-top:8px;font-weight:600;">★ Includes property-specific extras</div>` : ''}
+    <div style="margin-top:8px;font-size:11px;color:var(--ink3);">Hire cost: $${linen.hireCost.toFixed(2)} · Your charge: $${linenFee.toFixed(2)}</div>`;
+
+  document.getElementById('quote-summary').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Per changeover</div>
+      <div class="stat-val">$${total.toFixed(2)}</div>
+      <div class="stat-sub">+ GST${needsDel?' incl. delivery':''}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Est. monthly</div>
+      <div class="stat-val">$${Math.round(monthly).toLocaleString()}</div>
+      <div class="stat-sub">${freq} changeovers/month</div>
+    </div>`;
+
+  // Build quote doc
+  const today  = new Date();
+  const expiry = new Date(today.getTime() + validity * 86400000);
+  const fmtDate = d => d.toLocaleDateString('en-AU', {day:'numeric',month:'long',year:'numeric'});
+  const qNum   = 'Q' + String(today.getFullYear()).slice(2) + String(today.getMonth()+1).padStart(2,'0') + String(today.getDate()).padStart(2,'0') + String(p.id).slice(-2);
+  const bedStr = p.beds.map(b=>`${b.n} ${b.type}`).join(' · ');
+  const delivLabel = {none:'Collection from shed', property:'Delivery to property', cleaner:'Delivery to cleaner'}[p.delivery||'none'];
+
+  const linenDescLines = linen.bedLines.map(b =>
+    `${b.n}× ${b.type} bed: ${b.sheets} sheets, ${b.pillows} pillow cases, ${b.bath} bath towels, ${b.hand} hand towels`
+  );
+  linenDescLines.push(`${linen.bathmats} bathmat${linen.bathmats!==1?'s':''}, ${linen.teaTowels} tea towels`);
+
+  const deliveryRow = needsDel ? `<tr>
+    <td>
+      <div class="q-item-name">Delivery service</div>
+      <div class="q-item-desc">Linen delivered to ${p.delivery==='property'?'the property':'your cleaner'} each changeover.<br>Within Mansfield area.</div>
+    </td>
+    <td>Per changeover</td><td>$${delFee.toFixed(2)}</td></tr>` : '';
+
+  document.getElementById('quote-doc').innerHTML = `<div class="quote-doc" id="printable-quote">
+    <div class="quote-header">
+      <div>
+        <div class="quote-logo">Sheet<span>Shed</span></div>
+        <div style="font-size:11px;color:var(--ink3);margin-top:3px;letter-spacing:2px;text-transform:uppercase;">Your local linen service · Mansfield</div>
+      </div>
+      <div class="quote-meta"><strong>${qNum}</strong><br>Issued: ${fmtDate(today)}<br>Valid until: ${fmtDate(expiry)}<br>hello@sheetshed.com.au</div>
+    </div>
+
+    <div class="quote-title">Linen service quote</div>
+    <div class="quote-to">
+      Prepared for: <strong>${c?.name || 'Property Owner'}</strong> — ${p.name}<br>
+      ${p.address ? p.address + '<br>' : ''}
+      ${linen.totalBeds} bed${linen.totalBeds!==1?'s':''} · ${bedStr} · ${delivLabel}
+    </div>
+
+    <table class="quote-table">
+      <thead><tr><th style="width:50%">Service</th><th>Billing</th><th>Rate</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="q-item-name">Linen hire & laundering</div>
+            <div class="q-item-desc">${linenDescLines.join('<br>')}</div>
+          </td>
+          <td>Per changeover</td><td>$${linenFee.toFixed(2)}</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="q-item-name">Packing & preparation</div>
+            <div class="q-item-desc">Linen sorted, quality checked and packed into a labelled bag ready for ${needsDel?'delivery':'collection'} each changeover morning by 7am.</div>
+          </td>
+          <td>Per changeover</td><td>$${packFee.toFixed(2)}</td>
+        </tr>
+        ${deliveryRow}
+      </tbody>
+    </table>
+
+    <div class="quote-total-row">
+      <div class="quote-total-label">Total per changeover</div>
+      <div class="quote-total-val">$${total.toFixed(2)} <span style="font-size:12px;font-weight:400;color:var(--ink3);">+ GST</span></div>
+    </div>
+
+    <div class="quote-monthly">
+      <strong>Estimated monthly cost:</strong> $${monthly.toFixed(2)} + GST — based on ${freq} changeovers per month for ${p.name}.<br>
+      Billed per actual changeover only. No fixed monthly fee, no lock-in contract.
+    </div>
+
+    <div style="background:var(--accent-light);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--ink2);margin-bottom:16px;line-height:1.7;">
+      <strong>How it works:</strong> Sheet Shed connects to your booking platform and automatically prepares linen for every checkout. ${needsDel ? 'Linen is delivered directly to your property or cleaner.' : 'Clean bags are ready for collection at our Mansfield storage unit by 7am.'} Dirty linen returned at end of day — no counting, no sorting required.
+    </div>
+
+    <div class="quote-terms">
+      All prices in Australian dollars, excluding GST (10% applies). Valid for ${validity} days until ${fmtDate(expiry)}.<br>
+      Pricing subject to change with 30 days notice. Cancel anytime with 14 days notice.<br>
+      Sheet Shed · Mansfield VIC 3722 · hello@sheetshed.com.au · ABN: XX XXX XXX XXX
+    </div>
+  </div>`;
+}
+
+function printQuote() { window.print(); }
+
+function emailQuote() {
+  if (!selectedQuotePropId) { showToast('Select a property first'); return; }
+  const p    = properties.find(x => x.id === selectedQuotePropId);
+  const c    = customers.find(x => x.id === p?.customerId);
+  const email = document.getElementById('q-email').value || c?.email || '';
+  const total = document.getElementById('quote-summary').querySelector('.stat-val')?.textContent || '';
+  const subject = encodeURIComponent('Sheet Shed — Linen service quote for ' + (p?.name || 'your property'));
+  const body    = encodeURIComponent(
+    `Hi ${c?.name?.split(' ')[0] || 'there'},\n\n` +
+    `Thanks for your interest in Sheet Shed — your local linen service in Mansfield.\n\n` +
+    `I've prepared a quote for ${p?.name || 'your property'}. The rate is ${total} per changeover, ` +
+    `covering linen hire & laundering plus packing and preparation.\n\n` +
+    `I'll follow this up with the full quote document shortly. Feel free to reply with any questions.\n\n` +
+    `Best regards,\nSheet Shed\nhello@sheetshed.com.au\nMansfield VIC 3722`
+  );
+  window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+  if (!email) showToast('No email on file — add one above');
+}
+
+function updateCosts() {
+  const hourlyRate  = +document.getElementById('c-rate').value;
+  const minsPerBag  = +document.getElementById('c-pack').value;
+  const dailyBags   = +document.getElementById('c-daily').value;
+  const daysPerWeek = +document.getElementById('c-days').value;
+  const driveMin    = +document.getElementById('c-drive').value;
+  const tripsPerWk  = +document.getElementById('c-trips').value;
+  const fuelPerKm   = +document.getElementById('c-fuel').value;
+  const speedKmh    = +document.getElementById('c-speed').value;
+  const storageCost = +document.getElementById('c-storage').value;
+  const adminCost   = +document.getElementById('c-admin').value;
+
+  document.getElementById('cv-rate').textContent  = '$' + hourlyRate;
+  document.getElementById('cv-pack').textContent  = minsPerBag + ' min';
+  document.getElementById('cv-daily').textContent = dailyBags + ' bags';
+  document.getElementById('cv-days').textContent  = daysPerWeek + ' days';
+  document.getElementById('cv-drive').textContent = driveMin + ' min';
+  document.getElementById('cv-trips').textContent = tripsPerWk + ' trip' + (tripsPerWk > 1 ? 's' : '');
+  document.getElementById('cv-fuel').textContent  = '$' + fuelPerKm.toFixed(2);
+  document.getElementById('cv-speed').textContent = speedKmh + ' km/h';
+
+  // Labour: packing
+  const weeklyBags      = dailyBags * daysPerWeek;
+  const packingHrsWeek  = (weeklyBags * minsPerBag) / 60;
+  const packingCostWeek = packingHrsWeek * hourlyRate;
+
+  // Travel
+  const oneWayKm        = (driveMin / 60) * speedKmh;
+  const returnKm        = oneWayKm * 2;
+  const weeklyDriveKm   = returnKm * tripsPerWk;
+  const weeklyDriveHrs  = (driveMin * 2 * tripsPerWk) / 60;
+  const fuelCostWeek    = weeklyDriveKm * fuelPerKm;
+  const travelTimeCost  = weeklyDriveHrs * hourlyRate;
+  const totalTravelWeek = fuelCostWeek + travelTimeCost;
+
+  const totalCostWeek   = packingCostWeek + totalTravelWeek + storageCost + adminCost;
+
+  // Revenue (from pricing settings)
+  const cos = pricingSettings.weeklyChangeovers;
+  const r   = chargePerChangeover([{type:'Queen', n:4}], pricingSettings);
+  const weeklyRevenue  = r.charge * cos;
+  const grossProfit    = r.profit * cos;
+  const netProfitWeek  = grossProfit - totalCostWeek;
+  const netProfitHour  = packingHrsWeek + weeklyDriveHrs > 0
+    ? netProfitWeek / (packingHrsWeek + weeklyDriveHrs)
+    : 0;
+
+  // Cost breakdown table
+  document.getElementById('cost-breakdown-body').innerHTML = `
+    <tr><td>Packing labour (${weeklyBags} bags × ${minsPerBag} min @ $${hourlyRate}/hr)</td><td style="text-align:right;font-weight:600;">$${packingCostWeek.toFixed(2)}</td></tr>
+    <tr><td>Travel time (${(weeklyDriveHrs * 60).toFixed(0)} min driving @ $${hourlyRate}/hr)</td><td style="text-align:right;font-weight:600;">$${travelTimeCost.toFixed(2)}</td></tr>
+    <tr><td>Fuel (${weeklyDriveKm.toFixed(0)} km × $${fuelPerKm.toFixed(2)}/km)</td><td style="text-align:right;font-weight:600;">$${fuelCostWeek.toFixed(2)}</td></tr>
+    <tr><td>Storage unit</td><td style="text-align:right;font-weight:600;">$${storageCost.toFixed(2)}</td></tr>
+    <tr><td>Phone / admin</td><td style="text-align:right;font-weight:600;">$${adminCost.toFixed(2)}</td></tr>
+    <tr style="background:var(--bg2);">
+      <td style="font-weight:700;">Total weekly costs</td>
+      <td style="text-align:right;font-weight:800;font-family:'Nunito',sans-serif;font-size:15px;color:var(--red);">$${totalCostWeek.toFixed(2)}</td>
+    </tr>`;
+
+  // Summary stats
+  document.getElementById('cost-summary').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Gross profit (linen margin)</div>
+      <div class="stat-val">$${Math.round(grossProfit).toLocaleString()}</div>
+      <div class="stat-sub">${cos} changeovers/week</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total weekly costs</div>
+      <div class="stat-val" style="color:var(--red)">$${Math.round(totalCostWeek).toLocaleString()}</div>
+      <div class="stat-sub">labour + travel + fixed</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Net weekly profit</div>
+      <div class="stat-val" style="color:${netProfitWeek >= 0 ? 'var(--accent)' : 'var(--red)'}">$${Math.round(netProfitWeek).toLocaleString()}</div>
+      <div class="stat-sub">after all your costs</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Effective hourly rate</div>
+      <div class="stat-val" style="color:${netProfitHour >= hourlyRate ? 'var(--accent)' : 'var(--amber)'}">$${Math.round(netProfitHour)}/hr</div>
+      <div class="stat-sub">${(packingHrsWeek + weeklyDriveHrs).toFixed(1)} hrs worked/week</div>
+    </div>`;
+
+  // Annual table — quiet, shoulder, peak
+  const scenarios = [
+    { label: 'Quiet (off-season)',  co: Math.round(cos * 0.4), label2: '40% of normal changeovers' },
+    { label: 'Shoulder season',     co: cos,                    label2: 'Your current estimate' },
+    { label: 'Peak (ski season)',   co: Math.round(cos * 1.8),  label2: '180% of normal changeovers' },
+  ];
+  document.getElementById('annual-body').innerHTML = scenarios.map(s => {
+    const rev  = r.charge * s.co;
+    const gp   = r.profit * s.co;
+    const net  = gp - totalCostWeek;
+    const annNet = net * 52;
+    return `<tr>
+      <td><strong>${s.label}</strong><div style="font-size:11px;color:var(--ink3)">${s.label2} — ${s.co}/wk</div></td>
+      <td style="text-align:right;color:var(--ink3);">$${Math.round(net).toLocaleString()}</td>
+      <td style="text-align:right;font-weight:800;font-family:'Nunito',sans-serif;color:${annNet>=0?'var(--accent)':'var(--red)'};">$${Math.round(annNet).toLocaleString()}</td>
+    </tr>`;
+  }).join('');
+
+  // Contextual note
+  const hoursPerWeek = (packingHrsWeek + weeklyDriveHrs).toFixed(1);
+  const travelPct    = Math.round((totalTravelWeek / totalCostWeek) * 100);
+  document.getElementById('cost-note').innerHTML = `
+    <strong>Your time commitment:</strong> ${hoursPerWeek} hours per week — ${packingHrsWeek.toFixed(1)} hrs packing and ${weeklyDriveHrs.toFixed(1)} hrs driving. 
+    Travel accounts for <strong>${travelPct}%</strong> of your total costs at the current settings. 
+    ${travelPct > 40 ? `The 35-minute drive is your biggest cost lever — if you can negotiate a pickup from closer to Mansfield, or batch your run to once a fortnight during quiet periods, your net profit improves significantly.` : `Your packing time is your main cost — as you get faster or add a helper for busy mornings, that cost drops quickly.`}
+    At peak ski season your net annual profit is estimated at <strong>$${Math.round((r.profit * Math.round(cos*1.8) - totalCostWeek) * 52).toLocaleString()}</strong>.`;
+}
+
+function requestReplenishment(custId) {
+  const c = customers.find(x => x.id === custId);
+  if (!c?.kit) return;
+  c.kit.status = 'needed';
+  c.kit.invoiced = false;
+  renderCustomers();
+  showToast('Replenishment flagged — will appear on next invoice');
+}
+
+// ── EMERGENCY KITS ──
+const KIT_ITEM_OPTIONS = [
+  'Queen sheet','King sheet','King single sheet','Single sheet',
+  'Bath towel','Hand towel','Pillow case','Bathmat','Tea towel','Doona cover'
+];
+
+const KIT_ITEM_RATES = {
+  'Queen sheet': RATES.sheetQueen,
+  'King sheet': RATES.sheetKing,
+  'King single sheet': RATES.sheetKingSingle,
+  'Single sheet': RATES.sheetKingSingle,
+  'Bath towel': RATES.bathTowel,
+  'Hand towel': RATES.handTowel,
+  'Pillow case': RATES.pillowcase,
+  'Bathmat': RATES.bathmat,
+  'Tea towel': RATES.teaTowel,
+  'Doona cover': RATES.sheetQueen,
+};
+
+let editingKitCustId = null;
+let kitRows = [];
+
+function openKitModal(custId) {
+  editingKitCustId = custId;
+  const c = customers.find(x => x.id === custId);
+  document.getElementById('kit-modal-title').textContent = `Emergency kit — ${c.name}`;
+  kitRows = c.kit ? c.kit.items.map(i => ({...i})) : getDefaultKit(c);
+  document.getElementById('kit-status-sel').value = c.kit?.status || 'active';
+  document.getElementById('kit-invoiced-sel').value = c.kit?.invoiced ? 'true' : 'false';
+  renderKitRows();
+  openModal('modal-kit');
+}
+
+function getDefaultKit(c) {
+  if (c.type === 'individual') {
+    return [
+      {item:'Queen sheet', qty:3},
+      {item:'Bath towel', qty:2},
+      {item:'Hand towel', qty:2},
+      {item:'Pillow case', qty:4},
+      {item:'Bathmat', qty:1},
+      {item:'Tea towel', qty:2},
+    ];
+  }
+  return [
+    {item:'Queen sheet', qty:12},
+    {item:'King sheet', qty:6},
+    {item:'Bath towel', qty:12},
+    {item:'Hand towel', qty:12},
+    {item:'Pillow case', qty:24},
+    {item:'Bathmat', qty:6},
+    {item:'Tea towel', qty:12},
+  ];
+}
+
+function renderKitRows() {
+  const markup = pricingSettings.markup / 100;
+  let totalCost = 0;
+  document.getElementById('kit-items-list').innerHTML = kitRows.map((row, i) => {
+    const rate = KIT_ITEM_RATES[row.item] || 0;
+    const lineCost = rate * row.qty;
+    totalCost += lineCost;
+    const opts = KIT_ITEM_OPTIONS.map(o => `<option value="${o}" ${o===row.item?'selected':''}>${o}</option>`).join('');
+    return `<div class="kit-item-row">
+      <select class="form-select" style="flex:1;padding:5px 8px;font-size:12px;" onchange="updateKitItem(${i},'item',this.value)">${opts}</select>
+      <input type="number" class="kit-item-qty" value="${row.qty}" min="1" max="100" onchange="updateKitItem(${i},'qty',+this.value)">
+      <span style="font-size:12px;color:var(--ink3);min-width:52px;text-align:right;">$${lineCost.toFixed(2)}</span>
+      <button class="btn btn-outline btn-sm" style="padding:4px 8px;" onclick="removeKitItem(${i})">✕</button>
+    </div>`;
+  }).join('');
+
+  const chargeTotal = totalCost * (1 + markup);
+  const profit = chargeTotal - totalCost;
+  document.getElementById('kit-cost-preview').innerHTML = `
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+      <span style="color:var(--ink3);">Hire cost</span><span style="font-weight:600;">$${totalCost.toFixed(2)}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+      <span style="color:var(--ink3);">Your charge (${pricingSettings.markup}% markup)</span><span style="font-weight:700;color:var(--accent);font-family:'Nunito',sans-serif;font-size:15px;">$${chargeTotal.toFixed(2)}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;">
+      <span style="color:var(--ink3);">Your profit</span><span style="font-weight:600;color:var(--accent);">$${profit.toFixed(2)}</span>
+    </div>`;
+}
+
+function updateKitItem(i, field, val) {
+  kitRows[i][field] = field === 'qty' ? Math.max(1, val) : val;
+  renderKitRows();
+}
+
+function addKitItem() {
+  kitRows.push({ item: 'Queen sheet', qty: 1 });
+  renderKitRows();
+}
+
+function removeKitItem(i) {
+  kitRows.splice(i, 1);
+  renderKitRows();
+}
+
+function saveKit() {
+  const c = customers.find(x => x.id === editingKitCustId);
+  if (!c) return;
+  c.kit = {
+    items: [...kitRows],
+    status: document.getElementById('kit-status-sel').value,
+    invoiced: document.getElementById('kit-invoiced-sel').value === 'true',
+  };
+  closeModal('modal-kit');
+  renderCustomers();
+  showToast('Emergency kit saved');
+}
+
+// ── INIT ──
+renderDashboard();
+renderProperties();
+populateCustomerSelects();
+initPricing();
+updateOccupancy();
+updateCosts();
+
+// Request notification permission for last-minute booking alerts
+if ('Notification' in window && Notification.permission === 'default') {
+  setTimeout(() => {
+    Notification.requestPermission().then(p => {
+      if (p === 'granted') showToast('Push notifications enabled — you\'ll be alerted for new bookings');
+    });
+  }, 2000);
+}
+
+// Request browser notification permission
+if ('Notification' in window && Notification.permission === 'default') {
+  Notification.requestPermission();
+}
+
+// Poll iCal feeds every 60 seconds in production
+// For demo, just re-render dashboard every 60s to pick up changes
+setInterval(() => {
+  if (document.getElementById('page-dashboard').classList.contains('active')) {
+    renderDashboard();
+  }
+}, 60000);
+</script>
+</body>
+</html>
