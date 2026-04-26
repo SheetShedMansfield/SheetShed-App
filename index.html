@@ -317,6 +317,7 @@ nav { background: var(--ink); color: var(--white); display: flex; align-items: c
 .toast { position: fixed; bottom: 24px; right: 24px; background: var(--ink); color: var(--white); padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 500; z-index: 999; opacity: 0; transform: translateY(8px); transition: all 0.25s; pointer-events: none; }
 .toast.show { opacity: 1; transform: translateY(0); }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
 
@@ -3031,16 +3032,35 @@ async function ssShowPortal(user) {
 }
 
 // ── STARTUP WITH AUTH ──
+function ssHideLoading() {
+  document.getElementById('ss-loading').style.display='none';
+}
+function ssShowAuth() {
+  ssHideLoading();
+  document.getElementById('ss-auth').style.display='flex';
+}
+
+// Fallback: if nothing happens in 5 seconds, show login screen
+const ssLoadTimeout = setTimeout(ssShowAuth, 5000);
+
 (async function() {
-  const {data:{session}} = await sb.auth.getSession();
-  if(session) {
-    await ssOnSignedIn(session.user);
-  } else {
-    document.getElementById('ss-loading').style.display='none';
-    document.getElementById('ss-auth').style.display='flex';
+  try {
+    const {data:{session}, error} = await sb.auth.getSession();
+    clearTimeout(ssLoadTimeout);
+    if(error) { console.error('Auth error:', error); ssShowAuth(); return; }
+    if(session) {
+      await ssOnSignedIn(session.user);
+    } else {
+      ssShowAuth();
+    }
+  } catch(e) {
+    clearTimeout(ssLoadTimeout);
+    console.error('Startup error:', e);
+    ssShowAuth();
   }
-  sb.auth.onAuthStateChange(async (event,session) => {
-    if(event==='SIGNED_IN'&&session) {
+
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if(event==='SIGNED_IN' && session) {
       document.getElementById('ss-auth').style.display='none';
       document.getElementById('ss-loading').style.display='flex';
       await ssOnSignedIn(session.user);
