@@ -320,6 +320,52 @@ nav { background: var(--ink); color: var(--white); display: flex; align-items: c
 </head>
 <body>
 
+
+<!-- LOADING OVERLAY -->
+<div id="ss-loading" style="position:fixed;inset:0;background:#1a1a18;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;">
+  <div style="font-family:Nunito,sans-serif;font-size:36px;font-weight:900;color:white;">Sheet<span style="font-style:italic;font-weight:300;color:rgba(255,255,255,0.4);">Shed</span></div>
+  <div style="width:28px;height:28px;border:3px solid rgba(255,255,255,0.2);border-top-color:white;border-radius:50%;animation:ss-spin 0.8s linear infinite;"></div>
+  <style>@keyframes ss-spin{to{transform:rotate(360deg)}}</style>
+</div>
+
+<!-- AUTH SCREEN -->
+<div id="ss-auth" style="display:none;position:fixed;inset:0;background:#1a1a18;align-items:center;justify-content:center;z-index:9998;">
+  <div style="background:white;border-radius:20px;padding:40px;width:100%;max-width:400px;box-shadow:0 24px 64px rgba(0,0,0,0.4);margin:20px;">
+    <div style="font-family:Nunito,sans-serif;font-size:32px;font-weight:900;color:#1a1a18;text-align:center;margin-bottom:4px;">Sheet<span style="font-style:italic;font-weight:300;color:#7a7a72;">Shed</span></div>
+    <div style="text-align:center;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#7a7a72;margin-bottom:28px;">Your local linen service · Mansfield</div>
+    <div style="display:flex;gap:4px;background:#edeae2;border-radius:10px;padding:4px;margin-bottom:20px;">
+      <button id="ss-tab-login" onclick="ssTab('login')" style="flex:1;padding:8px;border:none;background:#1a1a18;color:white;border-radius:7px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">Sign in</button>
+      <button id="ss-tab-signup" onclick="ssTab('signup')" style="flex:1;padding:8px;border:none;background:none;color:#7a7a72;border-radius:7px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">Create account</button>
+    </div>
+    <div id="ss-auth-error" style="display:none;background:#fff0f0;border:1px solid #f0c0c0;border-radius:8px;padding:10px 14px;font-size:13px;color:#c02020;margin-bottom:12px;"></div>
+    <div id="ss-auth-ok" style="display:none;background:#e0f5ea;border:1px solid #b0e0c0;border-radius:8px;padding:10px 14px;font-size:13px;color:#1a5c32;margin-bottom:12px;"></div>
+    <div id="ss-login-form" style="display:flex;flex-direction:column;gap:10px;">
+      <input id="ss-email" type="email" placeholder="Email address" style="padding:11px 14px;border:1px solid rgba(26,26,24,0.15);border-radius:8px;font-family:inherit;font-size:14px;background:#f5f2eb;outline:none;">
+      <input id="ss-password" type="password" placeholder="Password" style="padding:11px 14px;border:1px solid rgba(26,26,24,0.15);border-radius:8px;font-family:inherit;font-size:14px;background:#f5f2eb;outline:none;">
+      <button onclick="ssSignIn()" style="padding:12px;background:#1a1a18;color:white;border:none;border-radius:8px;font-family:Nunito,sans-serif;font-size:15px;font-weight:800;cursor:pointer;">Sign in</button>
+    </div>
+    <div id="ss-signup-form" style="display:none;flex-direction:column;gap:10px;">
+      <input id="ss-name" type="text" placeholder="Your full name" style="padding:11px 14px;border:1px solid rgba(26,26,24,0.15);border-radius:8px;font-family:inherit;font-size:14px;background:#f5f2eb;outline:none;">
+      <input id="ss-email2" type="email" placeholder="Email address" style="padding:11px 14px;border:1px solid rgba(26,26,24,0.15);border-radius:8px;font-family:inherit;font-size:14px;background:#f5f2eb;outline:none;">
+      <input id="ss-password2" type="password" placeholder="Password (min 8 characters)" style="padding:11px 14px;border:1px solid rgba(26,26,24,0.15);border-radius:8px;font-family:inherit;font-size:14px;background:#f5f2eb;outline:none;">
+      <button onclick="ssSignUp()" style="padding:12px;background:#1a1a18;color:white;border:none;border-radius:8px;font-family:Nunito,sans-serif;font-size:15px;font-weight:800;cursor:pointer;">Create account</button>
+      <div style="text-align:center;font-size:12px;color:#7a7a72;">Your account will be linked to your properties once set up by Sheet Shed.</div>
+    </div>
+  </div>
+</div>
+
+<!-- CUSTOMER PORTAL -->
+<div id="ss-portal" style="display:none;">
+  <div style="background:#1a1a18;padding:24px;color:white;text-align:center;">
+    <div style="font-family:Nunito,sans-serif;font-size:28px;font-weight:900;">Sheet<span style="font-style:italic;font-weight:300;color:rgba(255,255,255,0.4);">Shed</span></div>
+    <div id="ss-portal-welcome" style="font-size:13px;color:rgba(255,255,255,0.55);margin-top:4px;">Your linen service dashboard</div>
+    <div style="margin-top:12px;"><button onclick="ssSignOut()" style="font-size:11px;color:rgba(255,255,255,0.4);background:none;border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:3px 10px;cursor:pointer;font-family:inherit;">Sign out</button></div>
+  </div>
+  <div style="max-width:700px;margin:0 auto;padding:24px;" id="ss-portal-content">
+    <div style="text-align:center;padding:48px;color:#7a7a72;">Loading your properties…</div>
+  </div>
+</div>
+
 <nav>
   <div class="nav-logo">Sheet<span>Shed</span></div>
   <div class="nav-tabs">
@@ -332,7 +378,7 @@ nav { background: var(--ink); color: var(--white); display: flex; align-items: c
     <button class="nav-tab" onclick="showPage('invoicing')">Invoicing</button>
     <button class="nav-tab" onclick="showPage('platforms')">Platforms</button>
   </div>
-  <div class="nav-right">Sheet Shed — Mansfield</div>
+  <div class="nav-right"><span id="ss-nav-email" style="font-size:11px;color:rgba(255,255,255,0.45);margin-right:8px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span><button onclick="ssSignOut()" style="font-size:11px;color:rgba(255,255,255,0.4);background:none;border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:3px 10px;cursor:pointer;font-family:inherit;">Sign out</button></div>
 </nav>
 
 <!-- DASHBOARD -->
@@ -2897,6 +2943,155 @@ setInterval(() => {
     renderDashboard();
   }
 }, 60000);
+
+// ── SUPABASE AUTH ──
+const SS_URL = 'https://exqoxuxealcxqqayxmic.supabase.co';
+const SS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4cW94dXhlYWxjeHFxYXl4bWljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNDk0OTcsImV4cCI6MjA5MjYyNTQ5N30.0VIq7pPy4N2QpwqXaxiae2b4wcTZzgKcCe243_yz_iI';
+const { createClient } = supabase;
+const sb = createClient(SS_URL, SS_KEY);
+const ADMIN_EMAIL = ''; // Set this to your email address after first login
+
+function ssTab(tab) {
+  document.getElementById('ss-tab-login').style.cssText = tab==='login' ? 'flex:1;padding:8px;border:none;background:#1a1a18;color:white;border-radius:7px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;' : 'flex:1;padding:8px;border:none;background:none;color:#7a7a72;border-radius:7px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;';
+  document.getElementById('ss-tab-signup').style.cssText = tab==='signup' ? 'flex:1;padding:8px;border:none;background:#1a1a18;color:white;border-radius:7px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;' : 'flex:1;padding:8px;border:none;background:none;color:#7a7a72;border-radius:7px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;';
+  document.getElementById('ss-login-form').style.display = tab==='login' ? 'flex' : 'none';
+  document.getElementById('ss-signup-form').style.display = tab==='signup' ? 'flex' : 'none';
+  document.getElementById('ss-auth-error').style.display = 'none';
+  document.getElementById('ss-auth-ok').style.display = 'none';
+}
+
+function ssShowErr(msg) { const e=document.getElementById('ss-auth-error'); e.textContent=msg; e.style.display='block'; }
+function ssShowOk(msg)  { const e=document.getElementById('ss-auth-ok');  e.textContent=msg; e.style.display='block'; }
+
+async function ssSignIn() {
+  const email=document.getElementById('ss-email').value.trim();
+  const pw=document.getElementById('ss-password').value;
+  if(!email||!pw) return ssShowErr('Please enter email and password.');
+  const {error} = await sb.auth.signInWithPassword({email,password:pw});
+  if(error) ssShowErr(error.message);
+}
+
+async function ssSignUp() {
+  const name=document.getElementById('ss-name').value.trim();
+  const email=document.getElementById('ss-email2').value.trim();
+  const pw=document.getElementById('ss-password2').value;
+  if(!name||!email||!pw) return ssShowErr('Please fill in all fields.');
+  if(pw.length<8) return ssShowErr('Password must be at least 8 characters.');
+  const {error} = await sb.auth.signUp({email,password:pw,options:{data:{full_name:name}}});
+  if(error) ssShowErr(error.message);
+  else ssShowOk('Account created! Check your email to confirm, then sign in.');
+}
+
+async function ssSignOut() {
+  await sb.auth.signOut();
+  document.getElementById('ss-auth').style.display='flex';
+  document.getElementById('app').style.display='none';
+  document.getElementById('ss-portal').style.display='none';
+  document.getElementById('ss-auth-error').style.display='none';
+}
+
+async function ssSyncData() {
+  // Load all data from Supabase into local arrays
+  const [c,p,o,inv] = await Promise.all([
+    sb.from('customers').select('*').order('created_at'),
+    sb.from('properties').select('*').order('created_at'),
+    sb.from('orders').select('*').order('order_date',{ascending:false}),
+    sb.from('invoices').select('*').order('created_at',{ascending:false}),
+  ]);
+  customers = (c.data||[]).map(r=>{return{id:r.id,name:r.name,email:r.email,phone:r.phone,platform:r.platform,type:r.type,kit:r.kit||null};});
+  properties = (p.data||[]).map(r=>{return{id:r.id,name:r.name,address:r.address,customerId:r.customer_id,platform:r.platform,ical:r.ical_url,beds:r.beds||[],extras:r.extras||{bathTowels:0,handTowels:0,pillowCases:0,bathmats:0,teaTowels:0},freq:r.freq||6,delivery:r.delivery||'none'};});
+  orders = (o.data||[]).map(r=>{return{id:r.id,propId:r.property_id,date:r.order_date,status:r.status,urgent:r.urgent||false,detectedAt:r.detected_at||r.created_at};});
+  invoices = (inv.data||[]).map(r=>{return{id:r.id,customerId:r.customer_id,period:r.period,dueDate:r.due_date,status:r.status,total:r.total_aud};});
+}
+
+async function ssShowPortal(user) {
+  const {data:custRows} = await sb.from('customers').select('*').eq('user_id',user.id);
+  if(!custRows||custRows.length===0) {
+    document.getElementById('ss-portal-content').innerHTML='<div style="text-align:center;padding:48px 24px;"><h2 style=\"font-family:Nunito,sans-serif;font-size:20px;margin-bottom:8px;\">Welcome to Sheet Shed</h2><p style=\"color:#7a7a72;font-size:13px;line-height:1.7;\">Your account has been created. Sheet Shed will link your properties to this account shortly.</p></div>';
+    return;
+  }
+  const cust=custRows[0];
+  document.getElementById('ss-portal-welcome').textContent='Welcome, '+cust.name;
+  const {data:propRows} = await sb.from('properties').select('*').eq('customer_id',cust.id);
+  const {data:invRows} = await sb.from('invoices').select('*').eq('customer_id',cust.id).order('created_at',{ascending:false});
+  const props=propRows||[];const invs=invRows||[];
+  let html='<h2 style=\"font-family:Nunito,sans-serif;font-size:20px;margin-bottom:16px;\">Your properties</h2>';
+  if(!props.length) html+='<div style=\"background:white;border:1px solid rgba(26,26,24,0.1);border-radius:10px;padding:32px;text-align:center;color:#7a7a72;margin-bottom:12px;\">No properties on file yet.</div>';
+  else props.forEach(p=>{
+    const beds=(p.beds||[]).map(b=>b.n+' '+b.type).join(' · ');
+    html+='<div style=\"background:white;border:1px solid rgba(26,26,24,0.1);border-radius:10px;padding:16px;margin-bottom:12px;\"><div style=\"font-family:Nunito,sans-serif;font-weight:700;font-size:15px;margin-bottom:4px;\">'+p.name+'</div><div style=\"font-size:12px;color:#7a7a72;margin-bottom:6px;\">'+(p.address||'')+' · '+beds+'</div><div style=\"font-size:12px;\">Calendar: '+(p.ical_url?'<span style=\"color:#1a5c32;font-weight:600;\">✓ Connected</span>':'<span style=\"color:#c4690a;\">Not connected</span>')+'</div></div>';
+  });
+  html+='<h2 style=\"font-family:Nunito,sans-serif;font-size:20px;margin:24px 0 16px;\">Recent invoices</h2>';
+  if(!invs.length) html+='<div style=\"background:white;border:1px solid rgba(26,26,24,0.1);border-radius:10px;padding:32px;text-align:center;color:#7a7a72;\">No invoices yet.</div>';
+  else invs.slice(0,5).forEach(inv=>{
+    const colors={draft:'#7a7a72',sent:'#1a6fa8',paid:'#1a5c32',overdue:'#c02020'};
+    html+='<div style=\"background:white;border:1px solid rgba(26,26,24,0.1);border-radius:10px;padding:16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;\"><div><div style=\"font-weight:600;\">'+(inv.period||'Invoice')+'</div><div style=\"font-size:12px;color:#7a7a72;\">Due: '+(inv.due_date||'—')+'</div></div><div style=\"text-align:right;\"><div style=\"font-family:Nunito,sans-serif;font-size:18px;font-weight:800;\">$'+((inv.total_aud||0).toFixed(2))+'</div><div style=\"font-size:11px;font-weight:700;color:'+(colors[inv.status]||'#7a7a72')+';\">'+((inv.status||'draft').toUpperCase())+'</div></div></div>';
+  });
+  document.getElementById('ss-portal-content').innerHTML=html;
+}
+
+// ── STARTUP WITH AUTH ──
+(async function() {
+  const {data:{session}} = await sb.auth.getSession();
+  if(session) {
+    await ssOnSignedIn(session.user);
+  } else {
+    document.getElementById('ss-loading').style.display='none';
+    document.getElementById('ss-auth').style.display='flex';
+  }
+  sb.auth.onAuthStateChange(async (event,session) => {
+    if(event==='SIGNED_IN'&&session) {
+      document.getElementById('ss-auth').style.display='none';
+      document.getElementById('ss-loading').style.display='flex';
+      await ssOnSignedIn(session.user);
+    }
+  });
+})();
+
+async function ssOnSignedIn(user) {
+  const isAdmin = ADMIN_EMAIL ? user.email===ADMIN_EMAIL : true;
+  if(isAdmin) {
+    await ssSyncData();
+    document.getElementById('ss-loading').style.display='none';
+    document.getElementById('app').style.display='block';
+    const emailEl=document.getElementById('ss-nav-email');
+    if(emailEl) emailEl.textContent=user.email;
+    // Boot the app
+    const today=new Date();
+    const todayDateEl=document.getElementById('today-date');
+    if(todayDateEl) todayDateEl.textContent=today.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    const invDue=document.getElementById('inv-due');
+    if(invDue){const d=new Date(today);d.setDate(d.getDate()+14);invDue.value=d.toISOString().split('T')[0];}
+    populateCustomerSelects();
+    renderDashboard();
+    renderProperties();
+    initPricing();
+    updateOccupancy();
+    updateCosts();
+    if('Notification'in window&&Notification.permission==='default')setTimeout(()=>Notification.requestPermission(),2000);
+  } else {
+    document.getElementById('ss-loading').style.display='none';
+    document.getElementById('ss-portal').style.display='block';
+    document.getElementById('ss-nav-email')&&(document.getElementById('ss-nav-email').textContent=user.email);
+    await ssShowPortal(user);
+  }
+}
+
+// Override saveProperty to write to Supabase
+const _origSaveProp = typeof saveProperty !== 'undefined' ? saveProperty : null;
+
+// Patch cycleStatus to save to Supabase
+const _origCycleStatus = cycleStatus;
+async function cycleStatus(id) {
+  const o=orders.find(x=>x.id===id);
+  if(!o)return;
+  const cycle={pending:'packed',packed:'collected',collected:'pending'};
+  o.status=cycle[o.status]||'pending';
+  await sb.from('orders').update({status:o.status}).eq('id',id);
+  renderDashboard();
+  showToast({packed:'Bag marked as packed',collected:'Dirty linen returned',pending:'Status reset'}[o.status]);
+}
+
 </script>
 </body>
 </html>
