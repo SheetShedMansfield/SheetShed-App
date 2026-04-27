@@ -2933,7 +2933,7 @@ const sb = createClient(SS_URL, SS_KEY, {
     detectSessionInUrl: true
   }
 });
-const ADMIN_EMAIL = 'sheetshedmansfield@gmail.com'; // Set this to your email address after first login
+const ADMIN_EMAIL = ''; // Set this to your email address after first login
 
 function ssTab(tab) {
   document.getElementById('ss-tab-login').style.cssText = tab==='login' ? 'flex:1;padding:8px;border:none;background:#1a1a18;color:white;border-radius:7px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;' : 'flex:1;padding:8px;border:none;background:none;color:#7a7a72;border-radius:7px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;';
@@ -3059,31 +3059,51 @@ const ssLoadTimeout = setTimeout(ssShowAuth, 5000);
 })();
 
 async function ssOnSignedIn(user) {
-  const isAdmin = ADMIN_EMAIL ? user.email===ADMIN_EMAIL : true;
-  if(isAdmin) {
-    await ssSyncData();
-    document.getElementById('ss-loading').style.display='none';
-    document.getElementById('app').style.display='block';
-    const emailEl=document.getElementById('ss-nav-email');
-    if(emailEl) emailEl.textContent=user.email;
-    // Boot the app
-    const today=new Date();
-    const todayDateEl=document.getElementById('today-date');
-    if(todayDateEl) todayDateEl.textContent=today.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-    const invDue=document.getElementById('inv-due');
-    if(invDue){const d=new Date(today);d.setDate(d.getDate()+14);invDue.value=d.toISOString().split('T')[0];}
-    populateCustomerSelects();
-    renderDashboard();
-    renderProperties();
-    initPricing();
-    updateOccupancy();
-    updateCosts();
-    if('Notification'in window&&Notification.permission==='default')setTimeout(()=>Notification.requestPermission(),2000);
-  } else {
-    document.getElementById('ss-loading').style.display='none';
-    document.getElementById('ss-portal').style.display='block';
-    document.getElementById('ss-nav-email')&&(document.getElementById('ss-nav-email').textContent=user.email);
-    await ssShowPortal(user);
+  try {
+    const isAdmin = ADMIN_EMAIL ? user.email === ADMIN_EMAIL : true;
+    if(isAdmin) {
+      try {
+        await ssSyncData();
+      } catch(e) {
+        console.error('Data sync error:', e);
+        // Continue even if sync fails - show empty dashboard
+      }
+      document.getElementById('ss-loading').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      const emailEl = document.getElementById('ss-nav-email');
+      if(emailEl) emailEl.textContent = user.email;
+      // Boot the app
+      try {
+        const today = new Date();
+        const todayDateEl = document.getElementById('today-date');
+        if(todayDateEl) todayDateEl.textContent = today.toLocaleDateString('en-AU', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+        const invDue = document.getElementById('inv-due');
+        if(invDue) { const d = new Date(today); d.setDate(d.getDate()+14); invDue.value = d.toISOString().split('T')[0]; }
+        populateCustomerSelects();
+        renderDashboard();
+        renderProperties();
+        initPricing();
+        updateOccupancy();
+        updateCosts();
+        if('Notification' in window && Notification.permission === 'default') {
+          setTimeout(() => Notification.requestPermission(), 3000);
+        }
+      } catch(e) {
+        console.error('Boot error:', e);
+      }
+    } else {
+      document.getElementById('ss-loading').style.display = 'none';
+      document.getElementById('ss-portal').style.display = 'block';
+      try {
+        await ssShowPortal(user);
+      } catch(e) {
+        console.error('Portal error:', e);
+        document.getElementById('ss-portal-content').innerHTML = '<div style="padding:40px;text-align:center;color:#7a7a72;">Error loading your data. Please refresh the page.</div>';
+      }
+    }
+  } catch(e) {
+    console.error('ssOnSignedIn error:', e);
+    ssShowAuth();
   }
 }
 
