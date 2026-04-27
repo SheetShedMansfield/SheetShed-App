@@ -1133,7 +1133,7 @@ nav { background: var(--ink); color: var(--white); display: flex; align-items: c
 <!-- ADD CUSTOMER MODAL -->
 <div class="modal-bg" id="modal-add-customer">
   <div class="modal">
-    <h2>Add customer</h2>
+    <h2 id="cust-modal-title">Add customer</h2>
     <p class="modal-sub">Customers are property owners or management companies you service.</p>
     <div class="form-row">
       <div class="form-group">
@@ -1854,40 +1854,51 @@ function renderCustomers() {
       </div>
       <div class="cust-props"><strong>${propCount}</strong>propert${propCount===1?'y':'ies'}</div>
       <div style="display:flex;gap:6px;">
-        <button class="btn btn-outline btn-sm" onclick="openKitModal(${c.id})">
+        <button class="btn btn-outline btn-sm" onclick="editCustomer('${c.id}')">Edit</button>
+        <button class="btn btn-outline btn-sm" onclick="openKitModal('${c.id}')">
           ${kit ? 'Edit kit' : '+ Add kit'}
         </button>
-        ${kit && kit.status === 'active' ? `<button class="btn btn-outline btn-sm" style="color:var(--amber)" onclick="requestReplenishment(${c.id})">Request replenishment</button>` : ''}
-        <button class="btn btn-outline btn-sm" onclick="deleteCustomer(${c.id})" style="color:var(--red)">Remove</button>
+        ${kit && kit.status === 'active' ? `<button class="btn btn-outline btn-sm" style="color:var(--amber)" onclick="requestReplenishment('${c.id}')">Request replenishment</button>` : ''}
+        <button class="btn btn-outline btn-sm" onclick="deleteCustomer('${c.id}')" style="color:var(--red)">Remove</button>
       </div>
     </div>`;
   }).join('') || '<div class="empty"><h3>No customers yet</h3><p>Add a customer first, then properties under them.</p></div>';
 }
 
-function deleteCustomer(id) {
+async function deleteCustomer(id) {
+  if (!confirm('Remove this customer and all their properties?')) return;
+  await sb.from('customers').delete().eq('id', id);
   customers = customers.filter(c => c.id !== id);
+  properties = properties.filter(p => p.customerId !== id);
   renderCustomers();
+  renderProperties();
   showToast('Customer removed');
 }
 
 async function saveCustomer() {
-  const name = document.getElementById('cust-name-input').value.trim();
-  const email = document.getElementById('cust-email-input').value.trim();
-  const phone = document.getElementById('cust-phone-input').value.trim();
+  const name     = document.getElementById('cust-name-input').value.trim();
+  const email    = document.getElementById('cust-email-input').value.trim();
+  const phone    = document.getElementById('cust-phone-input').value.trim();
   const platform = document.getElementById('cust-platform-select').value;
-  const type = document.getElementById('cust-type-select').value;
+  const type     = document.getElementById('cust-type-select').value;
   if (!name) { showToast('Please enter a name'); return; }
   showToast('Saving...');
   try {
-    const { data, error } = await sb.from('customers')
-      .insert({ name, email, phone, platform, type })
-      .select().single();
-    if (error) { showToast('Error saving: ' + error.message); console.error(error); return; }
-    customers.push({ id: data.id, name, email, phone, platform, type, kit: null });
+    if (editingCustId) {
+      const { error } = await sb.from('customers').update({ name, email, phone, platform, type }).eq('id', editingCustId);
+      if (error) { showToast('Error: ' + error.message); return; }
+      const c = customers.find(x => x.id === editingCustId);
+      Object.assign(c, { name, email, phone, platform, type });
+      showToast('Customer updated ✓');
+    } else {
+      const { data, error } = await sb.from('customers').insert({ name, email, phone, platform, type }).select().single();
+      if (error) { showToast('Error saving: ' + error.message); console.error(error); return; }
+      customers.push({ id: data.id, name, email, phone, platform, type, kit: null });
+      showToast('Customer saved ✓');
+    }
     closeModal('modal-add-customer');
     renderCustomers();
     populateCustomerSelects();
-    showToast('Customer saved ✓');
   } catch(e) {
     showToast('Error: ' + e.message);
     console.error(e);
@@ -1930,7 +1941,29 @@ function openBulkImport() {
   openModal('modal-bulk');
 }
 
-function openAddCustomer() { openModal('modal-add-customer'); }
+function openAddCustomer() {
+  editingCustId = null;
+  document.getElementById('cust-modal-title').textContent = 'Add customer';
+  document.getElementById('cust-name-input').value = '';
+  document.getElementById('cust-email-input').value = '';
+  document.getElementById('cust-phone-input').value = '';
+  document.getElementById('cust-platform-select').value = 'homhero';
+  document.getElementById('cust-type-select').value = 'company';
+  openModal('modal-add-customer');
+}
+
+function editCustomer(id) {
+  const c = customers.find(x => x.id === id);
+  if (!c) return;
+  editingCustId = id;
+  document.getElementById('cust-modal-title').textContent = 'Edit customer';
+  document.getElementById('cust-name-input').value = c.name || '';
+  document.getElementById('cust-email-input').value = c.email || '';
+  document.getElementById('cust-phone-input').value = c.phone || '';
+  document.getElementById('cust-platform-select').value = c.platform || 'homhero';
+  document.getElementById('cust-type-select').value = c.type || 'company';
+  openModal('modal-add-customer');
+}
 
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
@@ -3346,7 +3379,7 @@ const KIT_ITEM_RATES = {
   'Doona cover': RATES.sheetQueen,
 };
 
-let editingKitCustId = null;
+let editingCustId = null;
 let kitRows = [];
 
 function openKitModal(custId) {
