@@ -3087,51 +3087,46 @@ const ssLoadTimeout = setTimeout(ssShowAuth, 5000);
 })();
 
 async function ssOnSignedIn(user) {
-  try {
-    const isAdmin = ADMIN_EMAIL ? user.email === ADMIN_EMAIL : true;
-    if(isAdmin) {
-      try {
-        await ssSyncData();
-      } catch(e) {
-        console.error('Data sync error:', e);
-        // Continue even if sync fails - show empty dashboard
-      }
-      document.getElementById('ss-loading').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-      const emailEl = document.getElementById('ss-nav-email');
-      if(emailEl) emailEl.textContent = user.email;
-      // Boot the app
-      try {
-        const today = new Date();
-        const todayDateEl = document.getElementById('today-date');
-        if(todayDateEl) todayDateEl.textContent = today.toLocaleDateString('en-AU', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
-        const invDue = document.getElementById('inv-due');
-        if(invDue) { const d = new Date(today); d.setDate(d.getDate()+14); invDue.value = d.toISOString().split('T')[0]; }
-        populateCustomerSelects();
-        renderDashboard();
-        renderProperties();
-        initPricing();
-        updateOccupancy();
-        updateCosts();
-        if('Notification' in window && Notification.permission === 'default') {
-          setTimeout(() => Notification.requestPermission(), 3000);
-        }
-      } catch(e) {
-        console.error('Boot error:', e);
-      }
-    } else {
-      document.getElementById('ss-loading').style.display = 'none';
-      document.getElementById('ss-portal').style.display = 'block';
-      try {
-        await ssShowPortal(user);
-      } catch(e) {
-        console.error('Portal error:', e);
-        document.getElementById('ss-portal-content').innerHTML = '<div style="padding:40px;text-align:center;color:#7a7a72;">Error loading your data. Please refresh the page.</div>';
-      }
+  const isAdmin = ADMIN_EMAIL ? user.email === ADMIN_EMAIL : true;
+
+  // Hide loading, show correct view
+  document.getElementById('ss-loading').style.display = 'none';
+
+  if (isAdmin) {
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('ss-portal').style.display = 'none';
+
+    // Set nav email
+    try { document.getElementById('ss-nav-email').textContent = user.email; } catch(e) {}
+
+    // Set today date
+    try {
+      const today = new Date();
+      const el = document.getElementById('today-date');
+      if(el) el.textContent = today.toLocaleDateString('en-AU', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+      const invDue = document.getElementById('inv-due');
+      if(invDue) { const d = new Date(today); d.setDate(d.getDate()+14); invDue.value = d.toISOString().split('T')[0]; }
+    } catch(e) { console.warn('Date error:', e); }
+
+    // Load data from Supabase
+    try { await ssSyncData(); } catch(e) { console.warn('Sync error:', e); }
+
+    // Render UI one function at a time, catching each
+    try { populateCustomerSelects(); } catch(e) { console.warn('populateCustomerSelects:', e); }
+    try { renderDashboard(); } catch(e) { console.warn('renderDashboard:', e); }
+    try { renderProperties(); } catch(e) { console.warn('renderProperties:', e); }
+    try { initPricing(); } catch(e) { console.warn('initPricing:', e); }
+    try { updateOccupancy(); } catch(e) { console.warn('updateOccupancy:', e); }
+    try { updateCosts(); } catch(e) { console.warn('updateCosts:', e); }
+
+  } else {
+    document.getElementById('ss-portal').style.display = 'block';
+    document.getElementById('app').style.display = 'none';
+    try { await ssShowPortal(user); } catch(e) {
+      console.warn('Portal error:', e);
+      document.getElementById('ss-portal-content').innerHTML =
+        '<div style="padding:40px;text-align:center;color:#7a7a72;">Welcome to Sheet Shed. Your account is being set up.</div>';
     }
-  } catch(e) {
-    console.error('ssOnSignedIn error:', e);
-    ssShowAuth();
   }
 }
 
