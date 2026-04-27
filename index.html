@@ -2948,11 +2948,28 @@ function ssShowErr(msg) { const e=document.getElementById('ss-auth-error'); e.te
 function ssShowOk(msg)  { const e=document.getElementById('ss-auth-ok');  e.textContent=msg; e.style.display='block'; }
 
 async function ssSignIn() {
-  const email=document.getElementById('ss-email').value.trim();
-  const pw=document.getElementById('ss-password').value;
-  if(!email||!pw) return ssShowErr('Please enter email and password.');
-  const {error} = await sb.auth.signInWithPassword({email,password:pw});
-  if(error) ssShowErr(error.message);
+  const email = document.getElementById('ss-email').value.trim();
+  const pw = document.getElementById('ss-password').value;
+  if(!email || !pw) return ssShowErr('Please enter email and password.');
+  ssShowErr('Signing in...');
+  try {
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
+    if (error) {
+      ssShowErr('Sign in failed: ' + error.message);
+      return;
+    }
+    if (data?.session) {
+      ssShowErr('');
+      document.getElementById('ss-auth-error').style.display = 'none';
+      document.getElementById('ss-loading').style.display = 'flex';
+      document.getElementById('ss-auth').style.display = 'none';
+      await ssOnSignedIn(data.session.user);
+    } else {
+      ssShowErr('No session returned. Please try again.');
+    }
+  } catch(e) {
+    ssShowErr('Error: ' + e.message);
+  }
 }
 
 async function ssSignUp() {
