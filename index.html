@@ -3028,10 +3028,22 @@ const ssLoadTimeout = setTimeout(ssShowAuth, 5000);
 
 (async function() {
   try {
-    const {data:{session}, error} = await sb.auth.getSession();
+    // Handle magic link / oauth tokens in URL hash
+    const hash = window.location.hash;
+    if (hash && hash.includes('access_token')) {
+      clearTimeout(ssLoadTimeout);
+      await new Promise(r => setTimeout(r, 500));
+      const { data, error } = await sb.auth.getSession();
+      if (data?.session) {
+        history.replaceState(null, '', window.location.pathname);
+        await ssOnSignedIn(data.session.user);
+        return;
+      }
+    }
+    const { data: { session }, error } = await sb.auth.getSession();
     clearTimeout(ssLoadTimeout);
-    if(error) { console.error('Auth error:', error); ssShowAuth(); return; }
-    if(session) {
+    if (error) { console.error('Auth error:', error); ssShowAuth(); return; }
+    if (session) {
       await ssOnSignedIn(session.user);
     } else {
       ssShowAuth();
@@ -3043,17 +3055,16 @@ const ssLoadTimeout = setTimeout(ssShowAuth, 5000);
   }
 
   sb.auth.onAuthStateChange(async (event, session) => {
-    if(event==='SIGNED_IN' && session) {
-      document.getElementById('ss-auth').style.display='none';
-      document.getElementById('ss-loading').style.display='flex';
+    if (event === 'SIGNED_IN' && session) {
+      document.getElementById('ss-auth').style.display = 'none';
+      document.getElementById('ss-loading').style.display = 'flex';
       await ssOnSignedIn(session.user);
-    } else if(event==='TOKEN_REFRESHED' && session) {
-      // Session refreshed silently - stay logged in, do nothing
+    } else if (event === 'TOKEN_REFRESHED' && session) {
       console.log('Session refreshed');
-    } else if(event==='SIGNED_OUT') {
-      document.getElementById('ss-auth').style.display='flex';
-      document.getElementById('app').style.display='none';
-      document.getElementById('ss-portal').style.display='none';
+    } else if (event === 'SIGNED_OUT') {
+      document.getElementById('ss-auth').style.display = 'flex';
+      document.getElementById('app').style.display = 'none';
+      document.getElementById('ss-portal').style.display = 'none';
     }
   });
 })();
