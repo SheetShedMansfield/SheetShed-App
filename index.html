@@ -1535,9 +1535,9 @@ function removeBed(i) {
 }
 
 // ── SAVE PROPERTY ──
-function saveProperty() {
+async function saveProperty() {
   const name       = document.getElementById('prop-name-input').value.trim();
-  const customerId = +document.getElementById('prop-customer-select').value;
+  const customerId = document.getElementById('prop-customer-select').value;
   const platform   = document.getElementById('prop-platform-select').value;
   const address    = document.getElementById('prop-address-input').value.trim();
   const ical       = document.getElementById('prop-ical-input').value.trim();
@@ -1552,16 +1552,28 @@ function saveProperty() {
   const packingReq = document.getElementById('prop-packing-req').value;
   const delivery = packingReq === 'yes' ? 'none' : (document.getElementById('prop-delivery')?.value || 'bulk-pickup');
   if (!name) { showToast('Please enter a property name'); return; }
-  if (editingPropId) {
-    const p = properties.find(x => x.id === editingPropId);
-    Object.assign(p, { name, customerId, platform, address, ical, beds: [...bedRows], extras, freq, delivery });
-    showToast('Property updated');
-  } else {
-    properties.push({ id: Date.now(), name, customerId, platform, address, ical, beds: [...bedRows], extras, freq, delivery });
-    showToast('Property added');
+  if (!customerId) { showToast('Please select a customer'); return; }
+  const record = { name, customer_id: customerId, platform, address, ical_url: ical, beds: bedRows, extras, freq, delivery };
+  showToast('Saving...');
+  try {
+    if (editingPropId) {
+      const { error } = await sb.from('properties').update(record).eq('id', editingPropId);
+      if (error) { showToast('Error: ' + error.message); console.error(error); return; }
+      const p = properties.find(x => x.id === editingPropId);
+      Object.assign(p, { name, customerId, platform, address, ical, beds: [...bedRows], extras, freq, delivery });
+      showToast('Property updated ✓');
+    } else {
+      const { data, error } = await sb.from('properties').insert(record).select().single();
+      if (error) { showToast('Error: ' + error.message); console.error(error); return; }
+      properties.push({ id: data.id, name, customerId, platform, address, ical, beds: [...bedRows], extras, freq, delivery });
+      showToast('Property saved ✓');
+    }
+    closeModal('modal-add-prop');
+    renderProperties();
+  } catch(e) {
+    showToast('Error: ' + e.message);
+    console.error(e);
   }
-  closeModal('modal-add-prop');
-  renderProperties();
 }
 
 // ── BULK IMPORT ──
@@ -1642,21 +1654,28 @@ function deleteCustomer(id) {
   showToast('Customer removed');
 }
 
-function saveCustomer() {
+async function saveCustomer() {
   const name = document.getElementById('cust-name-input').value.trim();
+  const email = document.getElementById('cust-email-input').value.trim();
+  const phone = document.getElementById('cust-phone-input').value.trim();
+  const platform = document.getElementById('cust-platform-select').value;
+  const type = document.getElementById('cust-type-select').value;
   if (!name) { showToast('Please enter a name'); return; }
-  customers.push({
-    id: Date.now(),
-    name,
-    email: document.getElementById('cust-email-input').value.trim(),
-    phone: document.getElementById('cust-phone-input').value.trim(),
-    platform: document.getElementById('cust-platform-select').value,
-    type: document.getElementById('cust-type-select').value,
-  });
-  closeModal('modal-add-customer');
-  renderCustomers();
-  populateCustomerSelects();
-  showToast('Customer added');
+  showToast('Saving...');
+  try {
+    const { data, error } = await sb.from('customers')
+      .insert({ name, email, phone, platform, type })
+      .select().single();
+    if (error) { showToast('Error saving: ' + error.message); console.error(error); return; }
+    customers.push({ id: data.id, name, email, phone, platform, type, kit: null });
+    closeModal('modal-add-customer');
+    renderCustomers();
+    populateCustomerSelects();
+    showToast('Customer saved ✓');
+  } catch(e) {
+    showToast('Error: ' + e.message);
+    console.error(e);
+  }
 }
 
 // ── MODALS ──
