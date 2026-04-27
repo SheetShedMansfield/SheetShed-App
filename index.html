@@ -3532,17 +3532,25 @@ async function ssSignOut() {
 }
 
 async function ssSyncData() {
-  // Load all data from Supabase into local arrays
-  const [c,p,o,inv] = await Promise.all([
+  console.log('ssSyncData: loading from Supabase...');
+  const [c, p, o, inv] = await Promise.all([
     sb.from('customers').select('*').order('created_at'),
     sb.from('properties').select('*').order('created_at'),
-    sb.from('orders').select('*').order('order_date',{ascending:false}),
-    sb.from('invoices').select('*').order('created_at',{ascending:false}),
+    sb.from('orders').select('*').order('order_date', { ascending: false }),
+    sb.from('invoices').select('*').order('created_at', { ascending: false }),
   ]);
-  customers = (c.data||[]).map(r=>{return{id:r.id,name:r.name,email:r.email,phone:r.phone,platform:r.platform,type:r.type,kit:r.kit||null};});
-  properties = (p.data||[]).map(r=>{return{id:r.id,name:r.name,address:r.address,customerId:r.customer_id,platform:r.platform,ical:r.ical_url,beds:r.beds||[],extras:r.extras||{bathTowels:0,handTowels:0,pillowCases:0,bathmats:0,teaTowels:0},freq:r.freq||6,delivery:r.delivery||'none'};});
-  orders = (o.data||[]).map(r=>{return{id:r.id,propId:r.property_id,date:r.order_date,status:r.status,urgent:r.urgent||false,detectedAt:r.detected_at||r.created_at};});
-  invoices = (inv.data||[]).map(r=>{return{id:r.id,customerId:r.customer_id,period:r.period,dueDate:r.due_date,status:r.status,total:r.total_aud};});
+
+  if (c.error)   console.error('Customers load error:', c.error);
+  if (p.error)   console.error('Properties load error:', p.error);
+  if (o.error)   console.error('Orders load error:', o.error);
+  if (inv.error) console.error('Invoices load error:', inv.error);
+
+  console.log(`ssSyncData: got ${c.data?.length||0} customers, ${p.data?.length||0} properties, ${o.data?.length||0} orders`);
+
+  customers  = (c.data||[]).map(r => ({ id:r.id, name:r.name, email:r.email, phone:r.phone, platform:r.platform, type:r.type, kit:r.kit||null }));
+  properties = (p.data||[]).map(r => ({ id:r.id, name:r.name, address:r.address, customerId:r.customer_id, platform:r.platform, ical:r.ical_url, beds:r.beds||[], extras:r.extras||{bathTowels:0,handTowels:0,pillowCases:0,bathmats:0,teaTowels:0}, freq:r.freq||6, delivery:r.delivery||'none' }));
+  orders     = (o.data||[]).map(r => ({ id:r.id, propId:r.property_id, date:r.order_date, status:r.status, urgent:r.urgent||false, detectedAt:r.detected_at||r.created_at }));
+  invoices   = (inv.data||[]).map(r => ({ id:r.id, customerId:r.customer_id, period:r.period, dueDate:r.due_date, status:r.status, total:r.total_aud }));
 }
 
 async function ssShowPortal(user) {
@@ -3631,17 +3639,18 @@ const ssLoadTimeout = setTimeout(ssShowAuth, 5000);
 async function ssOnSignedIn(user) {
   const isAdmin = ADMIN_EMAIL ? user.email === ADMIN_EMAIL : true;
 
-  // Hide loading, show correct view
-  document.getElementById('ss-loading').style.display = 'none';
+  // Safe DOM helpers — never crash on missing elements
+  const hide = id => { try { const el = document.getElementById(id); if(el) el.style.display = 'none'; } catch(e) {} };
+  const show = (id, d='block') => { try { const el = document.getElementById(id); if(el) el.style.display = d; } catch(e) {} };
+
+  hide('ss-loading');
 
   if (isAdmin) {
-    document.getElementById('app').style.display = 'block';
-    document.getElementById('ss-portal').style.display = 'none';
+    show('app');
+    hide('ss-portal');
 
-    // Set nav email
-    try { document.getElementById('ss-nav-email').textContent = user.email; } catch(e) {}
+    try { const e = document.getElementById('ss-nav-email'); if(e) e.textContent = user.email; } catch(e) {}
 
-    // Set today date
     try {
       const today = new Date();
       const el = document.getElementById('today-date');
@@ -3650,10 +3659,15 @@ async function ssOnSignedIn(user) {
       if(invDue) { const d = new Date(today); d.setDate(d.getDate()+14); invDue.value = d.toISOString().split('T')[0]; }
     } catch(e) { console.warn('Date error:', e); }
 
-    // Load data from Supabase
     try { await ssSyncData(); } catch(e) { console.warn('Sync error:', e); }
 
-    // Render UI one function at a time, catching each
+    const custCount = customers.length;
+    const propCount = properties.length;
+    console.log('After sync — customers:', custCount, 'properties:', propCount);
+    if (custCount > 0 || propCount > 0) {
+      setTimeout(() => showToast(`Loaded ${custCount} customer${custCount!==1?'s':''}, ${propCount} propert${propCount!==1?'ies':'y'}`), 500);
+    }
+
     try { populateCustomerSelects(); } catch(e) { console.warn('populateCustomerSelects:', e); }
     try { renderDashboard(); } catch(e) { console.warn('renderDashboard:', e); }
     try { renderProperties(); } catch(e) { console.warn('renderProperties:', e); }
@@ -3662,12 +3676,12 @@ async function ssOnSignedIn(user) {
     try { updateCosts(); } catch(e) { console.warn('updateCosts:', e); }
 
   } else {
-    document.getElementById('ss-portal').style.display = 'block';
-    document.getElementById('app').style.display = 'none';
+    show('ss-portal');
+    hide('app');
     try { await ssShowPortal(user); } catch(e) {
       console.warn('Portal error:', e);
-      document.getElementById('ss-portal-content').innerHTML =
-        '<div style="padding:40px;text-align:center;color:#7a7a72;">Welcome to Sheet Shed. Your account is being set up.</div>';
+      const pc = document.getElementById('ss-portal-content');
+      if(pc) pc.innerHTML = '<div style="padding:40px;text-align:center;color:#7a7a72;">Welcome to Sheet Shed. Your account is being set up.</div>';
     }
   }
 }
