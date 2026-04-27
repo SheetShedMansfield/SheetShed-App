@@ -1015,40 +1015,43 @@ nav { background: var(--ink); color: var(--white); display: flex; align-items: c
       </div>
     </div>
     <div class="form-group">
-      <label class="form-label">Extra linen items <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">Override defaults if property needs more</span></label>
+      <label class="form-label">Other linen items</label>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:4px;">
         <div>
-          <label style="font-size:11px;color:var(--ink3);font-weight:600;display:block;margin-bottom:3px;">Extra bath towels</label>
+          <label style="font-size:11px;color:var(--ink3);font-weight:600;display:block;margin-bottom:3px;">Bath towels</label>
           <input type="number" class="form-input" id="prop-extra-bath" value="0" min="0" max="20" style="padding:6px 8px;">
         </div>
         <div>
-          <label style="font-size:11px;color:var(--ink3);font-weight:600;display:block;margin-bottom:3px;">Extra hand towels</label>
+          <label style="font-size:11px;color:var(--ink3);font-weight:600;display:block;margin-bottom:3px;">Hand towels</label>
           <input type="number" class="form-input" id="prop-extra-hand" value="0" min="0" max="20" style="padding:6px 8px;">
         </div>
         <div>
-          <label style="font-size:11px;color:var(--ink3);font-weight:600;display:block;margin-bottom:3px;">Extra pillow cases</label>
+          <label style="font-size:11px;color:var(--ink3);font-weight:600;display:block;margin-bottom:3px;">Pillow cases</label>
           <input type="number" class="form-input" id="prop-extra-pillow" value="0" min="0" max="20" style="padding:6px 8px;">
         </div>
         <div>
-          <label style="font-size:11px;color:var(--ink3);font-weight:600;display:block;margin-bottom:3px;">Extra bathmats</label>
+          <label style="font-size:11px;color:var(--ink3);font-weight:600;display:block;margin-bottom:3px;">Bathmats</label>
           <input type="number" class="form-input" id="prop-extra-bathmat" value="0" min="0" max="10" style="padding:6px 8px;">
         </div>
         <div>
-          <label style="font-size:11px;color:var(--ink3);font-weight:600;display:block;margin-bottom:3px;">Extra tea towels</label>
+          <label style="font-size:11px;color:var(--ink3);font-weight:600;display:block;margin-bottom:3px;">Tea towels</label>
           <input type="number" class="form-input" id="prop-extra-tea" value="0" min="0" max="10" style="padding:6px 8px;">
         </div>
-        <div>
-          <label style="font-size:11px;color:var(--ink3);font-weight:600;display:block;margin-bottom:3px;">Est. changeovers/month</label>
-          <input type="number" class="form-input" id="prop-freq" value="6" min="1" max="30" style="padding:6px 8px;">
-        </div>
+        
       </div>
     </div>
     <div class="form-group">
-      <label class="form-label">Delivery required?</label>
+      <label class="form-label">Packing required?</label>
+      <select class="form-select" id="prop-packing-req" onchange="togglePackingOptions(this.value)">
+        <option value="yes">Yes</option>
+        <option value="no">No</option>
+      </select>
+    </div>
+    <div class="form-group" id="prop-bulk-options" style="display:none;">
+      <label class="form-label">Collection method</label>
       <select class="form-select" id="prop-delivery">
-        <option value="none">No — cleaner collects from shed</option>
-        <option value="property">Yes — deliver to property</option>
-        <option value="cleaner">Yes — deliver to cleaner</option>
+        <option value="bulk-pickup">Bulk pick-up</option>
+        <option value="bulk-delivery">Bulk delivery (with fee)</option>
       </select>
     </div>
     <div class="modal-footer">
@@ -1545,8 +1548,9 @@ function saveProperty() {
     bathmats:   +document.getElementById('prop-extra-bathmat').value || 0,
     teaTowels:  +document.getElementById('prop-extra-tea').value || 0,
   };
-  const freq     = +document.getElementById('prop-freq').value || 6;
-  const delivery = document.getElementById('prop-delivery').value;
+  const freq     = 6;
+  const packingReq = document.getElementById('prop-packing-req').value;
+  const delivery = packingReq === 'yes' ? 'none' : (document.getElementById('prop-delivery')?.value || 'bulk-pickup');
   if (!name) { showToast('Please enter a property name'); return; }
   if (editingPropId) {
     const p = properties.find(x => x.id === editingPropId);
@@ -1669,9 +1673,21 @@ function openAddProp() {
   document.getElementById('prop-name-input').value = '';
   document.getElementById('prop-address-input').value = '';
   document.getElementById('prop-ical-input').value = '';
+  document.getElementById('prop-extra-bath').value = 0;
+  document.getElementById('prop-extra-hand').value = 0;
+  document.getElementById('prop-extra-pillow').value = 0;
+  document.getElementById('prop-extra-bathmat').value = 0;
+  document.getElementById('prop-extra-tea').value = 0;
+  document.getElementById('prop-packing-req').value = 'yes';
+  document.getElementById('prop-bulk-options').style.display = 'none';
   renderBedRows();
   populateCustomerSelects();
   openModal('modal-add-prop');
+}
+
+function togglePackingOptions(val) {
+  const bulk = document.getElementById('prop-bulk-options');
+  if (bulk) bulk.style.display = val === 'no' ? '' : 'none';
 }
 
 function openBulkImport() {
