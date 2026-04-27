@@ -1544,47 +1544,42 @@ function editProp(id) {
 
 // ── BED BUILDER ──
 // ── ADDRESS AUTOCOMPLETE ──
-// Uses Geoapify free tier — sign up at geoapify.com for a free API key (3000 req/day)
-const GEOAPIFY_KEY = ''; // Paste your free API key here
-
+// ── ADDRESS AUTOCOMPLETE ──
+const GEOAPIFY_KEY = 'd645b8b5c603470799b4ea7eaef8ad67';
 let addressDebounce = null;
 
 async function addressAutocomplete(query) {
   const suggestionsEl = document.getElementById('address-suggestions');
-  if (!query || query.length < 4) { closeAddressSuggestions(); return; }
-
-  // If no API key, fall back gracefully
-  if (!GEOAPIFY_KEY) {
-    suggestionsEl.style.display = 'none';
-    return;
-  }
+  if (!suggestionsEl) return;
+  if (!query || query.length < 3) { closeAddressSuggestions(); return; }
 
   clearTimeout(addressDebounce);
   addressDebounce = setTimeout(async () => {
     try {
       const url = `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(query)}&filter=countrycode:au&format=json&limit=6&apiKey=${GEOAPIFY_KEY}`;
       const res = await fetch(url);
+      if (!res.ok) { console.error('Geoapify error:', res.status, res.statusText); closeAddressSuggestions(); return; }
       const data = await res.json();
       const results = data.results || [];
+      console.log('Geoapify results:', results.length, 'for:', query);
       if (results.length === 0) { closeAddressSuggestions(); return; }
       suggestionsEl.innerHTML = results.map(r => {
-        const line1 = [r.housenumber, r.street].filter(Boolean).join(' ');
-        const line2 = [r.suburb || r.city, r.state_code, r.postcode].filter(Boolean).join(' ');
-        const full  = r.formatted || [line1, line2].filter(Boolean).join(', ');
-        return `<div class="address-suggestion" onmousedown="selectAddress('${full.replace(/'/g,"\\'")}')">
-          <div style="font-weight:600;">${line1 || full}</div>
-          ${line1 ? `<div style="font-size:11px;color:var(--ink3);">${line2}</div>` : ''}
+        const full = r.formatted || '';
+        return `<div class="address-suggestion" onmousedown="selectAddress('${full.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')">
+          <div style="font-size:13px;color:var(--ink);">${full}</div>
         </div>`;
       }).join('');
       suggestionsEl.style.display = 'block';
     } catch(e) {
+      console.error('Autocomplete error:', e);
       closeAddressSuggestions();
     }
-  }, 300);
+  }, 350);
 }
 
 function selectAddress(address) {
-  document.getElementById('prop-address-input').value = address;
+  const input = document.getElementById('prop-address-input');
+  if (input) input.value = address;
   closeAddressSuggestions();
 }
 
@@ -1769,18 +1764,23 @@ async function saveProperty() {
   const delivery = packingReq === 'yes' ? 'none' : (document.getElementById('prop-delivery')?.value || 'bulk-pickup');
   if (!name) { showToast('Please enter a property name'); return; }
   if (!customerId) { showToast('Please select a customer'); return; }
-  const record = { name, customer_id: customerId, platform, address, ical_url: ical, beds: bedRows, extras, freq, delivery };
+  // Only send columns that exist in Supabase
+  const record = { name, customer_id: customerId, platform, address, ical_url: ical, beds: bedRows };
+  // Add optional columns only if they exist
+  try { record.extras  = extras;   } catch(e) {}
+  try { record.freq    = freq;     } catch(e) {}
+  try { record.delivery = delivery; } catch(e) {}
   showToast('Saving...');
   try {
     if (editingPropId) {
       const { error } = await sb.from('properties').update(record).eq('id', editingPropId);
-      if (error) { showToast('Error: ' + error.message); console.error(error); return; }
+      if (error) { showToast('Error: ' + error.message); console.error('Update error:', error); return; }
       const p = properties.find(x => x.id === editingPropId);
       Object.assign(p, { name, customerId, platform, address, ical, beds: [...bedRows], extras, freq, delivery });
       showToast('Property updated ✓');
     } else {
       const { data, error } = await sb.from('properties').insert(record).select().single();
-      if (error) { showToast('Error: ' + error.message); console.error(error); return; }
+      if (error) { showToast('Error: ' + error.message); console.error('Insert error:', error); return; }
       properties.push({ id: data.id, name, customerId, platform, address, ical, beds: [...bedRows], extras, freq, delivery });
       showToast('Property saved ✓');
     }
@@ -1788,7 +1788,7 @@ async function saveProperty() {
     renderProperties();
   } catch(e) {
     showToast('Error: ' + e.message);
-    console.error(e);
+    console.error('saveProperty error:', e);
   }
 }
 
