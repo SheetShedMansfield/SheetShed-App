@@ -189,12 +189,6 @@ nav { background: var(--ink); color: var(--white); display: flex; align-items: c
 .price-table tr:last-child td { border-bottom: none; }
 .price-table tr:hover td { background: var(--bg); }
 .price-table .charge { font-weight: 600; color: var(--accent); }
-.spare-toggle { position: relative; display: inline-block; width: 36px; height: 20px; cursor: pointer; }
-.spare-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
-.spare-track { position: absolute; inset: 0; background: var(--bg3); border-radius: 20px; transition: background 0.2s; }
-.spare-track::after { content: ''; position: absolute; width: 14px; height: 14px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.2s; }
-.spare-toggle input:checked + .spare-track { background: var(--accent); }
-.spare-toggle input:checked + .spare-track::after { transform: translateX(16px); }
 /* INVOICING */
 .inv-layout { display: grid; grid-template-columns: 300px 1fr; gap: 24px; align-items: start; }
 .inv-list { display: flex; flex-direction: column; gap: 8px; }
@@ -314,6 +308,12 @@ nav { background: var(--ink); color: var(--white); display: flex; align-items: c
 .quote-monthly { background:var(--bg2); border-radius:10px; padding:12px 14px; font-size:12px; color:var(--ink3); margin-bottom:18px; line-height:1.7; }
 .quote-terms { font-size:11px; color:var(--ink3); line-height:1.7; border-top:1px solid var(--border); padding-top:14px; }
 @media print { nav, .day-header, #page-quote > div > div:first-child, .section-title + div > div:first-child { display:none !important; } }
+.delivery-card { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px; display:flex; align-items:center; gap:10px; cursor:grab; transition:all 0.15s; user-select:none; }
+.delivery-card:active { cursor:grabbing; opacity:0.8; }
+.delivery-card.dragging { opacity:0.4; border-style:dashed; }
+.delivery-card.drag-over { border-color:var(--ink); background:var(--accent-light); }
+.del-stop-num { width:28px; height:28px; background:var(--ink); color:white; border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'Nunito',sans-serif; font-size:12px; font-weight:800; flex-shrink:0; }
+.del-drag-handle { color:var(--ink3); font-size:16px; cursor:grab; padding:0 4px; flex-shrink:0; }
 .address-suggestion { padding:10px 14px; font-size:13px; cursor:pointer; border-bottom:1px solid rgba(26,26,24,0.06); color:var(--ink2); line-height:1.4; }
 .address-suggestion:last-child { border-bottom:none; }
 .address-suggestion:hover { background:var(--bg); color:var(--ink); }
@@ -384,6 +384,7 @@ nav { background: var(--ink); color: var(--white); display: flex; align-items: c
     <button class="nav-tab" onclick="showPage('costs')">Costs</button>
     <button class="nav-tab" onclick="showPage('quote')">Quote</button>
     <button class="nav-tab" onclick="showPage('invoicing')">Invoicing</button>
+    <button class="nav-tab" onclick="showPage('deliveries')">Deliveries</button>
     <button class="nav-tab" onclick="showPage('platforms')">Platforms</button>
   </div>
   <div class="nav-right">
@@ -885,6 +886,76 @@ nav { background: var(--ink); color: var(--white); display: flex; align-items: c
   </div>
 </div>
 
+<!-- DELIVERIES -->
+<div class="page" id="page-deliveries">
+  <div class="day-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <div>
+      <h1>Deliveries</h1>
+      <span class="date">Bulk delivery orders for the week — plan your route</span>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <select class="form-select" id="del-week-select" onchange="renderDeliveries()" style="width:160px;font-size:12px;">
+        <option value="this">This week</option>
+        <option value="next">Next week</option>
+      </select>
+      <button class="btn btn-outline btn-sm" onclick="optimiseRoute()">⚡ Auto-optimise route</button>
+      <button class="btn btn-primary btn-sm" onclick="openInMaps()">Open in Maps →</button>
+    </div>
+  </div>
+
+  <!-- Stats row -->
+  <div class="stats-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px;">
+    <div class="stat-card"><div class="stat-label">Deliveries this week</div><div class="stat-val" id="del-stat-count">0</div><div class="stat-sub">bulk delivery orders</div></div>
+    <div class="stat-card"><div class="stat-label">Properties</div><div class="stat-val" id="del-stat-props">0</div><div class="stat-sub">unique addresses</div></div>
+    <div class="stat-card"><div class="stat-label">Est. drive time</div><div class="stat-val" id="del-stat-time">—</div><div class="stat-sub">total round trip</div></div>
+    <div class="stat-card"><div class="stat-label">Revenue</div><div class="stat-val" id="del-stat-rev">$0</div><div class="stat-sub">delivery fees this week</div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;">
+
+    <!-- LEFT: delivery list (draggable) -->
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div class="section-title" style="margin:0;">Route order <span style="font-size:11px;color:var(--ink3);font-weight:400;margin-left:6px;">drag to reorder</span></div>
+        <div style="font-size:11px;color:var(--ink3);">Starting from: <strong>215 Dead Horse Ln, Mansfield</strong></div>
+      </div>
+
+      <!-- Start point -->
+      <div style="background:var(--ink);color:white;border-radius:10px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:10px;">
+        <div style="width:28px;height:28px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;">🏠</div>
+        <div>
+          <div style="font-weight:700;font-size:13px;">Sheet Shed — Storage shed</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.5);">215 Dead Horse Ln, Mansfield VIC 3722 · Start point</div>
+        </div>
+      </div>
+
+      <div id="delivery-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+
+      <!-- Empty state -->
+      <div id="delivery-empty" style="display:none;text-align:center;padding:40px 20px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);">
+        <div style="font-size:32px;margin-bottom:10px;">🚐</div>
+        <div style="font-family:'Nunito',sans-serif;font-weight:700;font-size:16px;margin-bottom:6px;">No deliveries this week</div>
+        <div style="font-size:13px;color:var(--ink3);">Orders with bulk delivery selected will appear here automatically.</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: map + summary -->
+    <div>
+      <div class="section-title" style="margin-bottom:10px;">Route map</div>
+      <div id="del-map-container" style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);height:380px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:14px;">
+        <div id="del-map-placeholder" style="text-align:center;color:var(--ink3);">
+          <div style="font-size:32px;margin-bottom:8px;">🗺️</div>
+          <div style="font-size:13px;">Add deliveries to see your route</div>
+        </div>
+        <iframe id="del-map-frame" style="width:100%;height:100%;border:none;display:none;" allowfullscreen></iframe>
+      </div>
+
+      <div class="section-title" style="margin-bottom:10px;">Delivery summary</div>
+      <div id="delivery-summary" style="display:flex;flex-direction:column;gap:6px;"></div>
+    </div>
+  </div>
+</div>
+
 <!-- PLATFORMS -->
 <div class="page" id="page-platforms">
   <h2 style="font-size:22px;margin-bottom:16px">Supported platforms</h2>
@@ -1157,6 +1228,7 @@ function showPage(name) {
   if (name === 'pricing') { updatePricing(); updateOccupancy(); }
   if (name === 'quote') { initQuote(); }
   if (name === 'invoicing') initInvoicing();
+  if (name === 'deliveries') renderDeliveries();
 }
 
 // ── DASHBOARD ──
@@ -1298,19 +1370,14 @@ function renderDashboard() {
     });
   });
 
-  const spares = pricingSettings.spares || { sheet: true, towel: true, pillowcase: true };
-  const spareSheets  = spares.sheet      ? bagCount : 0;
-  const spareTowels  = spares.towel      ? bagCount : 0;
-  const sparePillows = spares.pillowcase ? bagCount * 2 : 0;
-
   const packItems = [
     ...Object.entries(bedTypeCounts).map(([t,n]) => ({ name: `${t} bed sets`, total: n, sub: `${n} sets`, amber: false })),
-    { name: 'Sheets',       total: totalSheets + spareSheets,       sub: `${totalSheets} std${spareSheets ? ` + ${spareSheets} spare` : ''}`,    amber: !!spareSheets },
-    { name: 'Pillow cases', total: totalPillowcases + sparePillows, sub: `${totalPillowcases} std${sparePillows ? ` + ${sparePillows} spare` : ''}`, amber: !!sparePillows },
-    { name: 'Bath towels',  total: totalBathTowels + spareTowels,   sub: `${totalBathTowels} std${spareTowels ? ` + ${spareTowels} spare` : ''}`, amber: !!spareTowels },
-    { name: 'Hand towels',  total: totalHandTowels + spareTowels,   sub: `${totalHandTowels} std${spareTowels ? ` + ${spareTowels} spare` : ''}`, amber: !!spareTowels },
-    { name: 'Bathmats',     total: totalBathmats,    sub: `1 per 2 beds`, amber: false },
-    { name: 'Tea towels',   total: totalTeaTowels,   sub: `2 per property`, amber: false },
+    { name: 'Sheets',       total: totalSheets,       sub: `3 sheets per bed`,    amber: false },
+    { name: 'Pillow cases', total: totalPillowcases,  sub: `2–4 per bed`,         amber: false },
+    { name: 'Bath towels',  total: totalBathTowels,   sub: `2 per bed`,           amber: false },
+    { name: 'Hand towels',  total: totalHandTowels,   sub: `2 per bed`,           amber: false },
+    { name: 'Bathmats',     total: totalBathmats,     sub: `1 per 2 beds`,        amber: false },
+    { name: 'Tea towels',   total: totalTeaTowels,    sub: `2 per property`,      amber: false },
   ];
 
   document.getElementById('pack-grid').innerHTML = packItems.map((item, i) => {
@@ -1470,7 +1537,7 @@ function editProp(id) {
 // ── BED BUILDER ──
 // ── ADDRESS AUTOCOMPLETE ──
 // Uses Geoapify free tier — sign up at geoapify.com for a free API key (3000 req/day)
-const GEOAPIFY_KEY = 'd645b8b5c603470799b4ea7eaef8ad67'; // Paste your free API key here
+const GEOAPIFY_KEY = ''; // Paste your free API key here
 
 let addressDebounce = null;
 
@@ -1959,22 +2026,11 @@ function lossBufferPerChangeover(settings) {
   return weeklyLossCost / Math.max(settings.weeklyChangeovers, 1);
 }
 
-function spareCostPerBag() {
-  const s = pricingSettings.spares;
-  let cost = 0;
-  if (s.sheet)      cost += RATES.sheetQueen; // 1 spare flat sheet
-  if (s.towel)      cost += RATES.bathTowel + RATES.handTowel; // 1 spare bath + 1 hand
-  if (s.pillowcase) cost += RATES.pillowcase * 2; // 2 spare pillow cases
-  return cost;
-}
-
-
 function chargePerChangeover(beds, settings) {
   const cost = linenCostForBeds(beds);
   const buffer = lossBufferPerChangeover(settings);
-  const spare = spareCostPerBag();
-  const total = (cost + buffer + spare) * (1 + settings.markup / 100);
-  return { cost, buffer, spare, charge: total, profit: total - cost - buffer - spare };
+  const total = (cost + buffer) * (1 + settings.markup / 100);
+  return { cost, buffer, spare: 0, charge: total, profit: total - cost - buffer };
 }
 
 // For rate table — standard queen beds
@@ -2922,6 +2978,226 @@ function emailQuote() {
   );
   window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
   if (!email) showToast('No email on file — add one above');
+}
+
+// ── DELIVERIES ──
+const SHED_ADDRESS = '215 Dead Horse Ln, Mansfield VIC 3722';
+let deliveryRouteOrder = []; // array of property IDs in route order
+let dragSrcIdx = null;
+
+function getWeekDeliveryOrders(week = 'this') {
+  const today = new Date();
+  const day = today.getDay(); // 0=Sun
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - (day === 0 ? 6 : day - 1));
+  if (week === 'next') monday.setDate(monday.getDate() + 7);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+
+  const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const todayStr = fmt(today);
+  const monStr = fmt(monday);
+  const sunStr = fmt(sunday);
+
+  return orders.filter(o => {
+    const p = properties.find(x => x.id === o.propId);
+    if (!p) return false;
+    // Only bulk delivery orders
+    if (p.delivery !== 'bulk-delivery') return false;
+    const d = o.date === 'today' ? todayStr : o.date;
+    return d >= monStr && d <= sunStr;
+  });
+}
+
+function renderDeliveries() {
+  const week = document.getElementById('del-week-select')?.value || 'this';
+  const weekOrders = getWeekDeliveryOrders(week);
+
+  // Build unique property list (a property may have multiple orders in week)
+  const propMap = {};
+  weekOrders.forEach(o => {
+    const p = properties.find(x => x.id === o.propId);
+    if (!p) return;
+    if (!propMap[p.id]) propMap[p.id] = { p, orders: [] };
+    propMap[p.id].orders.push(o);
+  });
+  const deliveryProps = Object.values(propMap);
+
+  // Maintain route order — add new props, remove gone ones
+  deliveryRouteOrder = deliveryRouteOrder.filter(id => propMap[id]);
+  deliveryProps.forEach(({ p }) => {
+    if (!deliveryRouteOrder.includes(p.id)) deliveryRouteOrder.push(p.id);
+  });
+
+  // Stats
+  const totalRev = deliveryProps.length * 25; // $25 delivery fee per property
+  document.getElementById('del-stat-count').textContent = weekOrders.length;
+  document.getElementById('del-stat-props').textContent = deliveryProps.length;
+  document.getElementById('del-stat-time').textContent = deliveryProps.length > 0
+    ? `~${Math.round(deliveryProps.length * 12 + 20)} min` : '—';
+  document.getElementById('del-stat-rev').textContent = `$${totalRev.toFixed(2)}`;
+
+  const listEl = document.getElementById('delivery-list');
+  const emptyEl = document.getElementById('delivery-empty');
+
+  if (deliveryProps.length === 0) {
+    listEl.innerHTML = '';
+    emptyEl.style.display = '';
+    document.getElementById('delivery-summary').innerHTML = '';
+    updateDeliveryMap([]);
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  // Render in route order
+  listEl.innerHTML = deliveryRouteOrder.map((propId, idx) => {
+    const entry = propMap[propId];
+    if (!entry) return '';
+    const { p, orders: pOrders } = entry;
+    const c = customers.find(x => x.id === p.customerId);
+    const totalBeds = (p.beds || []).reduce((s, b) => s + b.n, 0);
+    const dates = pOrders.map(o => {
+      const d = new Date(o.date === 'today' ? new Date() : o.date);
+      return d.toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'short' });
+    }).join(', ');
+    const sc = { packed:'status-packed', pending:'status-pending', collected:'status-collected' };
+    return `<div class="delivery-card" id="del-card-${propId}"
+      draggable="true"
+      ondragstart="delDragStart(event,${idx})"
+      ondragover="delDragOver(event,${idx})"
+      ondrop="delDrop(event,${idx})"
+      ondragend="delDragEnd()">
+      <div class="del-drag-handle" title="Drag to reorder">⠿</div>
+      <div class="del-stop-num">${idx + 1}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</div>
+        <div style="font-size:11px;color:var(--ink3);margin-top:1px;">${c?.name || ''} · ${p.address || 'No address'}</div>
+        <div style="font-size:11px;color:var(--ink3);">${totalBeds} bed${totalBeds !== 1 ? 's' : ''} · ${dates}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+        ${pOrders.map(o => `<span class="status-pill ${sc[o.status] || 'status-pending'}" onclick="cycleStatus('${o.id}')" style="cursor:pointer;">${{packed:'Packed',pending:'To pack',collected:'Done'}[o.status]||'To pack'}</span>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+
+  // Summary panel
+  document.getElementById('delivery-summary').innerHTML = deliveryRouteOrder.map((propId, idx) => {
+    const entry = propMap[propId];
+    if (!entry) return '';
+    const { p } = entry;
+    return `<div style="background:var(--white);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;font-size:13px;">
+      <span style="font-family:'Nunito',sans-serif;font-weight:800;color:var(--ink3);min-width:20px;">${idx+1}</span>
+      <div style="flex:1;">
+        <div style="font-weight:600;">${p.name}</div>
+        <div style="font-size:11px;color:var(--ink3);">${p.address || 'No address set'}</div>
+      </div>
+      <span style="font-size:11px;font-weight:700;color:var(--green);">$25.00</span>
+    </div>`;
+  }).join('');
+
+  // Update map
+  updateDeliveryMap(deliveryRouteOrder.map(id => propMap[id]?.p).filter(Boolean));
+}
+
+function updateDeliveryMap(props) {
+  const frame = document.getElementById('del-map-frame');
+  const placeholder = document.getElementById('del-map-placeholder');
+  if (props.length === 0) {
+    frame.style.display = 'none';
+    placeholder.style.display = '';
+    return;
+  }
+  // Build Google Maps directions URL
+  const addresses = props.map(p => encodeURIComponent(p.address || 'Mansfield VIC'));
+  const origin = encodeURIComponent(SHED_ADDRESS);
+  const destination = addresses[addresses.length - 1];
+  const waypoints = addresses.slice(0, -1).join('|');
+  let mapsUrl = `https://www.google.com/maps/embed/v1/directions?key=&origin=${origin}&destination=${destination}`;
+  if (waypoints) mapsUrl += `&waypoints=${waypoints}`;
+  mapsUrl += '&mode=driving&region=au';
+
+  // Without a Maps API key, show a static route summary instead
+  frame.style.display = 'none';
+  placeholder.style.display = '';
+  placeholder.innerHTML = `
+    <div style="padding:20px;width:100%;text-align:left;">
+      <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;margin-bottom:14px;color:var(--ink);">📍 Delivery route</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--ink);flex-shrink:0;margin-top:5px;"></div>
+          <div style="font-size:13px;font-weight:600;">Sheet Shed, Mansfield (Start)</div>
+        </div>
+        ${props.map((p,i) => `
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <div style="width:8px;height:8px;border-radius:50%;background:${i===props.length-1?'#c02020':'var(--amber)'};flex-shrink:0;margin-top:5px;"></div>
+          <div><div style="font-size:13px;font-weight:600;">Stop ${i+1}: ${p.name}</div><div style="font-size:11px;color:var(--ink3);">${p.address||'No address'}</div></div>
+        </div>`).join('')}
+      </div>
+      <div style="margin-top:16px;">
+        <button class="btn btn-outline btn-sm" onclick="openInMaps()" style="width:100%;">Open full route in Google Maps →</button>
+      </div>
+    </div>`;
+}
+
+function openInMaps() {
+  const week = document.getElementById('del-week-select')?.value || 'this';
+  const weekOrders = getWeekDeliveryOrders(week);
+  const propIds = [...new Set(weekOrders.map(o => o.propId))];
+  const orderedIds = deliveryRouteOrder.filter(id => propIds.includes(id));
+  const props = orderedIds.map(id => properties.find(p => p.id === id)).filter(Boolean);
+  if (props.length === 0) { showToast('No deliveries to map'); return; }
+
+  const origin = encodeURIComponent(SHED_ADDRESS);
+  const addrs = props.map(p => encodeURIComponent(p.address || 'Mansfield VIC'));
+  const dest = addrs[addrs.length - 1];
+  const waypoints = addrs.slice(0, -1).join('/');
+  let url = `https://www.google.com/maps/dir/${origin}`;
+  if (waypoints) url += `/${waypoints}`;
+  url += `/${dest}`;
+  window.open(url, '_blank');
+}
+
+function optimiseRoute() {
+  // Simple nearest-neighbour optimisation based on address alphabetical order
+  // In production this would use a real routing API
+  const week = document.getElementById('del-week-select')?.value || 'this';
+  const weekOrders = getWeekDeliveryOrders(week);
+  const propIds = [...new Set(weekOrders.map(o => o.propId))];
+  // Sort by address (simple approximation — works well for same-town deliveries)
+  deliveryRouteOrder = propIds.sort((a, b) => {
+    const pa = properties.find(p => p.id === a);
+    const pb = properties.find(p => p.id === b);
+    return (pa?.address || '').localeCompare(pb?.address || '');
+  });
+  renderDeliveries();
+  showToast('Route optimised by address order ✓');
+}
+
+// Drag and drop
+function delDragStart(e, idx) {
+  dragSrcIdx = idx;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+function delDragOver(e, idx) {
+  e.preventDefault();
+  document.querySelectorAll('.delivery-card').forEach(c => c.classList.remove('drag-over'));
+  e.currentTarget.classList.add('drag-over');
+  e.dataTransfer.dropEffect = 'move';
+}
+function delDrop(e, idx) {
+  e.preventDefault();
+  if (dragSrcIdx === null || dragSrcIdx === idx) return;
+  const moved = deliveryRouteOrder.splice(dragSrcIdx, 1)[0];
+  deliveryRouteOrder.splice(idx, 0, moved);
+  renderDeliveries();
+}
+function delDragEnd() {
+  dragSrcIdx = null;
+  document.querySelectorAll('.delivery-card').forEach(c => {
+    c.classList.remove('dragging');
+    c.classList.remove('drag-over');
+  });
 }
 
 function updateCosts() {
