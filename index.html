@@ -1161,30 +1161,11 @@ nav { background: var(--ink); color: var(--white); display: flex; align-items: c
 
 <script>
 // ── DATA ──
-let customers = [
-  { id: 1, name: 'Alpine Stays Pty Ltd', email: 'info@alpinestays.com.au', phone: '0357 123 456', platform: 'homhero', type: 'company',
-    kit: { items: [{item:'Queen sheet',qty:12},{item:'King sheet',qty:12},{item:'Bath towel',qty:12},{item:'Hand towel',qty:12},{item:'Pillow case',qty:24},{item:'Bathmat',qty:6},{item:'Tea towel',qty:12}], status: 'active', invoiced: true } },
-  { id: 2, name: 'Joan Williams', email: 'joan@gmail.com', phone: '0412 345 678', platform: 'airbnb', type: 'individual',
-    kit: { items: [{item:'Queen sheet',qty:3},{item:'Bath towel',qty:2},{item:'Hand towel',qty:2},{item:'Pillow case',qty:4},{item:'Bathmat',qty:1},{item:'Tea towel',qty:2}], status: 'active', invoiced: true } },
-  { id: 3, name: 'Summit Rentals', email: 'bookings@summitrentals.com.au', phone: '0357 987 654', platform: 'guesty', type: 'company',
-    kit: null },
-];
+let customers = [];
 
-let properties = [
-  { id: 1, name: 'Mountain View Chalet', address: '14 High St, Mansfield', customerId: 1, platform: 'homhero', ical: 'https://homhero.com/ical/mv-chalet-123.ics', beds: [{type:'King',n:1},{type:'Queen',n:2}], extras:{bathTowels:0,handTowels:0,pillowCases:0,bathmats:0,teaTowels:0}, freq:8, delivery:'none' },
-  { id: 2, name: 'The Ski Retreat', address: '7 Snow Gum Rd, Mansfield', customerId: 1, platform: 'homhero', ical: 'https://homhero.com/ical/ski-retreat-456.ics', beds: [{type:'King',n:2},{type:'Single',n:2}], extras:{bathTowels:2,handTowels:0,pillowCases:0,bathmats:1,teaTowels:0}, freq:6, delivery:'property' },
-  { id: 3, name: 'Wren Cottage', address: '3 Wren Lane, Mansfield', customerId: 2, platform: 'airbnb', ical: 'https://airbnb.com/calendar/ical/wren-cottage.ics', beds: [{type:'Queen',n:1}], extras:{bathTowels:0,handTowels:0,pillowCases:0,bathmats:0,teaTowels:2}, freq:4, delivery:'none' },
-  { id: 4, name: 'Billabong Lodge', address: '22 River Rd, Mansfield', customerId: 3, platform: 'guesty', ical: 'https://guesty.com/ical/billabong-lodge.ics', beds: [{type:'King',n:1},{type:'Queen',n:1},{type:'Single',n:2}], extras:{bathTowels:0,handTowels:0,pillowCases:4,bathmats:0,teaTowels:0}, freq:5, delivery:'cleaner' },
-  { id: 5, name: 'Eagle\'s Nest', address: '88 Ridgeline Dr, Mansfield', customerId: 1, platform: 'homhero', ical: 'https://homhero.com/ical/eagles-nest.ics', beds: [{type:'Queen',n:3}], extras:{bathTowels:0,handTowels:0,pillowCases:0,bathmats:0,teaTowels:0}, freq:7, delivery:'none' },
-];
+let properties = [];
 
-let orders = [
-  { id: 1, propId: 1, date: 'today', status: 'packed',    urgent: false },
-  { id: 2, propId: 3, date: 'today', status: 'collected', urgent: false },
-  { id: 3, propId: 4, date: 'today', status: 'pending',   urgent: false },
-  { id: 4, propId: 5, date: 'today', status: 'pending',   urgent: true, detectedAt: new Date(Date.now() - 25*60000), alertDismissed: false },
-  { id: 5, propId: 2, date: 'today', status: 'pending',   urgent: true, detectedAt: new Date(Date.now() - 8*60000),  alertDismissed: false },
-];
+let orders = [];
 
 let bedRows = [];
 let editingPropId = null;
@@ -1904,11 +1885,7 @@ function initPricing() {
 }
 
 // ── INVOICING ──
-let invoices = [
-  { id: 1, customerId: 1, period: 'Week of 17 Mar 2026', dueDate: '2026-03-31', status: 'paid',    lines: [] },
-  { id: 2, customerId: 2, period: 'Week of 17 Mar 2026', dueDate: '2026-03-31', status: 'sent',    lines: [] },
-  { id: 3, customerId: 3, period: 'Week of 17 Mar 2026', dueDate: '2026-03-31', status: 'overdue', lines: [] },
-];
+let invoices = [];
 let selectedInvoiceId = null;
 
 function initInvoicing() {
@@ -2949,8 +2926,14 @@ setInterval(() => {
 const SS_URL = 'https://exqoxuxealcxqqayxmic.supabase.co';
 const SS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4cW94dXhlYWxjeHFxYXl4bWljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNDk0OTcsImV4cCI6MjA5MjYyNTQ5N30.0VIq7pPy4N2QpwqXaxiae2b4wcTZzgKcCe243_yz_iI';
 const { createClient } = supabase;
-const sb = createClient(SS_URL, SS_KEY);
-const ADMIN_EMAIL = 'sheetshedmansfield@gmail.com'; // Set this to your email address after first login
+const sb = createClient(SS_URL, SS_KEY, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  }
+});
+const ADMIN_EMAIL = ''; // Set this to your email address after first login
 
 function ssTab(tab) {
   document.getElementById('ss-tab-login').style.cssText = tab==='login' ? 'flex:1;padding:8px;border:none;background:#1a1a18;color:white;border-radius:7px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;' : 'flex:1;padding:8px;border:none;background:none;color:#7a7a72;border-radius:7px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;';
@@ -3064,6 +3047,13 @@ const ssLoadTimeout = setTimeout(ssShowAuth, 5000);
       document.getElementById('ss-auth').style.display='none';
       document.getElementById('ss-loading').style.display='flex';
       await ssOnSignedIn(session.user);
+    } else if(event==='TOKEN_REFRESHED' && session) {
+      // Session refreshed silently - stay logged in, do nothing
+      console.log('Session refreshed');
+    } else if(event==='SIGNED_OUT') {
+      document.getElementById('ss-auth').style.display='flex';
+      document.getElementById('app').style.display='none';
+      document.getElementById('ss-portal').style.display='none';
     }
   });
 })();
