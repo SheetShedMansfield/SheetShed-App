@@ -1726,7 +1726,6 @@ function updateBedsCostPreview() {
   preview.innerHTML = `<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
     <span>Hire cost: <strong>$${total.toFixed(2)}</strong>/changeover</span>
     <span>+ ${pricingSettings.markup}% markup = <strong style="color:var(--ink);font-family:'Nunito',sans-serif;font-size:14px;">$${charge.toFixed(2)}</strong> charge</span>
-    <span style="color:var(--ink3);">Also includes: ${Math.ceil(totalBeds/2)} bathmat${Math.ceil(totalBeds/2)!==1?'s':''}, 2 tea towels</span>
   </div>`;
 }
 
