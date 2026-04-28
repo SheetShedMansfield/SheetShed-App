@@ -1918,6 +1918,40 @@ function populateCustomerSelects() {
   });
 }
 
+function editProperty(id) {
+  const p = properties.find(x => x.id === id);
+  if (!p) return;
+  editingPropId = id;
+  bedRows = (p.beds || []).map(b => ({...b}));
+  document.getElementById('prop-modal-title').textContent = 'Edit property';
+  document.getElementById('prop-name-input').value    = p.name || '';
+  document.getElementById('prop-address-input').value = p.address || '';
+  document.getElementById('prop-ical-input').value    = p.ical || '';
+  document.getElementById('prop-extra-bath').value    = p.extras?.bathTowels || 0;
+  document.getElementById('prop-extra-hand').value    = p.extras?.handTowels || 0;
+  document.getElementById('prop-extra-pillow').value  = p.extras?.pillowCases || 0;
+  document.getElementById('prop-extra-bathmat').value = p.extras?.bathmats || 0;
+  document.getElementById('prop-extra-tea').value     = p.extras?.teaTowels || 0;
+  document.getElementById('prop-packing-req').value   = (p.delivery && p.delivery !== 'none') ? 'no' : 'yes';
+  const bulkOpts = document.getElementById('prop-bulk-options');
+  if (bulkOpts) bulkOpts.style.display = (p.delivery && p.delivery !== 'none') ? '' : 'none';
+  if (p.delivery && p.delivery !== 'none') {
+    document.getElementById('prop-delivery').value = p.delivery;
+  }
+  populatePropCustomerSelect(p.customerId);
+  document.getElementById('prop-platform-select').value = p.platform || 'homhero';
+  renderBedRows();
+  openModal('modal-add-prop');
+}
+
+function populatePropCustomerSelect(selectedId = null) {
+  const sel = document.getElementById('prop-customer-select');
+  if (!sel) return;
+  sel.innerHTML = customers.map(c =>
+    `<option value="${c.id}" ${c.id === selectedId ? 'selected' : ''}>${c.name}</option>`
+  ).join('');
+}
+
 function openAddProp() {
   editingPropId = null;
   bedRows = [];
@@ -1932,7 +1966,7 @@ function openAddProp() {
   document.getElementById('prop-packing-req').value = 'yes';
   document.getElementById('prop-bulk-options').style.display = 'none';
   renderBedRows();
-  populateCustomerSelects();
+  populatePropCustomerSelect();
   openModal('modal-add-prop');
 }
 
