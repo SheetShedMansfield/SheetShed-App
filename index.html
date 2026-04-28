@@ -1054,7 +1054,8 @@ nav { background: var(--ink); color: var(--white); display: flex; align-items: c
         <button class="bed-type-btn" onclick="addBedType('Double')">+ Double</button>
         <button class="bed-type-btn" onclick="addBedType('King Single')">+ King Single</button>
         <button class="bed-type-btn" onclick="addBedType('Single')">+ Single</button>
-        <button class="bed-type-btn" onclick="addBedType('Bunk')">+ Bunk</button>
+        <button class="bed-type-btn" onclick="addBedType('Bunk')">+ Single Bunk</button>
+        <button class="bed-type-btn" onclick="addBedType('King Single Bunk')">+ King Single Bunk</button>
       </div>
       <div id="beds-cost-preview" style="margin-top:12px;font-size:12px;color:var(--ink3);background:var(--bg);border-radius:8px;padding:10px 14px;display:none;"></div>
     </div>
@@ -1619,6 +1620,11 @@ const BUNK_CONFIGS = [
   { value: 'fitted-doona',      label: 'Fitted + doona cover' },
 ];
 
+const KING_SINGLE_BUNK_CONFIGS = [
+  { value: 'fitted-flat-doona', label: 'Fitted + flat + doona cover' },
+  { value: 'fitted-doona',      label: 'Fitted + doona cover' },
+];
+
 const SHEET_TYPES = [
   { value: 'standard', label: 'Standard' },
   { value: 'satin',    label: 'Satin stripe (+premium)' },
@@ -1629,7 +1635,7 @@ function addBedType(type) {
     type,
     n: 1,
     sheetType: 'standard',
-    config: type === 'Bunk' ? 'fitted-flat-doona' : 'fitted-flat-doona',
+    config: (type === 'Bunk' || type === 'King Single Bunk') ? 'fitted-flat-doona' : 'fitted-flat-doona',
   });
   renderBedRows();
 }
@@ -1642,7 +1648,7 @@ function renderBedRows() {
     const sheetOpts = SHEET_TYPES.map(s =>
       `<option value="${s.value}" ${b.sheetType===s.value?'selected':''}>${s.label}</option>`
     ).join('');
-    const configList = b.type === 'Bunk' ? BUNK_CONFIGS : BED_CONFIGS;
+    const configList = b.type === 'Bunk' ? BUNK_CONFIGS : b.type === 'King Single Bunk' ? KING_SINGLE_BUNK_CONFIGS : BED_CONFIGS;
     const configOpts = configList.map(c =>
       `<option value="${c.value}" ${b.config===c.value?'selected':''}>${c.label}</option>`
     ).join('');
@@ -1682,66 +1688,84 @@ function renderBedRows() {
 }
 
 function bedLinenCost(b) {
-  // Sheet rate based on type
   const isSatin = b.sheetType === 'satin';
-  let sheetRate;
-  if (b.type === 'King')        sheetRate = isSatin ? RATES.sheetKingSatin    : RATES.sheetKing;
-  else if (b.type === 'Queen')  sheetRate = isSatin ? RATES.sheetQueenSatin   : RATES.sheetQueen;
-  else if (b.type === 'Double') sheetRate = isSatin ? RATES.sheetQueenSatin   : RATES.sheetQueen;
-  else if (b.type === 'King Single') sheetRate = isSatin ? RATES.sheetKingSingleSatin : RATES.sheetKingSingle;
-  else if (b.type === 'Single') sheetRate = isSatin ? RATES.sheetSingleSatin  : RATES.sheetSingle;
-  else sheetRate = RATES.sheetSingleFitted; // Bunk
+  let flatRate;   // flat sheet rate
+  let fittedRate; // fitted sheet rate
+  if (b.type === 'King') {
+    flatRate   = isSatin ? RATES.sheetKingSatin    : RATES.sheetKing;
+    fittedRate = RATES.fittedKing;
+  } else if (b.type === 'Queen') {
+    flatRate   = isSatin ? RATES.sheetQueenSatin   : RATES.sheetQueen;
+    fittedRate = RATES.fittedQueen;
+  } else if (b.type === 'Double') {
+    flatRate   = isSatin ? RATES.sheetQueenSatin   : RATES.sheetQueen;
+    fittedRate = RATES.fittedQueen;
+  } else if (b.type === 'King Single') {
+    flatRate   = isSatin ? RATES.sheetKingSingleSatin : RATES.sheetKingSingle;
+    fittedRate = RATES.fittedKingSingle;
+  } else if (b.type === 'Single') {
+    flatRate   = isSatin ? RATES.sheetSingleSatin  : RATES.sheetSingle;
+    fittedRate = RATES.sheetSingleFitted;
+  } else if (b.type === 'King Single Bunk') {
+    flatRate   = RATES.sheetKingSingle;
+    fittedRate = RATES.fittedKingSingleBunk;
+  } else {
+    // Bunk (single bunk)
+    flatRate   = RATES.sheetSingleFitted;
+    fittedRate = RATES.sheetSingleFitted;
+  }
 
-  // Sheet count based on config
-  let sheetCount;
+  let sheetCostTotal = 0;
   let doonaCost = 0;
-  let flatCount = 0;
-  let fittedCount = 0;
 
-  if (b.type === 'Bunk') {
+  const isBunk = b.type === 'Bunk' || b.type === 'King Single Bunk';
+  const doonaRate = (b.type === 'King') ? RATES.doonaKing :
+                    (b.type === 'Queen' || b.type === 'Double') ? RATES.doonaQueen :
+                    RATES.doonaKingSingle;
+
+  if (isBunk) {
     if (b.config === 'fitted-doona') {
-      sheetCount = 1;
+      sheetCostTotal = fittedRate;
       doonaCost = RATES.doonaKingSingle;
     } else {
-      // fitted-flat-doona (default)
-      sheetCount = 2;
+      // fitted-flat-doona
+      sheetCostTotal = fittedRate + flatRate;
       doonaCost = RATES.doonaKingSingle;
     }
   } else if (b.config === 'fitted-flat-doona') {
-    sheetCount = 2;
-    if (b.type === 'King' || b.type === 'Double')    doonaCost = RATES.doonaKing;
-    else if (b.type === 'Queen')                      doonaCost = RATES.doonaQueen;
-    else if (b.type === 'King Single')                doonaCost = RATES.doonaKingSingle;
-    else                                              doonaCost = RATES.doonaKingSingle;
+    sheetCostTotal = fittedRate + flatRate;
+    doonaCost = doonaRate;
   } else if (b.config === 'fitted-2flat') {
-    sheetCount = 3;
+    sheetCostTotal = fittedRate + flatRate * 2;
   } else if (b.config === '3flat') {
-    sheetCount = 3;
+    sheetCostTotal = flatRate * 3;
   } else {
-    sheetCount = 2; // fitted + flat
+    // fitted-flat
+    sheetCostTotal = fittedRate + flatRate;
   }
 
-  const pillows = (b.type === 'Single' || b.type === 'King Single' || b.type === 'Bunk') ? 2 : 4;
-  const perBed = sheetRate * sheetCount + doonaCost + pillows * RATES.pillowcase;
+  const pillows = (b.type === 'Single' || b.type === 'King Single' || b.type === 'Bunk' || b.type === 'King Single Bunk') ? 2 : 4;
+  const perBed = sheetCostTotal + doonaCost + pillows * RATES.pillowcase;
   return perBed * b.n;
 }
 
 function bedLinenBreakdown(b) {
   const isSatin = b.sheetType === 'satin';
-  const sheetLabel = isSatin ? 'satin stripe' : 'standard';
-  const pillows = (b.type === 'Single' || b.type === 'King Single' || b.type === 'Bunk') ? 2 : 4;
+  const flatLabel = isSatin ? 'satin stripe flat' : 'flat';
+  const fittedLabel = 'fitted';
+  const pillows = (b.type === 'Single' || b.type === 'King Single' || b.type === 'Bunk' || b.type === 'King Single Bunk') ? 2 : 4;
   let items = [];
-  if (b.type === 'Bunk') {
-    if (b.config === 'fitted-doona') items.push('1 fitted standard single', '1 doona cover');
-    else items.push('1 fitted standard single', '1 flat standard single', '1 doona cover');
+  if (b.type === 'Bunk' || b.type === 'King Single Bunk') {
+    if (b.config === 'fitted-doona') items.push('1 fitted sheet', '1 doona cover');
+    else items.push('1 fitted sheet', '1 flat sheet', '1 doona cover');
   } else if (b.config === 'fitted-flat-doona') {
-    items.push(`1 fitted ${sheetLabel}`, `1 flat ${sheetLabel}`, `1 doona cover`);
+    items.push(`1 ${fittedLabel} sheet`, `1 ${flatLabel} sheet`, `1 doona cover`);
   } else if (b.config === 'fitted-2flat') {
-    items.push(`1 fitted ${sheetLabel}`, `2 flat ${sheetLabel}`);
+    items.push(`1 ${fittedLabel} sheet`, `2 ${flatLabel} sheets`);
   } else if (b.config === '3flat') {
-    items.push(`3 flat ${sheetLabel}`);
+    items.push(`3 ${flatLabel} sheets`);
   } else {
-    items.push(`1 fitted ${sheetLabel}`, `1 flat ${sheetLabel}`);
+    items.push(`1 ${fittedLabel} sheet`, `1 ${flatLabel} sheet`);
   }
   items.push(`${pillows} pillow cases`, `2 bath towels`, `2 hand towels`);
   return `Per bed: ${items.join(' · ')}`;
@@ -2049,12 +2073,17 @@ function showToast(msg) {
 // ── PRICING ──
 // Real hire company prices (ex GST)
 const RATES = {
-  // Standard sheets
-  sheetKing:              1.95,  // King sheet
-  sheetQueen:             1.95,  // Queen sheet
-  sheetKingSingle:        1.85,  // King single sheet
-  sheetSingle:            1.85,  // Single sheet
-  sheetSingleFitted:      2.45,  // Fitted standard single (bunks)
+  // Flat sheets (standard)
+  sheetKing:              1.95,  // King flat sheet
+  sheetQueen:             1.95,  // Queen flat sheet
+  sheetKingSingle:        1.85,  // King single flat sheet
+  sheetSingle:            1.85,  // Single flat sheet
+  // Fitted sheets
+  fittedKing:             1.50,  // King fitted sheet
+  fittedQueen:            1.50,  // Queen fitted sheet
+  fittedKingSingle:       1.50,  // King single fitted sheet
+  sheetSingleFitted:      2.45,  // Fitted standard single (single bunks)
+  fittedKingSingleBunk:   1.50,  // King single fitted (king single bunks)
   // Satin stripe sheets
   sheetKingSatin:         2.10,  // King satin stripe sheet
   sheetQueenSatin:        2.10,  // Queen satin stripe sheet
@@ -2212,19 +2241,25 @@ function updatePricing() {
   // Item reference table
   const refEl = el('item-rate-table');
   if (refEl) refEl.innerHTML = `
-    <tr><td colspan="3" style="background:var(--ink);color:white;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:8px 14px;">Sheets</td></tr>
-    <tr><td>King sheet</td><td>$${RATES.sheetKing.toFixed(2)}</td><td>Standard</td></tr>
+    <tr><td colspan="3" style="background:var(--ink);color:white;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:8px 14px;">Flat sheets</td></tr>
+    <tr><td>King flat sheet</td><td>$${RATES.sheetKing.toFixed(2)}</td><td>Standard</td></tr>
     <tr><td>King satin stripe sheet</td><td>$${RATES.sheetKingSatin.toFixed(2)}</td><td>Premium</td></tr>
-    <tr><td>King doona cover</td><td>$${RATES.doonaKing.toFixed(2)}</td><td>Per bed</td></tr>
-    <tr><td>Queen sheet</td><td>$${RATES.sheetQueen.toFixed(2)}</td><td>Standard</td></tr>
+    <tr><td>Queen flat sheet</td><td>$${RATES.sheetQueen.toFixed(2)}</td><td>Standard</td></tr>
     <tr><td>Queen satin stripe sheet</td><td>$${RATES.sheetQueenSatin.toFixed(2)}</td><td>Premium</td></tr>
-    <tr><td>Queen doona cover</td><td>$${RATES.doonaQueen.toFixed(2)}</td><td>Per bed</td></tr>
-    <tr><td>King single sheet</td><td>$${RATES.sheetKingSingle.toFixed(2)}</td><td>Standard</td></tr>
+    <tr><td>King single flat sheet</td><td>$${RATES.sheetKingSingle.toFixed(2)}</td><td>Standard</td></tr>
     <tr><td>King single satin sheet</td><td>$${RATES.sheetKingSingleSatin.toFixed(2)}</td><td>Premium</td></tr>
-    <tr><td>King single doona cover</td><td>$${RATES.doonaKingSingle.toFixed(2)}</td><td>Per bed</td></tr>
-    <tr><td>Single sheet</td><td>$${RATES.sheetSingle.toFixed(2)}</td><td>Standard</td></tr>
+    <tr><td>Single flat sheet</td><td>$${RATES.sheetSingle.toFixed(2)}</td><td>Standard</td></tr>
     <tr><td>Single satin stripe sheet</td><td>$${RATES.sheetSingleSatin.toFixed(2)}</td><td>Premium</td></tr>
-    <tr><td>Fitted standard single sheet</td><td>$${RATES.sheetSingleFitted.toFixed(2)}</td><td>Bunks only</td></tr>
+    <tr><td colspan="3" style="background:var(--ink);color:white;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:8px 14px;">Fitted sheets</td></tr>
+    <tr><td>King fitted sheet</td><td>$${RATES.fittedKing.toFixed(2)}</td><td>Standard</td></tr>
+    <tr><td>Queen fitted sheet</td><td>$${RATES.fittedQueen.toFixed(2)}</td><td>Standard</td></tr>
+    <tr><td>King single fitted sheet</td><td>$${RATES.fittedKingSingle.toFixed(2)}</td><td>Standard</td></tr>
+    <tr><td>Fitted standard single (single bunk)</td><td>$${RATES.sheetSingleFitted.toFixed(2)}</td><td>Single bunks</td></tr>
+    <tr><td>King single fitted (king single bunk)</td><td>$${RATES.fittedKingSingleBunk.toFixed(2)}</td><td>King single bunks</td></tr>
+    <tr><td colspan="3" style="background:var(--ink);color:white;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:8px 14px;">Doona covers</td></tr>
+    <tr><td>King doona cover</td><td>$${RATES.doonaKing.toFixed(2)}</td><td>Per bed</td></tr>
+    <tr><td>Queen doona cover</td><td>$${RATES.doonaQueen.toFixed(2)}</td><td>Per bed</td></tr>
+    <tr><td>King single doona cover</td><td>$${RATES.doonaKingSingle.toFixed(2)}</td><td>Per bed</td></tr>
     <tr><td colspan="3" style="background:var(--ink);color:white;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:8px 14px;">Towels & other</td></tr>
     <tr><td>Pillowcase</td><td>$${RATES.pillowcase.toFixed(2)}</td><td>4 per queen/king, 2 per single</td></tr>
     <tr><td>Premium bath towel</td><td>$${RATES.bathTowel.toFixed(2)}</td><td>2 per bed</td></tr>
