@@ -1840,7 +1840,7 @@ function renderCustomers() {
     const kitClass = kit
       ? kit.status === 'needed' ? 'kit-status-needed' : 'kit-status-active'
       : 'kit-status-none';
-    const kitDetail = kit
+    const kitDetail = kit && kit.items
       ? kit.items.map(i => `${i.qty} ${i.item}`).join(' · ')
       : 'No emergency kit assigned';
     const kitInvoiced = kit && kit.invoiced
@@ -1850,7 +1850,7 @@ function renderCustomers() {
       <div class="cust-avatar">${initials}</div>
       <div style="flex:1;min-width:200px;">
         <div class="cust-name">${c.name}</div>
-        <div class="cust-sub">${c.email} · ${c.phone} · ${platformLabels[c.platform]||c.platform} · ${c.type==='company'?'Management co.':'Individual owner'}</div>
+        <div class="cust-sub">${c.email||'—'} · ${c.phone||'—'} · ${platformLabels[c.platform]||c.platform||'—'} · ${c.type==='company'?'Management co.':'Individual owner'}</div>
         <div style="margin-top:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
           <span class="inv-status ${kitClass}" style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;">${kitLabel}</span>
           ${kitInvoiced}
@@ -1891,9 +1891,9 @@ async function saveCustomer() {
   try {
     if (editingCustId) {
       const { error } = await sb.from('customers').update({ name, email, phone, platform, type }).eq('id', editingCustId);
-      if (error) { showToast('Error: ' + error.message); return; }
+      if (error) { showToast('Error: ' + error.message); console.error(error); return; }
       const c = customers.find(x => x.id === editingCustId);
-      Object.assign(c, { name, email, phone, platform, type });
+      if (c) Object.assign(c, { name, email, phone, platform, type });
       showToast('Customer updated ✓');
     } else {
       const { data, error } = await sb.from('customers').insert({ name, email, phone, platform, type }).select().single();
@@ -1902,11 +1902,11 @@ async function saveCustomer() {
       showToast('Customer saved ✓');
     }
     closeModal('modal-add-customer');
-    renderCustomers();
-    populateCustomerSelects();
+    try { renderCustomers(); } catch(e) { console.warn('renderCustomers error:', e); }
+    try { populateCustomerSelects(); } catch(e) { console.warn('populateCustomerSelects error:', e); }
   } catch(e) {
     showToast('Error: ' + e.message);
-    console.error(e);
+    console.error('saveCustomer error:', e);
   }
 }
 
