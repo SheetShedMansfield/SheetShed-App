@@ -1009,7 +1009,7 @@ nav { background: var(--ink); color: var(--white); display: flex; align-items: c
 <!-- ADD PROPERTY MODAL -->
 <div class="modal-bg" id="modal-add-prop">
   <div class="modal">
-    <h2>Add property</h2>
+    <h2 id="prop-modal-title">Add property</h2>
     <p class="modal-sub">Enter the property details and paste the iCal URL from their booking platform.</p>
     <div class="form-row">
       <div class="form-group">
@@ -1520,6 +1520,14 @@ function renderProperties(filter = '') {
 }
 
 function filterProps(val) { renderProperties(val); }
+
+async function deleteProperty(id) {
+  if (!confirm('Remove this property?')) return;
+  await sb.from('properties').delete().eq('id', id);
+  properties = properties.filter(p => p.id !== id);
+  renderProperties();
+  showToast('Property removed');
+}
 
 function addOrderForProp(propId) {
   const exists = orders.find(o => o.propId === propId);
