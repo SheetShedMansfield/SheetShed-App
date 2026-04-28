@@ -392,7 +392,7 @@ nav { background: var(--ink); color: var(--white); display: flex; align-items: c
   <div class="nav-right">
   <span style="font-size:10px;font-weight:700;background:white;color:#1a1a18;border-radius:6px;padding:2px 8px;letter-spacing:0.05em;margin-right:6px;">ADMIN</span>
   <span id="ss-nav-email" style="font-size:11px;color:rgba(255,255,255,0.45);margin-right:8px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
-  <button onclick="event.preventDefault();event.stopPropagation();ssSignOut();" style="font-size:11px;color:rgba(255,255,255,0.4);background:none;border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:3px 10px;cursor:pointer;font-family:inherit;">Sign out</button>
+  <button onclick="event.preventDefault();event.stopPropagation();ssSignOut();" style="font-size:11px;color:rgba(255,255,255,0.6);background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:5px 12px;cursor:pointer;font-family:inherit;font-weight:600;flex-shrink:0;">Sign out</button>
 </div>
 </nav>
 
@@ -1614,6 +1614,11 @@ const BED_CONFIGS = [
   { value: '3flat',             label: '3 flat sheets only' },
 ];
 
+const BUNK_CONFIGS = [
+  { value: 'fitted-flat-doona', label: 'Fitted + flat + doona cover' },
+  { value: 'fitted-doona',      label: 'Fitted + doona cover' },
+];
+
 const SHEET_TYPES = [
   { value: 'standard', label: 'Standard' },
   { value: 'satin',    label: 'Satin stripe (+premium)' },
@@ -1624,7 +1629,7 @@ function addBedType(type) {
     type,
     n: 1,
     sheetType: 'standard',
-    config: 'fitted-flat-doona',
+    config: type === 'Bunk' ? 'fitted-flat-doona' : 'fitted-flat-doona',
   });
   renderBedRows();
 }
@@ -1637,7 +1642,8 @@ function renderBedRows() {
     const sheetOpts = SHEET_TYPES.map(s =>
       `<option value="${s.value}" ${b.sheetType===s.value?'selected':''}>${s.label}</option>`
     ).join('');
-    const configOpts = BED_CONFIGS.map(c =>
+    const configList = b.type === 'Bunk' ? BUNK_CONFIGS : BED_CONFIGS;
+    const configOpts = configList.map(c =>
       `<option value="${c.value}" ${b.config===c.value?'selected':''}>${c.label}</option>`
     ).join('');
 
@@ -1689,8 +1695,20 @@ function bedLinenCost(b) {
   // Sheet count based on config
   let sheetCount;
   let doonaCost = 0;
-  if (b.config === 'fitted-flat-doona') {
-    sheetCount = 2; // fitted + flat
+  let flatCount = 0;
+  let fittedCount = 0;
+
+  if (b.type === 'Bunk') {
+    if (b.config === 'fitted-doona') {
+      sheetCount = 1;
+      doonaCost = RATES.doonaKingSingle;
+    } else {
+      // fitted-flat-doona (default)
+      sheetCount = 2;
+      doonaCost = RATES.doonaKingSingle;
+    }
+  } else if (b.config === 'fitted-flat-doona') {
+    sheetCount = 2;
     if (b.type === 'King' || b.type === 'Double')    doonaCost = RATES.doonaKing;
     else if (b.type === 'Queen')                      doonaCost = RATES.doonaQueen;
     else if (b.type === 'King Single')                doonaCost = RATES.doonaKingSingle;
@@ -1704,7 +1722,7 @@ function bedLinenCost(b) {
   }
 
   const pillows = (b.type === 'Single' || b.type === 'King Single' || b.type === 'Bunk') ? 2 : 4;
-  const perBed = sheetRate * sheetCount + doonaCost + pillows * RATES.pillowcase + 2 * RATES.bathTowel + 2 * RATES.handTowel;
+  const perBed = sheetRate * sheetCount + doonaCost + pillows * RATES.pillowcase;
   return perBed * b.n;
 }
 
@@ -1713,7 +1731,10 @@ function bedLinenBreakdown(b) {
   const sheetLabel = isSatin ? 'satin stripe' : 'standard';
   const pillows = (b.type === 'Single' || b.type === 'King Single' || b.type === 'Bunk') ? 2 : 4;
   let items = [];
-  if (b.config === 'fitted-flat-doona') {
+  if (b.type === 'Bunk') {
+    if (b.config === 'fitted-doona') items.push('1 fitted standard single', '1 doona cover');
+    else items.push('1 fitted standard single', '1 flat standard single', '1 doona cover');
+  } else if (b.config === 'fitted-flat-doona') {
     items.push(`1 fitted ${sheetLabel}`, `1 flat ${sheetLabel}`, `1 doona cover`);
   } else if (b.config === 'fitted-2flat') {
     items.push(`1 fitted ${sheetLabel}`, `2 flat ${sheetLabel}`);
@@ -1729,16 +1750,12 @@ function bedLinenBreakdown(b) {
 function updateBedsCostPreview() {
   const preview = document.getElementById('beds-cost-preview');
   if (!preview || bedRows.length === 0) { if(preview) preview.style.display='none'; return; }
-  const totalBeds = bedRows.reduce((s,b) => s+b.n, 0);
   const linenCost = bedRows.reduce((s,b) => s+bedLinenCost(b), 0);
-  const bathmats = Math.ceil(totalBeds/2) * RATES.bathmat;
-  const teaTowels = 2 * RATES.teaTowel;
-  const total = linenCost + bathmats + teaTowels;
   const markup = pricingSettings.markup / 100;
-  const charge = total * (1 + markup);
+  const charge = linenCost * (1 + markup);
   preview.style.display = '';
   preview.innerHTML = `<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-    <span>Hire cost: <strong>$${total.toFixed(2)}</strong>/changeover</span>
+    <span>Bedding hire cost: <strong>$${linenCost.toFixed(2)}</strong>/changeover</span>
     <span>+ ${pricingSettings.markup}% markup = <strong style="color:var(--ink);font-family:'Nunito',sans-serif;font-size:14px;">$${charge.toFixed(2)}</strong> charge</span>
   </div>`;
 }
@@ -3620,12 +3637,10 @@ async function ssSignUp() {
 }
 
 async function ssSignOut() {
-  try {
-    await sb.auth.signOut();
-  } catch(e) {
-    console.warn('Sign out error:', e);
-  }
-  window.location.href = window.location.pathname;
+  try { await sb.auth.signOut(); } catch(e) {}
+  // Clear any cached session data
+  Object.keys(localStorage).forEach(k => { if(k.startsWith('sb-')) localStorage.removeItem(k); });
+  window.location.href = window.location.origin + window.location.pathname + '?signout=' + Date.now();
 }
 
 async function ssSyncData() {
