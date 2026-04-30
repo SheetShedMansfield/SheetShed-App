@@ -3665,12 +3665,7 @@ function saveKit() {
 }
 
 // ── INIT ──
-renderDashboard();
-renderProperties();
-populateCustomerSelects();
-initPricing();
-updateOccupancy();
-updateCosts();
+// Data is loaded via ssSyncData() after login — no pre-render needed here
 
 // Request notification permission for last-minute booking alerts
 if ('Notification' in window && Notification.permission === 'default') {
