@@ -1515,8 +1515,8 @@ function renderProperties(filter = '') {
         ${delivLabel ? `<div style="font-size:11px;color:var(--ink3);margin-top:3px;">${delivLabel}</div>` : ''}
       </div>
       <span class="platform-badge ${platClass}">${platformLabels[p.platform] || p.platform}</span>
-      <div style="font-size:11px;color:var(--ink3);text-align:right;">
-        <div style="margin-bottom:3px;">${p.ical ? '<span style="color:var(--green);">✓ iCal</span>' : '<span style="color:var(--amber);">No iCal</span>'}</div>
+      <div style="font-size:11px;text-align:right;">
+        ${(p.ical || p.ical_url) ? '<span style="color:var(--green);font-weight:600;">✓ iCal connected</span>' : '<span style="color:var(--amber);">No iCal</span>'}
       </div>
       <div style="display:flex;gap:6px;">
         <button class="btn btn-outline btn-sm" onclick="editProperty('${p.id}')">Edit</button>
@@ -3779,7 +3779,7 @@ async function ssSyncData() {
   console.log(`ssSyncData: got ${c.data?.length||0} customers, ${p.data?.length||0} properties, ${o.data?.length||0} orders`);
 
   customers  = (c.data||[]).map(r => ({ id:r.id, name:r.name, email:r.email, phone:r.phone, platform:r.platform, type:r.type, kit:r.kit||null }));
-  properties = (p.data||[]).map(r => ({ id:r.id, name:r.name, address:r.address, customerId:r.customer_id, platform:r.platform, ical:r.ical_url, beds:r.beds||[], extras:r.extras||{bathTowels:0,handTowels:0,pillowCases:0,bathmats:0,teaTowels:0}, freq:r.freq||6, delivery:r.delivery||'none' }));
+  properties = (p.data||[]).map(r => ({ id:r.id, name:r.name, address:r.address, customerId:r.customer_id, platform:r.platform, ical:r.ical_url||'', beds:r.beds||[], extras:r.extras||{bathTowels:0,handTowels:0,pillowCases:0,bathmats:0,teaTowels:0}, freq:r.freq||6, delivery:r.delivery||'none' }));
   orders     = (o.data||[]).map(r => ({ id:r.id, propId:r.property_id, date:r.order_date, status:r.status, urgent:r.urgent||false, detectedAt:r.detected_at||r.created_at }));
   invoices   = (inv.data||[]).map(r => ({ id:r.id, customerId:r.customer_id, period:r.period, dueDate:r.due_date, status:r.status, total:r.total_aud }));
 }
