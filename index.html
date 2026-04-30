@@ -455,33 +455,39 @@ nav { background: var(--ink); color: var(--white); display: flex; align-items: c
 
   <!-- CALENDAR VIEW -->
   <div id="dash-cal-view" style="display:none;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
       <button class="btn btn-outline btn-sm" onclick="calNav(-1)">← Prev</button>
       <div style="font-family:'Nunito',sans-serif;font-size:18px;font-weight:800;" id="cal-month-label"></div>
       <button class="btn btn-outline btn-sm" onclick="calNav(1)">Next →</button>
     </div>
-    <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;"></div>
-    <div id="cal-legend" style="display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;"></div>
-
-    <!-- Day detail panel -->
-    <div id="cal-detail" style="display:none;margin-top:24px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+    <div id="cal-sync-status" style="font-size:11px;color:var(--ink3);margin-bottom:10px;text-align:right;"></div>
+    <!-- Day headers -->
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px;">
+      <div style="text-align:center;font-size:11px;font-weight:700;color:var(--ink3);padding:4px;">Mon</div>
+      <div style="text-align:center;font-size:11px;font-weight:700;color:var(--ink3);padding:4px;">Tue</div>
+      <div style="text-align:center;font-size:11px;font-weight:700;color:var(--ink3);padding:4px;">Wed</div>
+      <div style="text-align:center;font-size:11px;font-weight:700;color:var(--ink3);padding:4px;">Thu</div>
+      <div style="text-align:center;font-size:11px;font-weight:700;color:var(--ink3);padding:4px;">Fri</div>
+      <div style="text-align:center;font-size:11px;font-weight:700;color:var(--ink3);padding:4px;">Sat</div>
+      <div style="text-align:center;font-size:11px;font-weight:700;color:var(--ink3);padding:4px;">Sun</div>
+    </div>
+    <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;"></div>
+    <!-- Legend -->
+    <div id="cal-legend" style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;align-items:center;">
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink3);"><div style="width:10px;height:10px;background:#e8f4fd;border:1px solid #1a6fa8;border-radius:2px;"></div>Stay period</div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink3);"><div style="width:10px;height:10px;background:var(--green-light);border:1px solid var(--green);border-radius:2px;"></div>Checkout (pack day)</div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink3);"><div style="width:10px;height:10px;background:var(--red-light);border:1px solid var(--red);border-radius:2px;"></div>Last-minute (&lt;24hr)</div>
+    </div>
+    <!-- Day detail -->
+    <div id="cal-detail" style="display:none;margin-top:20px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
         <div>
           <div style="font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;" id="cal-detail-title"></div>
           <div style="font-size:12px;color:var(--ink3);" id="cal-detail-sub"></div>
         </div>
         <button class="btn btn-outline btn-sm" onclick="closeCalDetail()">✕ Close</button>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
-        <div>
-          <div class="section-title" style="margin-bottom:10px;">Orders</div>
-          <div id="cal-detail-orders"></div>
-        </div>
-        <div>
-          <div class="section-title" style="margin-bottom:10px;">Linen to pack</div>
-          <div id="cal-detail-pack"></div>
-        </div>
-      </div>
+      <div id="cal-detail-content"></div>
     </div>
   </div>
 </div>
@@ -2627,43 +2633,174 @@ function updateOccupancy() {
 
 // ── DASHBOARD VIEW TOGGLE ──
 let dashView = 'list';
+
+// ── ICAL SYNC ENGINE ──
+let calendarBookings = [];
+let icalLastSync = null;
+let icalSyncInterval = null;
 let calViewDate = new Date();
+let selectedCalDate = null;
 
-// Scalable colour system — generates a unique hue for any number of customers
-// Uses HSL so colours stay visually distinct even at 30+ clients
-const CAL_COLORS = [
-  { dot:'#3b7dd8', light:'#e8f0fc' },
-  { dot:'#d84b6b', light:'#fce8ed' },
-  { dot:'#2ea86e', light:'#e5f7ee' },
-  { dot:'#c47c1a', light:'#fdf3e0' },
-  { dot:'#8b44c4', light:'#f3eafc' },
-  { dot:'#d85a2a', light:'#fceee8' },
-  { dot:'#1a9ab0', light:'#e5f6fa' },
-  { dot:'#b03a8a', light:'#fce8f4' },
-  { dot:'#5a8a2a', light:'#edf7e5' },
-  { dot:'#c4341a', light:'#fce8e5' },
-  { dot:'#2a5ab0', light:'#e5ecfc' },
-  { dot:'#b08a1a', light:'#fdf7e0' },
+function dateStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function parseIcalDate(str) {
+  // Handle YYYYMMDD and YYYYMMDDTHHMMSSZ formats
+  if (!str) return null;
+  const s = str.replace(/T.*$/, '');
+  if (s.length === 8) {
+    return new Date(+s.slice(0,4), +s.slice(4,6)-1, +s.slice(6,8));
+  }
+  return new Date(str);
+}
+
+async function fetchIcal(url) {
+  // Use a CORS proxy to fetch iCal
+  const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+  try {
+    const res = await fetch(proxy, { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.contents || null;
+  } catch(e) {
+    console.warn('iCal fetch error:', url, e.message);
+    return null;
+  }
+}
+
+function parseIcalEvents(icalText) {
+  const events = [];
+  const lines = icalText.replace(/\r\n|\r/g, '\n').replace(/\n /g, '').split('\n');
+  let current = null;
+  for (const line of lines) {
+    if (line.startsWith('BEGIN:VEVENT')) {
+      current = {};
+    } else if (line.startsWith('END:VEVENT') && current) {
+      if (current.start && current.end) events.push(current);
+      current = null;
+    } else if (current) {
+      if (line.startsWith('DTSTART')) current.start = parseIcalDate(line.split(':').slice(1).join(':'));
+      else if (line.startsWith('DTEND'))   current.end   = parseIcalDate(line.split(':').slice(1).join(':'));
+      else if (line.startsWith('SUMMARY')) current.summary = line.split(':').slice(1).join(':').trim();
+      else if (line.startsWith('UID'))     current.uid = line.split(':').slice(1).join(':').trim();
+    }
+  }
+  return events;
+}
+
+async function syncAllIcals() {
+  const propsWithIcal = properties.filter(p => p.ical);
+  if (propsWithIcal.length === 0) {
+    document.getElementById('cal-sync-status') && (document.getElementById('cal-sync-status').textContent = 'No iCal feeds connected yet');
+    return;
+  }
+
+  const statusEl = document.getElementById('cal-sync-status');
+  if (statusEl) statusEl.textContent = `Syncing ${propsWithIcal.length} calendar${propsWithIcal.length!==1?'s':''}…`;
+
+  const now = new Date();
+  const sixMonthsAhead = new Date(now); sixMonthsAhead.setMonth(sixMonthsAhead.getMonth() + 6);
+  const newBookings = [];
+
+  await Promise.all(propsWithIcal.map(async (p) => {
+    const text = await fetchIcal(p.ical);
+    if (!text) return;
+    const events = parseIcalEvents(text);
+    events.forEach(ev => {
+      if (!ev.start || !ev.end) return;
+      // Only show events in next 6 months
+      if (ev.end < now || ev.start > sixMonthsAhead) return;
+
+      // Checkout = end date (last day guests leave), checkin = start
+      const detectedAt = new Date().toISOString();
+      const hoursUntilCheckin = (ev.start - now) / 36e5;
+      const isLastMinute = hoursUntilCheckin <= 24 && hoursUntilCheckin >= 0;
+
+      newBookings.push({
+        id: p.id + '_' + (ev.uid || dateStr(ev.start)),
+        propId: p.id,
+        start: ev.start,
+        end: ev.end,
+        startStr: dateStr(ev.start),
+        endStr: dateStr(ev.end),
+        summary: ev.summary || 'Booking',
+        isLastMinute,
+        detectedAt,
+      });
+    });
+  }));
+
+  // Check for new last-minute bookings vs previous sync
+  if (icalLastSync) {
+    const prevIds = new Set(calendarBookings.map(b => b.id));
+    newBookings.filter(b => b.isLastMinute && !prevIds.has(b.id)).forEach(b => {
+      const p = properties.find(x => x.id === b.propId);
+      showToast(`⚠ Last-minute booking: ${p?.name || 'Unknown'}`);
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('Sheet Shed — Last-minute booking!', { body: `${p?.name} checks in within 24 hours.` });
+      }
+    });
+  }
+
+  calendarBookings = newBookings;
+  icalLastSync = new Date();
+  if (statusEl) statusEl.textContent = `Last synced: ${icalLastSync.toLocaleTimeString('en-AU', {hour:'2-digit', minute:'2-digit'})} · ${newBookings.length} booking${newBookings.length!==1?'s':''} across ${propsWithIcal.length} propert${propsWithIcal.length!==1?'ies':'y'}`;
+
+  // Auto-create orders for checkout dates
+  await syncOrdersFromCalendar();
+
+  if (dashView === 'calendar') renderCalendar();
+}
+
+async function syncOrdersFromCalendar() {
+  const today = dateStr(new Date());
+  const existing = new Set(orders.map(o => `${o.propId}_${o.date}`));
+
+  for (const b of calendarBookings) {
+    const checkoutKey = `${b.propId}_${b.endStr}`;
+    if (!existing.has(checkoutKey)) {
+      const newOrder = {
+        property_id: b.propId,
+        order_date: b.endStr,
+        status: 'pending',
+        urgent: b.isLastMinute,
+        detected_at: b.detectedAt,
+      };
+      try {
+        const { data, error } = await sb.from('orders').insert(newOrder).select().single();
+        if (!error && data) {
+          orders.push({ id: data.id, propId: data.property_id, date: data.order_date, status: data.status, urgent: data.urgent, detectedAt: data.detected_at });
+          existing.add(checkoutKey);
+        }
+      } catch(e) { console.warn('Order insert error:', e); }
+    }
+  }
+}
+
+function startIcalSync() {
+  syncAllIcals();
+  if (icalSyncInterval) clearInterval(icalSyncInterval);
+  icalSyncInterval = setInterval(syncAllIcals, 30 * 60 * 1000); // every 30 min
+}
+
+// ── CALENDAR RENDER ──
+const PROP_COLORS = [
+  '#3b7dd8','#d84b6b','#2ea86e','#c47c1a','#8b44c4',
+  '#d85a2a','#1a9ab0','#b03a8a','#5a8a2a','#c4341a',
 ];
-
-function customerColor(custId) {
-  const idx = customers.findIndex(c => c.id === custId);
-  if (idx === -1) return CAL_COLORS[0];
-  // For clients beyond 12, generate a hue from their index
-  if (idx < CAL_COLORS.length) return CAL_COLORS[idx];
-  const hue = (idx * 47) % 360; // golden-angle-ish spread
-  const dot   = `hsl(${hue}, 62%, 40%)`;
-  const light  = `hsl(${hue}, 62%, 94%)`;
-  return { dot, light };
+function propColor(propId) {
+  const idx = properties.findIndex(p => p.id === propId);
+  return PROP_COLORS[idx % PROP_COLORS.length] || '#888';
 }
 
 function setDashView(view) {
   dashView = view;
   document.getElementById('dash-list-view').style.display = view === 'list' ? '' : 'none';
   document.getElementById('dash-cal-view').style.display  = view === 'calendar' ? '' : 'none';
-  document.getElementById('view-list-btn').style.cssText = view === 'list'     ? 'background:var(--ink);color:white;border:none;' : 'background:none;color:var(--ink3);border:none;';
-  document.getElementById('view-cal-btn').style.cssText  = view === 'calendar' ? 'background:var(--ink);color:white;border:none;' : 'background:none;color:var(--ink3);border:none;';
-  document.getElementById('dashboard-heading').textContent = view === 'list' ? "Today's packing list" : 'Calendar view';
+  document.getElementById('view-list-btn').style.cssText  = view === 'list'     ? 'background:var(--ink);color:white;border:none;' : 'background:none;color:var(--ink3);border:none;';
+  document.getElementById('view-cal-btn').style.cssText   = view === 'calendar' ? 'background:var(--ink);color:white;border:none;' : 'background:none;color:var(--ink3);border:none;';
+  document.getElementById('dashboard-heading').textContent = view === 'list' ? "Today's packing list" : 'Booking calendar';
   if (view === 'calendar') renderCalendar();
 }
 
@@ -2677,225 +2814,172 @@ function renderCalendar() {
   const year  = calViewDate.getFullYear();
   const month = calViewDate.getMonth();
   const today = new Date();
+  const todayStr = dateStr(today);
 
   document.getElementById('cal-month-label').textContent =
     calViewDate.toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
 
-  const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const daysInPrevMonth = new Date(year, month, 0).getDate();
+  // Monday-first: getDay() returns 0=Sun, so Mon=1 => offset=0, Sun=0 => offset=6
+  const firstDayOfWeek = new Date(year, month, 1).getDay();
+  const offset = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
 
-  // Build order map: date string → orders[]
-  const orderMap = {};
-  orders.forEach(o => {
-    // Use order date — for demo, spread across the month plausibly
-    const key = o.date === 'today'
-      ? `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`
-      : o.date;
-    if (!orderMap[key]) orderMap[key] = [];
-    orderMap[key].push(o);
-  });
+  let html = '';
 
-  // Day headers
-  const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  let html = dayNames.map(d => `<div class="cal-day-header">${d}</div>`).join('');
-
-  // Pad start
-  for (let i = 0; i < firstDay; i++) {
-    const dayNum = daysInPrevMonth - firstDay + i + 1;
-    html += `<div class="cal-day other-month"><div class="cal-day-num">${dayNum}</div></div>`;
+  // Blank cells before month start
+  for (let i = 0; i < offset; i++) {
+    html += '<div style="min-height:80px;background:var(--bg2);border-radius:8px;opacity:0.3;"></div>';
   }
 
-  // Days
   for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const isToday = d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
-    const dayOrders = orderMap[dateStr] || [];
-    const hasOrders = dayOrders.length > 0;
+    const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = ds === todayStr;
+    const dayDate = new Date(year, month, d);
 
-    const dayNumHtml = isToday
-      ? `<div class="cal-day-num"><div style="background:var(--ink);color:white;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;">${d}</div></div>`
-      : `<div class="cal-day-num">${d}</div>`;
-
-    // Group orders by customer → dot + count per customer, max 4 rows
-    const custOrderMap = {};
-    dayOrders.forEach(o => {
-      const p = properties.find(x => x.id === o.propId);
-      const custId = p?.customerId;
-      if (!custOrderMap[custId]) custOrderMap[custId] = 0;
-      custOrderMap[custId]++;
+    // Find all bookings active on this day
+    const dayBookings = calendarBookings.filter(b => {
+      return dayDate >= b.start && dayDate < b.end;
     });
+    // Checkouts on this day
+    const checkouts = calendarBookings.filter(b => b.endStr === ds);
+    // Checkins on this day
+    const checkins  = calendarBookings.filter(b => b.startStr === ds);
 
-    const dotRows = Object.entries(custOrderMap).slice(0, 4).map(([custId, count]) => {
-      const c   = customers.find(x => x.id === +custId);
-      const col = customerColor(+custId);
-      const initials = c ? c.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase() : '??';
-      return `<div class="cal-dot-row">
-        <div class="cal-dot" style="background:${col.dot};" title="${c?.name || 'Customer'}"></div>
-        <span class="cal-dot-count">${count}</span>
-        <span class="cal-dot-label">${c?.name?.split(' ')[0] || 'Customer'}</span>
+    const hasLastMinute = dayBookings.some(b => b.isLastMinute) || checkouts.some(b => b.isLastMinute);
+
+    const borderColor = hasLastMinute ? 'var(--red)' :
+                        checkouts.length > 0 ? 'var(--green)' :
+                        isToday ? 'var(--ink)' : 'var(--border)';
+    const bgColor = hasLastMinute ? 'var(--red-light)' :
+                    checkouts.length > 0 ? 'var(--green-light)' :
+                    dayBookings.length > 0 ? '#f0f7ff' : 'var(--white)';
+
+    // Build content — show property strips
+    const visibleBookings = dayBookings.slice(0, 3);
+    const bookingStrips = visibleBookings.map(b => {
+      const p = properties.find(x => x.id === b.propId);
+      const totalBeds = (p?.beds||[]).reduce((s,b)=>s+b.n,0);
+      const col = propColor(b.propId);
+      const isOut = b.endStr === ds;
+      const isIn  = b.startStr === ds;
+      return `<div style="background:${col}22;border-left:3px solid ${col};border-radius:0 3px 3px 0;padding:1px 4px;margin-bottom:1px;font-size:9px;color:${col};font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+        ${isIn?'▶ ':''}${isOut?'✓ ':''}${p?.name||'?'} · ${totalBeds}bd
       </div>`;
     }).join('');
+    const moreText = dayBookings.length > 3 ? `<div style="font-size:9px;color:var(--ink3);padding:1px 4px;">+${dayBookings.length-3} more</div>` : '';
 
-    const moreClients = Object.keys(custOrderMap).length > 4
-      ? `<div style="font-size:10px;color:var(--ink3);margin-top:2px;">+${Object.keys(custOrderMap).length - 4} more</div>` : '';
-
-    const totalBadge = hasOrders
-      ? `<div class="cal-total-badge">${dayOrders.length}</div>` : '';
-
-    html += `<div class="cal-day ${isToday ? 'today' : ''} ${hasOrders ? 'has-orders' : ''}"
-      onclick="calDayClick('${dateStr}', ${d})"
-      title="${dayOrders.length} order${dayOrders.length!==1?'s':''}">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-        ${dayNumHtml}
-        ${totalBadge}
+    html += `<div onclick="calDayClick('${ds}')"
+      style="min-height:80px;background:${bgColor};border:2px solid ${borderColor};border-radius:8px;padding:5px;cursor:pointer;transition:all 0.1s;overflow:hidden;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px;">
+        <span style="font-family:'Nunito',sans-serif;font-size:12px;font-weight:${isToday?900:700};${isToday?'background:var(--ink);color:white;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;':''}">${d}</span>
+        ${checkouts.length>0?`<span style="font-size:9px;font-weight:700;color:var(--green);background:var(--green-light);padding:1px 4px;border-radius:4px;">PACK</span>`:''}
+        ${hasLastMinute?`<span style="font-size:9px;font-weight:700;color:var(--red);background:var(--red-light);padding:1px 4px;border-radius:4px;">URGENT</span>`:''}
       </div>
-      ${dotRows}
-      ${moreClients}
+      ${bookingStrips}${moreText}
     </div>`;
   }
 
-  // Pad end
-  const totalCells = firstDay + daysInMonth;
-  const remainder  = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
-  for (let i = 1; i <= remainder; i++) {
-    html += `<div class="cal-day other-month"><div class="cal-day-num">${i}</div></div>`;
+  // Fill remaining cells
+  const totalCells = offset + daysInMonth;
+  const remainder = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for (let i = 0; i < remainder; i++) {
+    html += '<div style="min-height:80px;background:var(--bg2);border-radius:8px;opacity:0.3;"></div>';
   }
 
   document.getElementById('cal-grid').innerHTML = html;
 
-  // Legend — dot per customer, orders this month
-  const todayStr2 = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
-  const legendHtml = customers.map(c => {
-    const col = customerColor(c.id);
-    const monthOrders = orders.filter(o => {
-      const p = properties.find(x => x.id === o.propId);
-      if (p?.customerId !== c.id) return false;
-      const key = o.date === 'today'
-        ? `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`
-        : o.date;
-      return key.startsWith(`${year}-${String(month+1).padStart(2,'0')}`);
-    }).length;
-    return `<div class="cal-legend-item">
-      <div style="width:10px;height:10px;border-radius:3px;background:${col.dot};flex-shrink:0;"></div>
-      <span>${c.name}</span>
-      ${monthOrders > 0 ? `<span style="font-size:11px;background:var(--bg2);border-radius:10px;padding:1px 7px;font-weight:700;">${monthOrders}</span>` : ''}
+  // Legend — properties that have bookings this month
+  const activePropIds = [...new Set(calendarBookings
+    .filter(b => b.start.getFullYear()===year && b.start.getMonth()===month ||
+                 b.end.getFullYear()===year && b.end.getMonth()===month)
+    .map(b => b.propId))];
+  const legend = activePropIds.map(id => {
+    const p = properties.find(x => x.id === id);
+    const col = propColor(id);
+    return `<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink2);">
+      <div style="width:10px;height:10px;background:${col};border-radius:2px;flex-shrink:0;"></div>
+      ${p?.name||'?'}
     </div>`;
   }).join('');
-  document.getElementById('cal-legend').innerHTML = legendHtml || '<span style="font-size:12px;color:var(--ink3);">No customers yet</span>';
+  document.getElementById('cal-legend').innerHTML = legend ||
+    '<span style="font-size:11px;color:var(--ink3);">No bookings this month</span>';
 }
 
-let selectedCalDate = null;
-
-function calDayClick(dateStr, dayNum, monthName) {
-  // Deselect previous
-  document.querySelectorAll('.cal-day.selected').forEach(el => el.classList.remove('selected'));
-  // Select clicked
-  event.currentTarget.classList.add('selected');
-  selectedCalDate = dateStr;
-
-  const today = new Date();
-  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-
-  const dayOrders = orders.filter(o => {
-    const key = o.date === 'today' ? todayStr : o.date;
-    return key === dateStr;
-  });
+function calDayClick(ds) {
+  closeCalDetail();
+  selectedCalDate = ds;
+  const dayDate = new Date(ds + 'T00:00:00');
+  const dayBookings = calendarBookings.filter(b => dayDate >= b.start && dayDate < b.end);
+  const checkouts   = calendarBookings.filter(b => b.endStr === ds);
+  const checkins    = calendarBookings.filter(b => b.startStr === ds);
 
   const detail = document.getElementById('cal-detail');
-  const [y, m, d] = dateStr.split('-');
-  const dateObj = new Date(+y, +m - 1, +d);
-  const dayLabel = dateObj.toLocaleDateString('en-AU', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
-  const isToday  = dateStr === todayStr;
-  const isPast   = dateObj < today && !isToday;
-
-  document.getElementById('cal-detail-title').textContent = dayLabel;
+  const [y,m,d] = ds.split('-');
+  const dateObj = new Date(+y,+m-1,+d);
+  document.getElementById('cal-detail-title').textContent =
+    dateObj.toLocaleDateString('en-AU', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
   document.getElementById('cal-detail-sub').textContent =
-    dayOrders.length === 0 ? 'No orders on this day'
-    : `${dayOrders.length} order${dayOrders.length!==1?'s':''} · ${dayOrders.reduce((s,o)=>{const p=properties.find(x=>x.id===o.propId);return s+(p?.beds.reduce((a,b)=>a+b.n,0)||0);},0)} beds to service`;
+    `${dayBookings.length} active booking${dayBookings.length!==1?'s':''} · ${checkouts.length} checkout${checkouts.length!==1?'s':''} · ${checkins.length} check-in${checkins.length!==1?'s':''}`;
 
-  // Orders list
-  if (dayOrders.length === 0) {
-    document.getElementById('cal-detail-orders').innerHTML =
-      `<div style="font-size:13px;color:var(--ink3);padding:16px;background:var(--bg2);border-radius:10px;text-align:center;">No orders scheduled</div>`;
-    document.getElementById('cal-detail-pack').innerHTML =
-      `<div style="font-size:13px;color:var(--ink3);padding:16px;background:var(--bg2);border-radius:10px;text-align:center;">Nothing to pack</div>`;
-  } else {
-    document.getElementById('cal-detail-orders').innerHTML = dayOrders.map(o => {
-      const p  = properties.find(x => x.id === o.propId);
-      const c  = customers.find(x => x.id === p?.customerId);
-      const col = customerColor(c?.id);
-      const bedHtml = (p?.beds || []).map(b => `<span class="bed-pill bed-${b.type.toLowerCase()}">${b.n} ${b.type}</span>`).join(' ');
+  let html = '';
+
+  if (checkouts.length > 0) {
+    html += `<div style="font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;color:var(--green);margin-bottom:8px;">✓ Checkouts — pack today</div>`;
+    checkouts.forEach(b => {
+      const p = properties.find(x => x.id === b.propId);
+      const c = customers.find(x => x.id === p?.customerId);
       const totalBeds = (p?.beds||[]).reduce((s,b)=>s+b.n,0);
-      const statusMap = { packed:['status-packed','Packed'], pending:['status-pending','To pack'], collected:['status-collected','Returned'] };
-      const [sc, sl] = statusMap[o.status] || statusMap.pending;
-      return `<div class="cal-detail-order" style="border-left:3px solid ${col.dot};">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-          <div>
-            <div class="cal-detail-order-name">${p?.name || 'Unknown'}</div>
-            <div class="cal-detail-order-meta">${c?.name || ''} · ${p?.address || ''}</div>
-            <div style="margin-bottom:4px;">${bedHtml}</div>
-            <div style="font-size:11px;color:var(--ink3);">${totalBeds} beds · ${totalBeds*3} sheets · ${totalBeds*2} bath towels</div>
-          </div>
-          <span class="status-pill ${sc}" style="flex-shrink:0;">${sl}</span>
-        </div>
-        ${isToday ? `<div style="margin-top:8px;"><button class="btn btn-outline btn-sm" onclick="cycleStatusFromCal(${o.id}, '${dateStr}')">Update status</button></div>` : ''}
+      const col = propColor(b.propId);
+      html += `<div style="background:var(--green-light);border:1px solid var(--green);border-left:4px solid ${col};border-radius:8px;padding:12px 14px;margin-bottom:8px;">
+        <div style="font-weight:700;font-size:14px;">${p?.name||'?'}</div>
+        <div style="font-size:12px;color:var(--ink3);">${c?.name||''} · ${p?.address||''}</div>
+        <div style="font-size:12px;color:var(--ink2);margin-top:4px;">${totalBeds} bed${totalBeds!==1?'s':''} · ${(p?.beds||[]).map(b=>b.n+' '+b.type).join(' · ')}</div>
+        ${b.isLastMinute?'<div style="font-size:11px;font-weight:700;color:var(--red);margin-top:4px;">⚠ Last-minute booking — urgent!</div>':''}
       </div>`;
-    }).join('');
-
-    // Build packing totals for this day
-    let sheets=0, pillowcases=0, bathTowels=0, handTowels=0, bathmats=0;
-    const teaTowels = dayOrders.length * 2;
-    const bedTypeCounts = {};
-    dayOrders.forEach(o => {
-      const p = properties.find(x => x.id === o.propId);
-      (p?.beds || []).forEach(b => {
-        bedTypeCounts[b.type] = (bedTypeCounts[b.type]||0) + b.n;
-        sheets      += b.n * 3;
-        pillowcases += b.n * ((b.type==='Single'||b.type==='King Single'||b.type==='Bunk') ? 2 : 4);
-        bathTowels  += b.n * 2;
-        handTowels  += b.n * 2;
-        bathmats    += Math.ceil(b.n / 2);
-      });
     });
-
-    const packItems = [
-      ...Object.entries(bedTypeCounts).map(([t,n])=>({ name:`${t} bed sets`, count:n, highlight:false })),
-      { name:'Sheets',       count:sheets,      highlight:false },
-      { name:'Pillow cases', count:pillowcases, highlight:false },
-      { name:'Bath towels',  count:bathTowels,  highlight:false },
-      { name:'Hand towels',  count:handTowels,  highlight:false },
-      { name:'Bathmats',     count:bathmats,    highlight:false },
-      { name:'Tea towels',   count:teaTowels,   highlight:false },
-    ];
-
-    document.getElementById('cal-detail-pack').innerHTML = packItems.map(item =>
-      `<div class="cal-detail-pack-item">
-        <span class="cal-detail-pack-name">${item.name}</span>
-        <span class="cal-detail-pack-count">${item.count}</span>
-      </div>`
-    ).join('');
   }
 
+  if (checkins.length > 0) {
+    html += `<div style="font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;color:var(--ink2);margin:12px 0 8px;">▶ Check-ins today</div>`;
+    checkins.forEach(b => {
+      const p = properties.find(x => x.id === b.propId);
+      const col = propColor(b.propId);
+      html += `<div style="background:var(--white);border:1px solid var(--border);border-left:4px solid ${col};border-radius:8px;padding:10px 14px;margin-bottom:8px;">
+        <div style="font-weight:700;">${p?.name||'?'}</div>
+        <div style="font-size:12px;color:var(--ink3);">Guests arrive today · stays until ${new Date(b.endStr+'T00:00:00').toLocaleDateString('en-AU',{day:'numeric',month:'short'})}</div>
+      </div>`;
+    });
+  }
+
+  const stayOnly = dayBookings.filter(b => b.startStr !== ds && b.endStr !== ds);
+  if (stayOnly.length > 0) {
+    html += `<div style="font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;color:var(--ink3);margin:12px 0 8px;">Guests in house</div>`;
+    stayOnly.forEach(b => {
+      const p = properties.find(x => x.id === b.propId);
+      const col = propColor(b.propId);
+      html += `<div style="background:var(--bg);border:1px solid var(--border);border-left:4px solid ${col};border-radius:8px;padding:8px 14px;margin-bottom:6px;">
+        <div style="font-weight:600;font-size:13px;">${p?.name||'?'}</div>
+        <div style="font-size:11px;color:var(--ink3);">Checkout: ${new Date(b.endStr+'T00:00:00').toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short'})}</div>
+      </div>`;
+    });
+  }
+
+  if (!html) html = '<div style="text-align:center;padding:24px;color:var(--ink3);font-size:13px;">No bookings on this day</div>';
+
+  document.getElementById('cal-detail-content').innerHTML = html;
   detail.style.display = '';
-  // Smooth scroll to detail panel
-  setTimeout(() => detail.scrollIntoView({ behavior:'smooth', block:'nearest' }), 50);
+  setTimeout(() => detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
 }
 
 function closeCalDetail() {
-  document.getElementById('cal-detail').style.display = 'none';
-  document.querySelectorAll('.cal-day.selected').forEach(el => el.classList.remove('selected'));
+  const d = document.getElementById('cal-detail');
+  if (d) d.style.display = 'none';
   selectedCalDate = null;
 }
 
 function cycleStatusFromCal(orderId, dateStr) {
   cycleStatus(orderId);
-  // Re-render the detail panel for the same day
-  const el = document.querySelector(`.cal-day[onclick*="'${dateStr}'"]`);
-  const parts = dateStr.split('-');
-  calDayClick(dateStr, +parts[2]);
 }
-
 
 // ── QUOTE BUILDER ──
 let selectedQuotePropId = null;
@@ -3821,6 +3905,7 @@ async function ssOnSignedIn(user) {
     try { initPricing(); } catch(e) { console.warn('initPricing:', e); }
     try { updateOccupancy(); } catch(e) { console.warn('updateOccupancy:', e); }
     try { updateCosts(); } catch(e) { console.warn('updateCosts:', e); }
+    try { startIcalSync(); } catch(e) { console.warn('iCal sync error:', e); }
 
   } else {
     show('ss-portal');
