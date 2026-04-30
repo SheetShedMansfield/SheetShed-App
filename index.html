@@ -1256,6 +1256,7 @@ function showPage(name) {
   if (name === 'properties') renderProperties();
   if (name === 'customers') renderCustomers();
   if (name === 'pricing') { updatePricing(); updateOccupancy(); }
+  if (name === 'costs') { loadCostSettings(); updateCosts(); }
   if (name === 'quote') { initQuote(); }
   if (name === 'invoicing') initInvoicing();
   if (name === 'deliveries') renderDeliveries();
@@ -3460,6 +3461,53 @@ function delDragEnd() {
   });
 }
 
+function saveCostSettings() {
+  try {
+    const settings = {
+      rate: document.getElementById('c-rate').value,
+      pack: document.getElementById('c-pack').value,
+      daily: document.getElementById('c-daily').value,
+      days: document.getElementById('c-days').value,
+      drive: document.getElementById('c-drive').value,
+      trips: document.getElementById('c-trips').value,
+      fuel: document.getElementById('c-fuel').value,
+      speed: document.getElementById('c-speed').value,
+      storage: document.getElementById('c-storage').value,
+      admin: document.getElementById('c-admin').value,
+      travelOn: document.getElementById('c-travel-on').checked,
+    };
+    localStorage.setItem('ss-cost-settings', JSON.stringify(settings));
+  } catch(e) {}
+}
+
+function loadCostSettings() {
+  try {
+    const saved = localStorage.getItem('ss-cost-settings');
+    if (!saved) return;
+    const s = JSON.parse(saved);
+    if (s.rate  !== undefined) document.getElementById('c-rate').value  = s.rate;
+    if (s.pack  !== undefined) document.getElementById('c-pack').value  = s.pack;
+    if (s.daily !== undefined) document.getElementById('c-daily').value = s.daily;
+    if (s.days  !== undefined) document.getElementById('c-days').value  = s.days;
+    if (s.drive !== undefined) document.getElementById('c-drive').value = s.drive;
+    if (s.trips !== undefined) document.getElementById('c-trips').value = s.trips;
+    if (s.fuel  !== undefined) document.getElementById('c-fuel').value  = s.fuel;
+    if (s.speed !== undefined) document.getElementById('c-speed').value = s.speed;
+    if (s.storage !== undefined) document.getElementById('c-storage').value = s.storage;
+    if (s.admin !== undefined) document.getElementById('c-admin').value = s.admin;
+    if (s.travelOn !== undefined) document.getElementById('c-travel-on').checked = s.travelOn;
+    toggleTravelCard(s.travelOn !== false);
+  } catch(e) {}
+}
+
+function toggleTravelCard(on) {
+  const card = document.getElementById('c-travel-card');
+  if (card) {
+    card.style.opacity = on ? '1' : '0.4';
+    card.style.pointerEvents = on ? '' : 'none';
+  }
+}
+
 function updateCosts() {
   const hourlyRate  = +document.getElementById('c-rate').value;
   const minsPerBag  = +document.getElementById('c-pack').value;
@@ -3471,8 +3519,12 @@ function updateCosts() {
   const speedKmh    = +document.getElementById('c-speed').value;
   const storageCost = +document.getElementById('c-storage').value;
   const adminCost   = +document.getElementById('c-admin').value;
+  const travelOn    = document.getElementById('c-travel-on').checked;
 
-  document.getElementById('cv-rate').textContent  = '$' + hourlyRate;
+  toggleTravelCard(travelOn);
+  saveCostSettings();
+
+  document.getElementById('cv-rate').textContent  = hourlyRate === 0 ? '$0 (volunteering)' : '$' + hourlyRate;
   document.getElementById('cv-pack').textContent  = minsPerBag + ' min';
   document.getElementById('cv-daily').textContent = dailyBags + ' bags';
   document.getElementById('cv-days').textContent  = daysPerWeek + ' days';
@@ -3486,13 +3538,12 @@ function updateCosts() {
   const packingHrsWeek  = (weeklyBags * minsPerBag) / 60;
   const packingCostWeek = packingHrsWeek * hourlyRate;
 
-  // Travel
+  // Travel (only included if toggled on)
   const oneWayKm        = (driveMin / 60) * speedKmh;
-  const returnKm        = oneWayKm * 2;
-  const weeklyDriveKm   = returnKm * tripsPerWk;
+  const weeklyDriveKm   = oneWayKm * 2 * tripsPerWk;
   const weeklyDriveHrs  = (driveMin * 2 * tripsPerWk) / 60;
-  const fuelCostWeek    = weeklyDriveKm * fuelPerKm;
-  const travelTimeCost  = weeklyDriveHrs * hourlyRate;
+  const fuelCostWeek    = travelOn ? weeklyDriveKm * fuelPerKm : 0;
+  const travelTimeCost  = travelOn ? weeklyDriveHrs * hourlyRate : 0;
   const totalTravelWeek = fuelCostWeek + travelTimeCost;
 
   const totalCostWeek   = packingCostWeek + totalTravelWeek + storageCost + adminCost;
@@ -3500,22 +3551,21 @@ function updateCosts() {
   // Revenue (from pricing settings)
   const cos = pricingSettings.weeklyChangeovers;
   const r   = chargePerChangeover([{type:'Queen', n:4}], pricingSettings);
-  const weeklyRevenue  = r.charge * cos;
-  const grossProfit    = r.profit * cos;
-  const netProfitWeek  = grossProfit - totalCostWeek;
-  const netProfitHour  = packingHrsWeek + weeklyDriveHrs > 0
-    ? netProfitWeek / (packingHrsWeek + weeklyDriveHrs)
-    : 0;
+  const grossProfit   = r.profit * cos;
+  const netProfitWeek = grossProfit - totalCostWeek;
+  const totalHrs      = packingHrsWeek + (travelOn ? weeklyDriveHrs : 0);
+  const netProfitHour = totalHrs > 0 ? netProfitWeek / totalHrs : netProfitWeek;
 
   // Cost breakdown table
+  const travelNote = travelOn ? '' : ' <span style="font-size:10px;color:var(--ink3);">(excluded)</span>';
   document.getElementById('cost-breakdown-body').innerHTML = `
     <tr><td>Packing labour (${weeklyBags} bags × ${minsPerBag} min @ $${hourlyRate}/hr)</td><td style="text-align:right;font-weight:600;">$${packingCostWeek.toFixed(2)}</td></tr>
-    <tr><td>Travel time (${(weeklyDriveHrs * 60).toFixed(0)} min driving @ $${hourlyRate}/hr)</td><td style="text-align:right;font-weight:600;">$${travelTimeCost.toFixed(2)}</td></tr>
-    <tr><td>Fuel (${weeklyDriveKm.toFixed(0)} km × $${fuelPerKm.toFixed(2)}/km)</td><td style="text-align:right;font-weight:600;">$${fuelCostWeek.toFixed(2)}</td></tr>
+    <tr style="${travelOn?'':'opacity:0.4'}"><td>Travel time (${(weeklyDriveHrs*60).toFixed(0)} min @ $${hourlyRate}/hr)${travelNote}</td><td style="text-align:right;font-weight:600;">$${travelTimeCost.toFixed(2)}</td></tr>
+    <tr style="${travelOn?'':'opacity:0.4'}"><td>Fuel (${weeklyDriveKm.toFixed(0)} km × $${fuelPerKm.toFixed(2)}/km)${travelNote}</td><td style="text-align:right;font-weight:600;">$${fuelCostWeek.toFixed(2)}</td></tr>
     <tr><td>Storage unit</td><td style="text-align:right;font-weight:600;">$${storageCost.toFixed(2)}</td></tr>
     <tr><td>Phone / admin</td><td style="text-align:right;font-weight:600;">$${adminCost.toFixed(2)}</td></tr>
     <tr style="background:var(--bg2);">
-      <td style="font-weight:700;">Total weekly costs</td>
+      <td style="font-weight:700;">Total weekly costs${travelOn?'':' (excl. travel)'}</td>
       <td style="text-align:right;font-weight:800;font-family:'Nunito',sans-serif;font-size:15px;color:var(--red);">$${totalCostWeek.toFixed(2)}</td>
     </tr>`;
 
