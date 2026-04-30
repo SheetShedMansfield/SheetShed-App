@@ -3839,7 +3839,18 @@ async function ssSyncData() {
   console.log(`ssSyncData: got ${c.data?.length||0} customers, ${p.data?.length||0} properties, ${o.data?.length||0} orders`);
 
   customers  = (c.data||[]).map(r => ({ id:r.id, name:r.name, email:r.email, phone:r.phone, platform:r.platform, type:r.type, kit:r.kit||null }));
-  properties = (p.data||[]).map(r => ({ id:r.id, name:r.name, address:r.address, customerId:r.customer_id, platform:r.platform, ical:r.ical_url||'', beds:r.beds||[], extras:r.extras||{bathTowels:0,handTowels:0,pillowCases:0,bathmats:0,teaTowels:0}, freq:r.freq||6, delivery:r.delivery||'none' }));
+  properties = (p.data||[]).map(r => ({
+    id:r.id, name:r.name, address:r.address, customerId:r.customer_id,
+    platform:r.platform, ical:r.ical_url||'',
+    beds: (r.beds||[]).map(b => ({
+      type: b.type || 'Queen',
+      n: b.n || 1,
+      sheetType: b.sheetType || 'standard',
+      config: b.config || 'fitted-flat-doona',
+    })),
+    extras: r.extras||{bathTowels:0,handTowels:0,pillowCases:0,bathmats:0,teaTowels:0},
+    freq: r.freq||6, delivery: r.delivery||'none'
+  }));
   orders     = (o.data||[]).map(r => ({ id:r.id, propId:r.property_id, date:r.order_date, status:r.status, urgent:r.urgent||false, detectedAt:r.detected_at||r.created_at }));
   invoices   = (inv.data||[]).map(r => ({ id:r.id, customerId:r.customer_id, period:r.period, dueDate:r.due_date, status:r.status, total:r.total_aud }));
 }
