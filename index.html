@@ -579,6 +579,7 @@ nav { background: var(--ink); color: var(--white); display: flex; align-items: c
         <div class="psc-row"><div class="psc-label">Hand towel</div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-handTowel" value="1.80" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
         <div class="psc-row"><div class="psc-label">Bathmat</div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-bathmat" value="1.80" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
         <div class="psc-row"><div class="psc-label">Tea towel</div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-teaTowel" value="1.80" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">Face washer</div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-faceWasher" value="1.50" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
       </div>
 
       <div class="price-setting-card" style="margin-bottom:14px;background:var(--accent-light);border-color:var(--ink);">
@@ -1120,8 +1121,10 @@ nav { background: var(--ink); color: var(--white); display: flex; align-items: c
           <label style="font-size:11px;color:var(--ink3);font-weight:600;display:block;margin-bottom:3px;">Tea towels</label>
           <input type="number" class="form-input" id="prop-extra-tea" value="0" min="0" max="10" style="padding:6px 8px;">
         </div>
-        
-      </div>
+        <div>
+          <label style="font-size:11px;color:var(--ink3);font-weight:600;display:block;margin-bottom:3px;">Face washers</label>
+          <input type="number" class="form-input" id="prop-extra-facewasher" value="0" min="0" max="20" style="padding:6px 8px;">
+        </div>
     </div>
     <div class="form-group">
       <label class="form-label">Packing required?</label>
@@ -1656,6 +1659,12 @@ const BED_CONFIGS = [
   { value: '3flat',             label: '3 flat sheets only' },
 ];
 
+// Satin stripe replaces the doona cover — no doona needed
+const SATIN_CONFIGS = [
+  { value: 'satin-fitted-flat', label: 'Satin top + fitted standard + flat standard' },
+  { value: 'satin-2flat',       label: 'Satin top + 2 flat standard' },
+];
+
 const BUNK_CONFIGS = [
   { value: 'fitted-flat-doona', label: 'Fitted + flat + doona cover' },
   { value: 'fitted-doona',      label: 'Fitted + doona cover' },
@@ -1689,9 +1698,16 @@ function renderBedRows() {
     const sheetOpts = SHEET_TYPES.map(s =>
       `<option value="${s.value}" ${b.sheetType===s.value?'selected':''}>${s.label}</option>`
     ).join('');
-    const configList = b.type === 'Bunk' ? BUNK_CONFIGS : b.type === 'King Single Bunk' ? KING_SINGLE_BUNK_CONFIGS : BED_CONFIGS;
+    const isSatin   = b.sheetType === 'satin';
+    const configList = b.type === 'Bunk' ? BUNK_CONFIGS
+                     : b.type === 'King Single Bunk' ? KING_SINGLE_BUNK_CONFIGS
+                     : isSatin ? SATIN_CONFIGS
+                     : BED_CONFIGS;
+    // If switching to satin and current config isn't a satin config, reset to first satin config
+    const validConfigs = configList.map(c => c.value);
+    const activeConfig = validConfigs.includes(b.config) ? b.config : configList[0].value;
     const configOpts = configList.map(c =>
-      `<option value="${c.value}" ${b.config===c.value?'selected':''}>${c.label}</option>`
+      `<option value="${c.value}" ${activeConfig===c.value?'selected':''}>${c.label}</option>`
     ).join('');
 
     // Calculate cost for this bed row
@@ -1769,10 +1785,25 @@ function bedLinenCost(b) {
       sheetCostTotal = fittedRate;
       doonaCost = RATES.doonaKingSingle;
     } else {
-      // fitted-flat-doona
       sheetCostTotal = fittedRate + flatRate;
       doonaCost = RATES.doonaKingSingle;
     }
+  } else if (b.config === 'satin-fitted-flat-doona') {
+    sheetCostTotal = RATES[`sheet${b.type==='King'?'King':b.type==='Queen'||b.type==='Double'?'Queen':'KingSingle'}Satin`] + fittedRate + (b.type==='King'?RATES.sheetKing:b.type==='Queen'||b.type==='Double'?RATES.sheetQueen:RATES.sheetKingSingle);
+    doonaCost = doonaRate;
+  } else if (b.config === 'satin-2flat-doona') {
+    const stdFlat = b.type==='King'?RATES.sheetKing:b.type==='Queen'||b.type==='Double'?RATES.sheetQueen:RATES.sheetKingSingle;
+    const satinFlat = b.type==='King'?RATES.sheetKingSatin:b.type==='Queen'||b.type==='Double'?RATES.sheetQueenSatin:RATES.sheetKingSingleSatin;
+    sheetCostTotal = satinFlat + stdFlat * 2;
+    doonaCost = doonaRate;
+  } else if (b.config === 'satin-fitted-flat') {
+    const satinFlat = b.type==='King'?RATES.sheetKingSatin:b.type==='Queen'||b.type==='Double'?RATES.sheetQueenSatin:RATES.sheetKingSingleSatin;
+    const stdFlat = b.type==='King'?RATES.sheetKing:b.type==='Queen'||b.type==='Double'?RATES.sheetQueen:RATES.sheetKingSingle;
+    sheetCostTotal = satinFlat + fittedRate + stdFlat;
+  } else if (b.config === 'satin-2flat') {
+    const satinFlat = b.type==='King'?RATES.sheetKingSatin:b.type==='Queen'||b.type==='Double'?RATES.sheetQueenSatin:RATES.sheetKingSingleSatin;
+    const stdFlat = b.type==='King'?RATES.sheetKing:b.type==='Queen'||b.type==='Double'?RATES.sheetQueen:RATES.sheetKingSingle;
+    sheetCostTotal = satinFlat + stdFlat * 2;
   } else if (b.config === 'fitted-flat-doona') {
     sheetCostTotal = fittedRate + flatRate;
     doonaCost = doonaRate;
@@ -1799,17 +1830,25 @@ function bedLinenBreakdown(b) {
   if (b.type === 'Bunk' || b.type === 'King Single Bunk') {
     if (b.config === 'fitted-doona') items.push('1 fitted sheet', '1 doona cover');
     else items.push('1 fitted sheet', '1 flat sheet', '1 doona cover');
+  } else if (b.config === 'satin-fitted-flat-doona') {
+    items.push('1 satin top sheet', '1 fitted std sheet', '1 flat std sheet', '1 doona cover');
+  } else if (b.config === 'satin-2flat-doona') {
+    items.push('1 satin top sheet', '2 flat std sheets', '1 doona cover');
+  } else if (b.config === 'satin-fitted-flat') {
+    items.push('1 satin top sheet', '1 fitted std sheet', '1 flat std sheet');
+  } else if (b.config === 'satin-2flat') {
+    items.push('1 satin top sheet', '2 flat std sheets');
   } else if (b.config === 'fitted-flat-doona') {
-    items.push(`1 ${fittedLabel} sheet`, `1 ${flatLabel} sheet`, `1 doona cover`);
+    items.push('1 fitted sheet', '1 flat sheet', '1 doona cover');
   } else if (b.config === 'fitted-2flat') {
-    items.push(`1 ${fittedLabel} sheet`, `2 ${flatLabel} sheets`);
+    items.push('1 fitted sheet', '2 flat sheets');
   } else if (b.config === '3flat') {
-    items.push(`3 ${flatLabel} sheets`);
+    items.push('3 flat sheets');
   } else {
-    items.push(`1 ${fittedLabel} sheet`, `1 ${flatLabel} sheet`);
+    items.push('1 fitted sheet', '1 flat sheet');
   }
-  items.push(`${pillows} pillow cases`, `2 bath towels`, `2 hand towels`);
-  return `Per bed: ${items.join(' · ')}`;
+  items.push(`${pillows} pillow cases`);
+  return items.join(' · ');
 }
 
 function updateBedsCostPreview() {
@@ -1852,6 +1891,7 @@ async function saveProperty() {
     pillowCases: +document.getElementById('prop-extra-pillow').value || 0,
     bathmats:   +document.getElementById('prop-extra-bathmat').value || 0,
     teaTowels:  +document.getElementById('prop-extra-tea').value || 0,
+    faceWashers: +document.getElementById('prop-extra-facewasher').value || 0,
   };
   const freq     = 6;
   const packingReq = document.getElementById('prop-packing-req').value;
@@ -2022,6 +2062,7 @@ function editProperty(id) {
   document.getElementById('prop-extra-pillow').value  = p.extras?.pillowCases || 0;
   document.getElementById('prop-extra-bathmat').value = p.extras?.bathmats || 0;
   document.getElementById('prop-extra-tea').value     = p.extras?.teaTowels || 0;
+  document.getElementById('prop-extra-facewasher').value = p.extras?.faceWashers || 0;
   document.getElementById('prop-packing-req').value   = (p.delivery && p.delivery !== 'none') ? 'no' : 'yes';
   const bulkOpts = document.getElementById('prop-bulk-options');
   if (bulkOpts) bulkOpts.style.display = (p.delivery && p.delivery !== 'none') ? '' : 'none';
@@ -2053,6 +2094,7 @@ function openAddProp() {
   document.getElementById('prop-extra-pillow').value = 0;
   document.getElementById('prop-extra-bathmat').value = 0;
   document.getElementById('prop-extra-tea').value = 0;
+  document.getElementById('prop-extra-facewasher').value = 0;
   document.getElementById('prop-packing-req').value = 'yes';
   document.getElementById('prop-bulk-options').style.display = 'none';
   renderBedRows();
@@ -2115,32 +2157,32 @@ function showToast(msg) {
 // Real hire company prices (ex GST)
 const RATES = {
   // Flat sheets (standard)
-  sheetKing:              1.95,  // King flat sheet
-  sheetQueen:             1.95,  // Queen flat sheet
-  sheetKingSingle:        1.85,  // King single flat sheet
-  sheetSingle:            1.85,  // Single flat sheet
+  sheetKing:              1.95,
+  sheetQueen:             1.95,
+  sheetKingSingle:        1.85,
+  sheetSingle:            1.85,
   // Fitted sheets
-  fittedKing:             1.50,  // King fitted sheet
-  fittedQueen:            1.50,  // Queen fitted sheet
-  fittedKingSingle:       1.50,  // King single fitted sheet
-  sheetSingleFitted:      2.45,  // Fitted standard single (single bunks)
-  fittedKingSingleBunk:   1.50,  // King single fitted (king single bunks)
+  fittedKing:             2.95,
+  fittedQueen:            2.95,
+  fittedKingSingle:       2.45,
+  sheetSingleFitted:      2.45,
+  fittedKingSingleBunk:   2.45,
   // Satin stripe sheets
-  sheetKingSatin:         2.10,  // King satin stripe sheet
-  sheetQueenSatin:        2.10,  // Queen satin stripe sheet
-  sheetKingSingleSatin:   2.00,  // King single satin sheet
-  sheetSingleSatin:       2.00,  // Single satin stripe sheet
+  sheetKingSatin:         2.10,
+  sheetQueenSatin:        2.10,
+  sheetKingSingleSatin:   2.00,
+  sheetSingleSatin:       2.00,
   // Doona covers
-  doonaKing:              3.00,  // King doona cover
-  doonaQueen:             3.00,  // Queen doona cover
-  doonaKingSingle:        3.00,  // King single doona cover
+  doonaKing:              9.00,
+  doonaQueen:             9.00,
+  doonaKingSingle:        7.50,
   // Towels & other
   pillowcase:             0.95,
-  bathTowel:              1.15,  // Premium bath towel
+  bathTowel:              1.15,
   handTowel:              0.95,
   bathmat:                0.95,
   teaTowel:               0.90,
-  faceWasher:             0,
+  faceWasher:             0.75,
 };
 
 // Items per bed by type
@@ -2223,7 +2265,7 @@ let MY_PRICES = {
   fittedKingSingle: 2.50, sheetSingleFitted: 3.50,
   doonaKing: 5.00, doonaQueen: 5.00, doonaKingSingle: 4.50,
   pillowcase: 1.80, bathTowel: 2.00, handTowel: 1.80,
-  bathmat: 1.80, teaTowel: 1.80,
+  bathmat: 1.80, teaTowel: 1.80, faceWasher: 1.50,
   serviceCharge: 15.00,
 };
 
@@ -2231,7 +2273,7 @@ function saveMyPrices() {
   const fields = ['sheetKing','sheetKingSatin','sheetQueen','sheetQueenSatin',
     'sheetKingSingle','sheetSingle','fittedKing','fittedQueen','fittedKingSingle',
     'sheetSingleFitted','doonaKing','doonaQueen','doonaKingSingle',
-    'pillowcase','bathTowel','handTowel','bathmat','teaTowel','serviceCharge'];
+    'pillowcase','bathTowel','handTowel','bathmat','teaTowel','faceWasher','serviceCharge'];
   fields.forEach(f => {
     const el = document.getElementById('mp-' + f);
     if (el) MY_PRICES[f] = +el.value || 0;
@@ -2266,11 +2308,28 @@ function bedLinenCostCharge(b) {
                     (b.type === 'Queen' || b.type === 'Double') ? MY_PRICES.doonaQueen : MY_PRICES.doonaKingSingle;
   const isBunk = b.type === 'Bunk' || b.type === 'King Single Bunk';
 
+  // Standard flat and fitted rates (used for sheets underneath satin)
+  const stdFlatRate = b.type==='King' ? MY_PRICES.sheetKing
+    : (b.type==='Queen'||b.type==='Double') ? MY_PRICES.sheetQueen
+    : b.type==='King Single' ? MY_PRICES.sheetKingSingle
+    : MY_PRICES.sheetSingle;
+  const satinRate = b.type==='King' ? MY_PRICES.sheetKingSatin
+    : (b.type==='Queen'||b.type==='Double') ? MY_PRICES.sheetQueenSatin
+    : MY_PRICES.sheetKingSatin; // king single satin
+
   let sheetCost = 0, doonaCost = 0;
   if (isBunk) {
     sheetCost = b.config === 'fitted-doona' ? fittedRate : fittedRate + flatRate;
     doonaCost = MY_PRICES.doonaKingSingle;
     if (b.config === 'fitted') { sheetCost = fittedRate; doonaCost = 0; }
+  } else if (b.config === 'satin-fitted-flat-doona') {
+    sheetCost = satinRate + fittedRate + stdFlatRate; doonaCost = doonaRate;
+  } else if (b.config === 'satin-2flat-doona') {
+    sheetCost = satinRate + stdFlatRate * 2; doonaCost = doonaRate;
+  } else if (b.config === 'satin-fitted-flat') {
+    sheetCost = satinRate + fittedRate + stdFlatRate;
+  } else if (b.config === 'satin-2flat') {
+    sheetCost = satinRate + stdFlatRate * 2;
   } else if (b.config === 'fitted-flat-doona') { sheetCost = fittedRate + flatRate; doonaCost = doonaRate; }
   else if (b.config === 'fitted-2flat')  { sheetCost = fittedRate + flatRate * 2; }
   else if (b.config === '3flat')         { sheetCost = flatRate * 3; }
@@ -2371,6 +2430,7 @@ function updatePricing() {
     <tr><td>Hand towel</td><td>$${RATES.handTowel.toFixed(2)}</td><td>2 per bed</td></tr>
     <tr><td>Bathmat</td><td>$${RATES.bathmat.toFixed(2)}</td><td>1 per 2 beds</td></tr>
     <tr><td>Tea towel</td><td>$${RATES.teaTowel.toFixed(2)}</td><td>2 per changeover</td></tr>
+    <tr><td>Face washer</td><td>$${RATES.faceWasher.toFixed(2)}</td><td>Per item</td></tr>
   `;
 }
 
@@ -2402,14 +2462,16 @@ function updatePropertyCost() {
     (extras.handTowels  || 0) * RATES.handTowel +
     (extras.pillowCases || 0) * RATES.pillowcase +
     (extras.bathmats    || 0) * RATES.bathmat +
-    (extras.teaTowels   || 0) * RATES.teaTowel;
+    (extras.teaTowels   || 0) * RATES.teaTowel +
+    (extras.faceWashers || 0) * RATES.faceWasher;
 
   const extrasCharge =
     (extras.bathTowels  || 0) * MY_PRICES.bathTowel +
     (extras.handTowels  || 0) * MY_PRICES.handTowel +
     (extras.pillowCases || 0) * MY_PRICES.pillowcase +
     (extras.bathmats    || 0) * MY_PRICES.bathmat +
-    (extras.teaTowels   || 0) * MY_PRICES.teaTowel;
+    (extras.teaTowels   || 0) * MY_PRICES.teaTowel +
+    (extras.faceWashers || 0) * (MY_PRICES.faceWasher || RATES.faceWasher);
 
   const totalCost  = linenCost + extrasCost;
   const yourCharge = p.beds.reduce((s,b) => s + bedLinenCostCharge(b), 0) + extrasCharge + MY_PRICES.serviceCharge;
@@ -2443,6 +2505,7 @@ function updatePropertyCost() {
           extras.pillowCases ? extras.pillowCases + ' pillow case' + (extras.pillowCases>1?'s':'') : '',
           extras.bathmats    ? extras.bathmats    + ' bathmat' + (extras.bathmats>1?'s':'')        : '',
           extras.teaTowels   ? extras.teaTowels   + ' tea towel' + (extras.teaTowels>1?'s':'')    : '',
+          extras.faceWashers ? extras.faceWashers + ' face washer' + (extras.faceWashers>1?'s':'') : '',
         ].filter(Boolean).join(', ')}</span>
         <span>$${extrasCost.toFixed(2)}</span>
       </div>` : ''}
@@ -3570,18 +3633,13 @@ function delDragEnd() {
 
 function saveCostSettings() {
   try {
+    const get = id => document.getElementById(id)?.value;
     const settings = {
-      rate: document.getElementById('c-rate').value,
-      pack: document.getElementById('c-pack').value,
-      daily: document.getElementById('c-daily').value,
-      days: document.getElementById('c-days').value,
-      drive: document.getElementById('c-drive').value,
-      trips: document.getElementById('c-trips').value,
-      fuel: document.getElementById('c-fuel').value,
-      speed: document.getElementById('c-speed').value,
-      storage: document.getElementById('c-storage').value,
-      admin: document.getElementById('c-admin').value,
-      travelOn: document.getElementById('c-travel-on').checked,
+      rate: get('c-rate'), pack: get('c-pack'), daily: get('c-daily'),
+      days: get('c-days'), drive: get('c-drive'), trips: get('c-trips'),
+      fuel: get('c-fuel'), speed: get('c-speed'), storage: get('c-storage'),
+      admin: get('c-admin'),
+      travelOn: document.getElementById('c-travel-on')?.checked ?? true,
     };
     localStorage.setItem('ss-cost-settings', JSON.stringify(settings));
   } catch(e) {}
@@ -3626,7 +3684,7 @@ function updateCosts() {
   const speedKmh    = +document.getElementById('c-speed').value;
   const storageCost = +document.getElementById('c-storage').value;
   const adminCost   = +document.getElementById('c-admin').value;
-  const travelOn    = document.getElementById('c-travel-on').checked;
+  const travelOn    = document.getElementById('c-travel-on')?.checked ?? true;
 
   toggleTravelCard(travelOn);
   saveCostSettings();
