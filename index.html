@@ -181,6 +181,8 @@ nav { background: var(--ink); color: var(--white); display: flex; align-items: c
 .psc-control input { flex: 1; }
 .psc-val { font-size: 13px; font-weight: 600; min-width: 38px; text-align: right; color: var(--accent); }
 .pricing-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; margin-bottom: 18px; }
+.my-price-input { width:80px;padding:6px 8px;border:1px solid var(--border);border-radius:7px;font-family:inherit;font-size:14px;font-weight:700;background:var(--bg);color:var(--ink);text-align:right;outline:none; }
+.my-price-input:focus { border-color:var(--ink); }
 .loss-note { background: var(--amber-light); border: 1px solid rgba(196,105,10,0.2); border-radius: var(--radius); padding: 14px 18px; font-size: 12px; color: var(--ink2); line-height: 1.6; margin-top: 4px; }
 .loss-note-title { font-weight: 600; font-size: 12px; color: var(--amber); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.05em; }
 .price-table-wrap { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-top: 12px; }
@@ -531,59 +533,78 @@ nav { background: var(--ink); color: var(--white); display: flex; align-items: c
 <!-- PRICING -->
 <div class="page" id="page-pricing">
   <div class="day-header">
-    <h1>Pricing settings</h1>
-    <span class="date">Your charge rate, markup &amp; loss buffer</span>
+    <h1>Pricing</h1>
+    <span class="date">Set your prices per item — these flow through to all quotes, costs and invoices</span>
   </div>
 
   <div class="pricing-layout">
     <div class="pricing-left">
-      <div class="section-title">Your rate settings</div>
 
+      <div class="section-title">Your prices — per item</div>
+      <div style="font-size:12px;color:var(--ink3);margin-bottom:12px;line-height:1.6;">Enter what you charge customers. These replace the markup slider — set each price individually based on your market research.</div>
+
+      <div class="price-setting-card" style="margin-bottom:14px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink3);padding:6px 0 8px;">Flat sheets</div>
+        <div class="psc-row"><div class="psc-label">King flat sheet<span>Supplier: $${RATES.sheetKing.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-sheetKing" value="3.50" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">King satin stripe sheet<span>Supplier: $${RATES.sheetKingSatin.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-sheetKingSatin" value="4.00" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">Queen flat sheet<span>Supplier: $${RATES.sheetQueen.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-sheetQueen" value="3.50" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">Queen satin stripe sheet<span>Supplier: $${RATES.sheetQueenSatin.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-sheetQueenSatin" value="4.00" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">King single flat sheet<span>Supplier: $${RATES.sheetKingSingle.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-sheetKingSingle" value="3.20" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">Single flat sheet<span>Supplier: $${RATES.sheetSingle.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-sheetSingle" value="3.20" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+      </div>
+
+      <div class="price-setting-card" style="margin-bottom:14px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink3);padding:6px 0 8px;">Fitted sheets</div>
+        <div class="psc-row"><div class="psc-label">King fitted sheet<span>Supplier: $${RATES.fittedKing.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-fittedKing" value="2.50" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">Queen fitted sheet<span>Supplier: $${RATES.fittedQueen.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-fittedQueen" value="2.50" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">King single fitted sheet<span>Supplier: $${RATES.fittedKingSingle.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-fittedKingSingle" value="2.50" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">Fitted standard single (bunk)<span>Supplier: $${RATES.sheetSingleFitted.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-sheetSingleFitted" value="3.50" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+      </div>
+
+      <div class="price-setting-card" style="margin-bottom:14px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink3);padding:6px 0 8px;">Doona covers</div>
+        <div class="psc-row"><div class="psc-label">King doona cover<span>Supplier: $${RATES.doonaKing.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-doonaKing" value="5.00" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">Queen doona cover<span>Supplier: $${RATES.doonaQueen.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-doonaQueen" value="5.00" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">King single doona cover<span>Supplier: $${RATES.doonaKingSingle.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-doonaKingSingle" value="4.50" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+      </div>
+
+      <div class="price-setting-card" style="margin-bottom:14px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink3);padding:6px 0 8px;">Towels & other</div>
+        <div class="psc-row"><div class="psc-label">Pillowcase<span>Supplier: $${RATES.pillowcase.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-pillowcase" value="1.80" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">Premium bath towel<span>Supplier: $${RATES.bathTowel.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-bathTowel" value="2.00" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">Hand towel<span>Supplier: $${RATES.handTowel.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-handTowel" value="1.80" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">Bathmat<span>Supplier: $${RATES.bathmat.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-bathmat" value="1.80" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">Tea towel<span>Supplier: $${RATES.teaTowel.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-teaTowel" value="1.80" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+      </div>
+
+      <div class="price-setting-card" style="margin-bottom:14px;background:var(--accent-light);border-color:var(--ink);">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink);padding:6px 0 8px;">Service charge</div>
+        <div class="psc-row"><div class="psc-label">Packing & service fee per bag<span>Charged to customer per changeover</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-serviceCharge" value="15.00" min="0" step="0.50" oninput="saveMyPrices();updatePricing()"></div></div>
+      </div>
+
+      <div class="section-title" style="margin-top:8px;">Weekly revenue estimate</div>
+      <div class="pricing-stats" id="pricing-stats"></div>
+
+      <div style="font-size:12px;color:var(--ink3);margin-top:12px;line-height:1.6;background:var(--bg);border-radius:var(--radius);padding:12px 14px;">
+        <strong>Tip:</strong> Your prices are saved automatically in your browser. The supplier cost is shown below each field so you can see your margin at a glance.
+      </div>
+
+      <div class="section-title" style="margin-top:18px;">Business settings</div>
       <div class="price-setting-card">
-        <div class="psc-row">
-          <div class="psc-label">Markup on linen cost<span>Applied on top of what the hire company charges you</span></div>
-          <div class="psc-control">
-            <input type="range" min="10" max="100" step="5" id="p-markup" oninput="updatePricing()">
-            <span class="psc-val" id="pv-markup">40%</span>
-          </div>
-        </div>
-        <div class="psc-row">
-          <div class="psc-label">Packing cost per bag<span>Your internal cost — hidden from customers</span></div>
-          <div class="psc-control">
-            <input type="range" min="5" max="15" step="1" id="p-packing" oninput="updatePricing()">
-            <span class="psc-val" id="pv-packing">$8</span>
-          </div>
-        </div>
-        <div class="psc-row">
-          <div class="psc-label">Monthly loss buffer<span>% of stock expected to go missing per month</span></div>
-          <div class="psc-control">
-            <input type="range" min="0" max="10" step="1" id="p-loss" oninput="updatePricing()">
-            <span class="psc-val" id="pv-loss">3%</span>
-          </div>
-        </div>
         <div class="psc-row">
           <div class="psc-label">Active properties<span>Used to spread loss cost across changeovers</span></div>
           <div class="psc-control">
-            <input type="range" min="1" max="60" step="1" id="p-props" oninput="updatePricing()">
+            <input type="range" min="1" max="100" step="1" id="p-props" oninput="updatePricing()">
             <span class="psc-val" id="pv-props">20</span>
           </div>
         </div>
         <div class="psc-row">
           <div class="psc-label">Weekly changeovers<span>Estimated across all properties</span></div>
           <div class="psc-control">
-            <input type="range" min="1" max="80" step="1" id="p-cos" oninput="updatePricing()">
+            <input type="range" min="1" max="100" step="1" id="p-cos" oninput="updatePricing()">
             <span class="psc-val" id="pv-cos">25</span>
           </div>
         </div>
-      </div>
-
-
-      <div class="section-title" style="margin-top:22px">Weekly revenue estimate</div>
-      <div class="pricing-stats" id="pricing-stats"></div>
-
-      <div class="loss-note">
-        <div class="loss-note-title">How the loss buffer works</div>
-        Your monthly stock loss cost is calculated across all active properties, then divided evenly across your weekly changeovers. This tiny amount is added to each charge — making losses invisible to customers and harmless to you. You never count bags, never chase missing towels.
       </div>
     </div>
 
@@ -2194,18 +2215,82 @@ function chargePerBeds(bedCount, settings) {
   return chargePerChangeover(beds, settings);
 }
 
+// ── MY PRICES (what you charge customers) ──
+let MY_PRICES = {
+  sheetKing: 3.50, sheetKingSatin: 4.00,
+  sheetQueen: 3.50, sheetQueenSatin: 4.00,
+  sheetKingSingle: 3.20, sheetSingle: 3.20,
+  fittedKing: 2.50, fittedQueen: 2.50,
+  fittedKingSingle: 2.50, sheetSingleFitted: 3.50,
+  doonaKing: 5.00, doonaQueen: 5.00, doonaKingSingle: 4.50,
+  pillowcase: 1.80, bathTowel: 2.00, handTowel: 1.80,
+  bathmat: 1.80, teaTowel: 1.80,
+  serviceCharge: 15.00,
+};
+
+function saveMyPrices() {
+  const fields = ['sheetKing','sheetKingSatin','sheetQueen','sheetQueenSatin',
+    'sheetKingSingle','sheetSingle','fittedKing','fittedQueen','fittedKingSingle',
+    'sheetSingleFitted','doonaKing','doonaQueen','doonaKingSingle',
+    'pillowcase','bathTowel','handTowel','bathmat','teaTowel','serviceCharge'];
+  fields.forEach(f => {
+    const el = document.getElementById('mp-' + f);
+    if (el) MY_PRICES[f] = +el.value || 0;
+  });
+  try { localStorage.setItem('ss-my-prices', JSON.stringify(MY_PRICES)); } catch(e) {}
+}
+
+function loadMyPrices() {
+  try {
+    const saved = localStorage.getItem('ss-my-prices');
+    if (saved) MY_PRICES = { ...MY_PRICES, ...JSON.parse(saved) };
+  } catch(e) {}
+  // Populate inputs
+  Object.entries(MY_PRICES).forEach(([key, val]) => {
+    const el = document.getElementById('mp-' + key);
+    if (el) el.value = val;
+  });
+}
+
+// bedLinenCost using MY_PRICES (what we charge customers)
+function bedLinenCostCharge(b) {
+  const isSatin = b.sheetType === 'satin';
+  let flatRate, fittedRate;
+  if (b.type === 'King')             { flatRate = isSatin ? MY_PRICES.sheetKingSatin    : MY_PRICES.sheetKing;       fittedRate = MY_PRICES.fittedKing; }
+  else if (b.type === 'Queen')       { flatRate = isSatin ? MY_PRICES.sheetQueenSatin   : MY_PRICES.sheetQueen;      fittedRate = MY_PRICES.fittedQueen; }
+  else if (b.type === 'Double')      { flatRate = isSatin ? MY_PRICES.sheetQueenSatin   : MY_PRICES.sheetQueen;      fittedRate = MY_PRICES.fittedQueen; }
+  else if (b.type === 'King Single') { flatRate = isSatin ? MY_PRICES.sheetKingSatin    : MY_PRICES.sheetKingSingle; fittedRate = MY_PRICES.fittedKingSingle; }
+  else if (b.type === 'Single')      { flatRate = isSatin ? MY_PRICES.sheetSingle       : MY_PRICES.sheetSingle;     fittedRate = MY_PRICES.sheetSingleFitted; }
+  else { flatRate = MY_PRICES.sheetSingleFitted; fittedRate = MY_PRICES.sheetSingleFitted; } // bunks
+
+  const doonaRate = (b.type === 'King') ? MY_PRICES.doonaKing :
+                    (b.type === 'Queen' || b.type === 'Double') ? MY_PRICES.doonaQueen : MY_PRICES.doonaKingSingle;
+  const isBunk = b.type === 'Bunk' || b.type === 'King Single Bunk';
+
+  let sheetCost = 0, doonaCost = 0;
+  if (isBunk) {
+    sheetCost = b.config === 'fitted-doona' ? fittedRate : fittedRate + flatRate;
+    doonaCost = MY_PRICES.doonaKingSingle;
+    if (b.config === 'fitted') { sheetCost = fittedRate; doonaCost = 0; }
+  } else if (b.config === 'fitted-flat-doona') { sheetCost = fittedRate + flatRate; doonaCost = doonaRate; }
+  else if (b.config === 'fitted-2flat')  { sheetCost = fittedRate + flatRate * 2; }
+  else if (b.config === '3flat')         { sheetCost = flatRate * 3; }
+  else                                   { sheetCost = fittedRate + flatRate; }
+
+  const pillows = (b.type === 'Single' || b.type === 'King Single' || b.type === 'Bunk' || b.type === 'King Single Bunk') ? 2 : 4;
+  return (sheetCost + doonaCost + pillows * MY_PRICES.pillowcase) * b.n;
+}
+
 function updatePricing() {
-  pricingSettings.markup     = +document.getElementById('p-markup').value;
-  pricingSettings.packingCost = +document.getElementById('p-packing').value;
-  pricingSettings.lossRate   = +document.getElementById('p-loss').value;
+  saveMyPrices();
   pricingSettings.activeProps = +document.getElementById('p-props').value;
   pricingSettings.weeklyChangeovers = +document.getElementById('p-cos').value;
+  pricingSettings.packingCost = MY_PRICES.serviceCharge;
 
-  document.getElementById('pv-markup').textContent  = pricingSettings.markup + '%';
-  document.getElementById('pv-packing').textContent = '$' + pricingSettings.packingCost;
-  document.getElementById('pv-loss').textContent    = pricingSettings.lossRate + '%';
-  document.getElementById('pv-props').textContent   = pricingSettings.activeProps;
-  document.getElementById('pv-cos').textContent     = pricingSettings.weeklyChangeovers;
+  const pvProps = document.getElementById('pv-props');
+  const pvCos   = document.getElementById('pv-cos');
+  if (pvProps) pvProps.textContent = pricingSettings.activeProps;
+  if (pvCos)   pvCos.textContent   = pricingSettings.weeklyChangeovers;
 
   const el = id => document.getElementById(id);
 
@@ -2221,20 +2306,18 @@ function updatePricing() {
     if (current) updatePropertyCost();
   }
 
-  // Weekly estimates using avg across all properties or fallback
-  const markup = pricingSettings.markup / 100;
+  // Weekly estimates using MY_PRICES charge rates
   const weeklyChangeovers = pricingSettings.weeklyChangeovers;
-  const avgCost = properties.length > 0
+  const avgCharge = properties.length > 0
     ? properties.reduce((s,p) => {
-        const lc = p.beds.reduce((a,b) => a+bedLinenCost(b), 0);
-        const totalBeds = p.beds.reduce((a,b)=>a+b.n,0);
-        return s + lc + Math.ceil(totalBeds/2)*RATES.bathmat + 2*RATES.teaTowel;
+        return s + p.beds.reduce((a,b) => a + bedLinenCostCharge(b), 0) + MY_PRICES.serviceCharge;
       }, 0) / properties.length
-    : (RATES.sheetQueen*2 + RATES.doonaQueen + 4*RATES.pillowcase + 2*RATES.bathTowel + 2*RATES.handTowel) * 2
-      + Math.ceil(2/2)*RATES.bathmat + 2*RATES.teaTowel;
-  const avgCharge = avgCost * (1 + markup);
-  const weeklyRev = avgCharge * weeklyChangeovers;
-  const weeklyProfit = (avgCharge - avgCost) * weeklyChangeovers - 70;
+    : bedLinenCostCharge({type:'Queen',n:2,sheetType:'standard',config:'fitted-flat-doona'}) + MY_PRICES.serviceCharge;
+  const avgHireCost = properties.length > 0
+    ? properties.reduce((s,p) => s + p.beds.reduce((a,b) => a + bedLinenCost(b), 0), 0) / properties.length
+    : bedLinenCost({type:'Queen',n:2,sheetType:'standard',config:'fitted-flat-doona'});
+  const weeklyRev    = avgCharge * weeklyChangeovers;
+  const weeklyProfit = (avgCharge - avgHireCost) * weeklyChangeovers - 70;
 
   const statsEl = el('pricing-stats');
   if (statsEl) statsEl.innerHTML = `
@@ -2314,7 +2397,7 @@ function updatePropertyCost() {
   const bathmats   = Math.ceil(totalBeds/2) * RATES.bathmat;
   const teaTowels  = 2 * RATES.teaTowel;
   const totalCost  = linenCost + bathmats + teaTowels;
-  const yourCharge = totalCost * (1 + markup);
+  const yourCharge = p.beds.reduce((s,b) => s + bedLinenCostCharge(b), 0) + MY_PRICES.serviceCharge;
   const profit     = yourCharge - totalCost;
 
   container.innerHTML = `
@@ -2364,11 +2447,9 @@ function updatePropertyCost() {
 
 
 function initPricing() {
-  document.getElementById('p-markup').value  = pricingSettings.markup;
-  document.getElementById('p-packing').value = pricingSettings.packingCost;
-  document.getElementById('p-loss').value    = pricingSettings.lossRate;
-  document.getElementById('p-props').value   = pricingSettings.activeProps;
-  document.getElementById('p-cos').value     = pricingSettings.weeklyChangeovers;
+  loadMyPrices();
+  document.getElementById('p-props').value = pricingSettings.activeProps;
+  document.getElementById('p-cos').value   = pricingSettings.weeklyChangeovers;
   updatePricing();
 }
 
