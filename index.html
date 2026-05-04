@@ -831,17 +831,10 @@ nav { background: var(--ink); color: var(--white); display: flex; align-items: c
       <div class="section-title">Your fees</div>
       <div class="price-setting-card" style="margin-bottom:18px;">
         <div class="psc-row">
-          <div class="psc-label">Markup on linen hire<span>Applied on top of hire cost</span></div>
-          <div class="psc-control">
-            <input type="range" min="0" max="100" value="40" step="5" id="q-markup" oninput="updateQuote()">
-            <span class="psc-val" id="qv-markup">40%</span>
-          </div>
-        </div>
-        <div class="psc-row">
-          <div class="psc-label">Packing & preparation fee<span>Your labour charge per bag</span></div>
+          <div class="psc-label">Packing & preparation fee<span>Set in Pricing tab — your service charge per bag</span></div>
           <div class="psc-control" style="min-width:auto;gap:8px;">
             <span style="font-size:13px;color:var(--ink3);">$</span>
-            <input type="number" id="q-packing" value="12" min="0" max="100" oninput="updateQuote()" style="width:70px;padding:6px 8px;border:1px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;background:var(--bg);color:var(--ink);text-align:right;">
+            <input type="number" id="q-packing" min="0" max="100" oninput="updateQuote()" style="width:70px;padding:6px 8px;border:1px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;background:var(--bg);color:var(--ink);text-align:right;">
             <span style="font-size:12px;color:var(--ink3);">per changeover</span>
           </div>
         </div>
@@ -1276,7 +1269,7 @@ function showPage(name) {
   if (name === 'dashboard') renderDashboard();
   if (name === 'properties') renderProperties();
   if (name === 'customers') renderCustomers();
-  if (name === 'pricing') { updatePricing(); updateOccupancy(); }
+  if (name === 'pricing') { loadMyPrices(); updatePricing(); updateOccupancy(); }
   if (name === 'costs') { loadCostSettings(); updateCosts(); }
   if (name === 'quote') { initQuote(); }
   if (name === 'invoicing') initInvoicing();
@@ -2286,6 +2279,8 @@ function updatePricing() {
   pricingSettings.activeProps = +document.getElementById('p-props').value;
   pricingSettings.weeklyChangeovers = +document.getElementById('p-cos').value;
   pricingSettings.packingCost = MY_PRICES.serviceCharge;
+  // Persist business settings
+  try { localStorage.setItem('ss-pricing-settings', JSON.stringify({ activeProps: pricingSettings.activeProps, weeklyChangeovers: pricingSettings.weeklyChangeovers })); } catch(e) {}
 
   const pvProps = document.getElementById('pv-props');
   const pvCos   = document.getElementById('pv-cos');
@@ -2448,6 +2443,11 @@ function updatePropertyCost() {
 
 function initPricing() {
   loadMyPrices();
+  try {
+    const saved = JSON.parse(localStorage.getItem('ss-pricing-settings') || '{}');
+    if (saved.activeProps) pricingSettings.activeProps = saved.activeProps;
+    if (saved.weeklyChangeovers) pricingSettings.weeklyChangeovers = saved.weeklyChangeovers;
+  } catch(e) {}
   document.getElementById('p-props').value = pricingSettings.activeProps;
   document.getElementById('p-cos').value   = pricingSettings.weeklyChangeovers;
   updatePricing();
@@ -3095,10 +3095,12 @@ function cycleStatusFromCal(orderId, dateStr) {
 let selectedQuotePropId = null;
 
 function initQuote() {
-  // Populate customer filter
   const cSel = document.getElementById('q-customer');
   cSel.innerHTML = '<option value="">All customers</option>' +
     customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  // Pre-fill packing fee from MY_PRICES
+  const packEl = document.getElementById('q-packing');
+  if (packEl) packEl.value = MY_PRICES.serviceCharge || 15;
   quoteFilterProps();
 }
 
@@ -3176,19 +3178,16 @@ function updateQuote() {
   if (!p) return;
   const c        = customers.find(x => x.id === p.customerId);
   const email    = document.getElementById('q-email').value || c?.email || '';
-  const markup   = +document.getElementById('q-markup').value;
   const packFee  = +document.getElementById('q-packing').value;
   const delFee   = +document.getElementById('q-delivery').value;
   const validity = +document.getElementById('q-validity').value;
   const freq     = p.freq || 6;
   const needsDel = p.delivery && p.delivery !== 'none';
 
-  document.getElementById('qv-markup').textContent = markup + '%';
-
-  const linen     = quoteExactLinen(p);
-  const linenFee  = +(linen.hireCost * (1 + markup / 100)).toFixed(2);
-  const total     = linenFee + packFee + (needsDel ? delFee : 0);
-  const monthly   = total * freq;
+  const linen    = quoteExactLinen(p);
+  const linenFee = +(p.beds.reduce((s,b) => s + bedLinenCostCharge(b), 0)).toFixed(2);
+  const total    = linenFee + packFee + (needsDel ? delFee : 0);
+  const monthly  = total * freq;
 
   // Linen summary panel
   const hasBedExtras = p.extras && Object.values(p.extras).some(v=>v>0);
@@ -3947,10 +3946,12 @@ async function ssSignUp() {
 }
 
 async function ssSignOut() {
-  try { await sb.auth.signOut(); } catch(e) {}
-  // Clear any cached session data
-  Object.keys(localStorage).forEach(k => { if(k.startsWith('sb-')) localStorage.removeItem(k); });
-  window.location.href = window.location.origin + window.location.pathname + '?signout=' + Date.now();
+  try { await sb.auth.signOut(); } catch(e) { console.warn('signOut error:', e); }
+  // Clear all Supabase session keys from localStorage
+  try {
+    Object.keys(localStorage).filter(k => k.includes('supabase') || k.startsWith('sb-')).forEach(k => localStorage.removeItem(k));
+  } catch(e) {}
+  window.location.href = window.location.origin + window.location.pathname;
 }
 
 async function ssSyncData() {
