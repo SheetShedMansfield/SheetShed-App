@@ -466,10 +466,6 @@ nav { background: var(--ink); color: var(--white); display: flex; align-items: c
     </div>
     <div class="section-title">Orders — mark each bag as packed when ready</div>
     <div class="order-list" id="order-list"></div>
-    <div class="packing-section">
-      <div class="section-title">Linen to pack (total — all bags)</div>
-      <div class="pack-grid" id="pack-grid"></div>
-    </div>
     <div class="late-pack-section" id="late-pack-section" style="display:none;"></div>
   </div>
 
@@ -2964,27 +2960,46 @@ async function syncAllIcals() {
 }
 
 async function syncOrdersFromCalendar() {
-  const today = dateStr(new Date());
-  const existing = new Set(orders.map(o => `${o.propId}_${o.date}`));
+  // Build dedup key from both propId+date — ensure date field is not undefined
+  const existing = new Set(
+    orders
+      .filter(o => o.propId && o.date)
+      .map(o => `${o.propId}_${o.date}`)
+  );
 
   for (const b of calendarBookings) {
+    if (!b.propId || !b.endStr) continue;
     const checkoutKey = `${b.propId}_${b.endStr}`;
-    if (!existing.has(checkoutKey)) {
-      const newOrder = {
+    if (existing.has(checkoutKey)) continue;
+
+    // Double-check Supabase hasn't already got this order
+    try {
+      const { data: existing_row } = await sb.from('orders')
+        .select('id')
+        .eq('property_id', b.propId)
+        .eq('order_date', b.endStr)
+        .maybeSingle();
+      if (existing_row) {
+        existing.add(checkoutKey);
+        continue;
+      }
+
+      const { data, error } = await sb.from('orders').insert({
         property_id: b.propId,
         order_date: b.endStr,
         status: 'pending',
         urgent: b.isLastMinute,
         detected_at: b.detectedAt,
-      };
-      try {
-        const { data, error } = await sb.from('orders').insert(newOrder).select().single();
-        if (!error && data) {
-          orders.push({ id: data.id, propId: data.property_id, date: data.order_date, status: data.status, urgent: data.urgent, detectedAt: data.detected_at });
-          existing.add(checkoutKey);
-        }
-      } catch(e) { console.warn('Order insert error:', e); }
-    }
+      }).select().single();
+
+      if (!error && data) {
+        orders.push({ id: data.id, propId: data.property_id, date: data.order_date, status: data.status, urgent: data.urgent, detectedAt: data.detected_at });
+        existing.add(checkoutKey);
+        console.log('Created order for', b.endStr, b.propId);
+      } else if (error) {
+        console.warn('Order insert error:', error.message);
+      }
+    } catch(e) { console.warn('Order sync error:', e); }
   }
 }
 
