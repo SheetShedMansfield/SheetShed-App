@@ -1816,12 +1816,11 @@ function updateBedsCostPreview() {
   const preview = document.getElementById('beds-cost-preview');
   if (!preview || bedRows.length === 0) { if(preview) preview.style.display='none'; return; }
   const linenCost = bedRows.reduce((s,b) => s+bedLinenCost(b), 0);
-  const markup = pricingSettings.markup / 100;
-  const charge = linenCost * (1 + markup);
+  const charge    = bedRows.reduce((s,b) => s+bedLinenCostCharge(b), 0);
   preview.style.display = '';
   preview.innerHTML = `<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
     <span>Bedding hire cost: <strong>$${linenCost.toFixed(2)}</strong>/changeover</span>
-    <span>+ ${pricingSettings.markup}% markup = <strong style="color:var(--ink);font-family:'Nunito',sans-serif;font-size:14px;">$${charge.toFixed(2)}</strong> charge</span>
+    <span style="color:var(--ink3);font-size:12px;">Your charge: <strong style="color:var(--ink);">$${charge.toFixed(2)}</strong></span>
   </div>`;
 }
 
@@ -4011,7 +4010,7 @@ async function ssSyncData() {
     extras: r.extras||{bathTowels:0,handTowels:0,pillowCases:0,bathmats:0,teaTowels:0},
     freq: r.freq||6, delivery: r.delivery||'none'
   }));
-  orders     = (o.data||[]).map(r => ({ id:r.id, propId:r.property_id, date:r.order_date, status:r.status, urgent:r.urgent||false, detectedAt:r.detected_at||r.created_at }));
+  orders     = (o.data||[]).map(r => ({ id:r.id, propId:r.property_id||r.prop_id, date:r.order_date||r.date, status:r.status||'pending', urgent:r.urgent||false, detectedAt:r.detected_at||r.created_at||new Date().toISOString() }));
   invoices   = (inv.data||[]).map(r => ({ id:r.id, customerId:r.customer_id, period:r.period, dueDate:r.due_date, status:r.status, total:r.total_aud }));
 }
 
