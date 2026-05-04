@@ -1865,6 +1865,16 @@ function updateBedsCostPreview() {
 
 function updateBedProp(i, prop, val) {
   bedRows[i][prop] = val;
+  // When switching sheet type, reset config to first valid option for that type
+  if (prop === 'sheetType') {
+    const isSatin = val === 'satin';
+    const isBunk = bedRows[i].type === 'Bunk' || bedRows[i].type === 'King Single Bunk';
+    if (!isBunk) {
+      const validConfigs = isSatin ? SATIN_CONFIGS : BED_CONFIGS;
+      const currentValid = validConfigs.some(c => c.value === bedRows[i].config);
+      if (!currentValid) bedRows[i].config = validConfigs[0].value;
+    }
+  }
   renderBedRows();
 }
 
@@ -3660,7 +3670,7 @@ function loadCostSettings() {
     if (s.speed !== undefined) document.getElementById('c-speed').value = s.speed;
     if (s.storage !== undefined) document.getElementById('c-storage').value = s.storage;
     if (s.admin !== undefined) document.getElementById('c-admin').value = s.admin;
-    if (s.travelOn !== undefined) document.getElementById('c-travel-on').checked = s.travelOn;
+    if (s.travelOn !== undefined) { const el = document.getElementById('c-travel-on'); if(el) el.checked = s.travelOn; }
     toggleTravelCard(s.travelOn !== false);
   } catch(e) {}
 }
@@ -4195,7 +4205,6 @@ async function ssOnSignedIn(user) {
     try { renderProperties(); } catch(e) { console.warn('renderProperties:', e); }
     try { initPricing(); } catch(e) { console.warn('initPricing:', e); }
     try { updateOccupancy(); } catch(e) { console.warn('updateOccupancy:', e); }
-    try { updateCosts(); } catch(e) { console.warn('updateCosts:', e); }
     try { startIcalSync(); } catch(e) { console.warn('iCal sync error:', e); }
 
   } else {
