@@ -1428,16 +1428,9 @@ function renderDashboard() {
     { name: 'Tea towels',   total: totalTeaTowels,    sub: `2 per property`,      amber: false },
   ];
 
-  document.getElementById('pack-grid').innerHTML = packItems.map((item, i) => {
-    const spareTag = item.amber ? `<span style="font-size:10px;background:var(--amber-light);color:var(--amber);padding:1px 6px;border-radius:10px;margin-left:5px;font-weight:500">incl. spare</span>` : '';
-    return `<div class="pack-item" id="pack-${i}" onclick="togglePack(${i})">
-      <div class="pack-check"><svg width="10" height="8" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1"/></svg></div>
-      <div style="flex:1">
-        <div class="pack-name">${item.name}${spareTag}</div>
-        <div class="pack-count"><strong>${item.total}</strong> — ${item.sub}</div>
-      </div>
-    </div>`;
-  }).join('');
+  // Pack grid removed — totals shown per-order card instead
+  const packGridEl = document.getElementById('pack-grid');
+  if (packGridEl) packGridEl.innerHTML = '';
 
   // Late additions — separate packing summary for urgent orders
   const urgentOrders = todayOrders.filter(o => o.urgent);
