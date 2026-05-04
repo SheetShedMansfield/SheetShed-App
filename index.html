@@ -105,6 +105,10 @@ nav { background: var(--ink); color: var(--white); display: flex; align-items: c
 .prop-card:hover { box-shadow: var(--shadow); }
 .prop-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
 .prop-name { font-weight: 600; font-size: 14px; }
+.prop-card-new { background:var(--white);border:1px solid var(--border);border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:10px;transition:box-shadow 0.15s; }
+.prop-card-new:hover { box-shadow:0 4px 16px rgba(0,0,0,0.08); }
+.prop-card-top { display:flex;align-items:flex-start;justify-content:space-between;gap:12px; }
+.prop-card-actions { display:flex;gap:8px;padding-top:10px;border-top:1px solid var(--border2); }
 .prop-owner { font-size: 12px; color: var(--ink3); margin-top: 2px; }
 .platform-badge { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.04em; }
 .plat-homhero { background: #e8f0fa; color: #1e4a7a; }
@@ -518,7 +522,7 @@ nav { background: var(--ink); color: var(--white); display: flex; align-items: c
     <button class="btn btn-outline btn-sm" onclick="openBulkImport()">Bulk import</button>
     <button class="btn btn-primary btn-sm" onclick="openAddProp()">+ Add property</button>
   </div>
-  <div class="prop-list" id="prop-grid"></div>
+  <div class="prop-list" id="prop-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;"></div>
 </div>
 
 <!-- CUSTOMERS -->
@@ -545,36 +549,36 @@ nav { background: var(--ink); color: var(--white); display: flex; align-items: c
 
       <div class="price-setting-card" style="margin-bottom:14px;">
         <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink3);padding:6px 0 8px;">Flat sheets</div>
-        <div class="psc-row"><div class="psc-label">King flat sheet<span>Supplier: $${RATES.sheetKing.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-sheetKing" value="3.50" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
-        <div class="psc-row"><div class="psc-label">King satin stripe sheet<span>Supplier: $${RATES.sheetKingSatin.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-sheetKingSatin" value="4.00" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
-        <div class="psc-row"><div class="psc-label">Queen flat sheet<span>Supplier: $${RATES.sheetQueen.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-sheetQueen" value="3.50" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
-        <div class="psc-row"><div class="psc-label">Queen satin stripe sheet<span>Supplier: $${RATES.sheetQueenSatin.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-sheetQueenSatin" value="4.00" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
-        <div class="psc-row"><div class="psc-label">King single flat sheet<span>Supplier: $${RATES.sheetKingSingle.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-sheetKingSingle" value="3.20" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
-        <div class="psc-row"><div class="psc-label">Single flat sheet<span>Supplier: $${RATES.sheetSingle.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-sheetSingle" value="3.20" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">King flat sheet</div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-sheetKing" value="3.50" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">King satin stripe sheet</div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-sheetKingSatin" value="4.00" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">Queen flat sheet</div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-sheetQueen" value="3.50" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">Queen satin stripe sheet</div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-sheetQueenSatin" value="4.00" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">King single flat sheet</div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-sheetKingSingle" value="3.20" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">Single flat sheet</div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-sheetSingle" value="3.20" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
       </div>
 
       <div class="price-setting-card" style="margin-bottom:14px;">
         <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink3);padding:6px 0 8px;">Fitted sheets</div>
-        <div class="psc-row"><div class="psc-label">King fitted sheet<span>Supplier: $${RATES.fittedKing.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-fittedKing" value="2.50" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
-        <div class="psc-row"><div class="psc-label">Queen fitted sheet<span>Supplier: $${RATES.fittedQueen.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-fittedQueen" value="2.50" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
-        <div class="psc-row"><div class="psc-label">King single fitted sheet<span>Supplier: $${RATES.fittedKingSingle.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-fittedKingSingle" value="2.50" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
-        <div class="psc-row"><div class="psc-label">Fitted standard single (bunk)<span>Supplier: $${RATES.sheetSingleFitted.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-sheetSingleFitted" value="3.50" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">King fitted sheet</div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-fittedKing" value="2.50" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">Queen fitted sheet</div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-fittedQueen" value="2.50" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">King single fitted sheet</div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-fittedKingSingle" value="2.50" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">Fitted standard single (bunk)</div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-sheetSingleFitted" value="3.50" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
       </div>
 
       <div class="price-setting-card" style="margin-bottom:14px;">
         <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink3);padding:6px 0 8px;">Doona covers</div>
-        <div class="psc-row"><div class="psc-label">King doona cover<span>Supplier: $${RATES.doonaKing.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-doonaKing" value="5.00" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
-        <div class="psc-row"><div class="psc-label">Queen doona cover<span>Supplier: $${RATES.doonaQueen.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-doonaQueen" value="5.00" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
-        <div class="psc-row"><div class="psc-label">King single doona cover<span>Supplier: $${RATES.doonaKingSingle.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-doonaKingSingle" value="4.50" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">King doona cover</div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-doonaKing" value="5.00" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">Queen doona cover</div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-doonaQueen" value="5.00" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">King single doona cover</div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-doonaKingSingle" value="4.50" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
       </div>
 
       <div class="price-setting-card" style="margin-bottom:14px;">
         <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink3);padding:6px 0 8px;">Towels & other</div>
-        <div class="psc-row"><div class="psc-label">Pillowcase<span>Supplier: $${RATES.pillowcase.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-pillowcase" value="1.80" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
-        <div class="psc-row"><div class="psc-label">Premium bath towel<span>Supplier: $${RATES.bathTowel.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-bathTowel" value="2.00" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
-        <div class="psc-row"><div class="psc-label">Hand towel<span>Supplier: $${RATES.handTowel.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-handTowel" value="1.80" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
-        <div class="psc-row"><div class="psc-label">Bathmat<span>Supplier: $${RATES.bathmat.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-bathmat" value="1.80" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
-        <div class="psc-row"><div class="psc-label">Tea towel<span>Supplier: $${RATES.teaTowel.toFixed(2)}</span></div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-teaTowel" value="1.80" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">Pillowcase</div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-pillowcase" value="1.80" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">Premium bath towel</div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-bathTowel" value="2.00" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">Hand towel</div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-handTowel" value="1.80" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">Bathmat</div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-bathmat" value="1.80" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
+        <div class="psc-row"><div class="psc-label">Tea towel</div><div class="psc-control" style="min-width:auto;gap:6px;"><span style="color:var(--ink3);font-size:13px;">$</span><input type="number" class="my-price-input" id="mp-teaTowel" value="1.80" min="0" step="0.05" oninput="saveMyPrices();updatePricing()"></div></div>
       </div>
 
       <div class="price-setting-card" style="margin-bottom:14px;background:var(--accent-light);border-color:var(--ink);">
@@ -1536,18 +1540,20 @@ function renderProperties(filter = '') {
     const beds = (p.beds || []).map(b => `<span class="bed-pill">${b.n} ${b.type}</span>`).join('');
     const platClass = { homhero:'plat-homhero', airbnb:'plat-airbnb', guesty:'plat-guesty', stayz:'plat-stayz' }[p.platform] || 'plat-manual';
     const delivLabel = { none:'Cleaner collects', 'bulk-pickup':'Bulk pick-up', 'bulk-delivery':'Bulk delivery', property:'Delivery to property', cleaner:'Delivery to cleaner' }[p.delivery] || '';
-    return `<div class="prop-row">
-      <div style="flex:1;min-width:200px;">
-        <div class="prop-name">${p.name}</div>
-        <div class="prop-meta">${c?.name || 'Unknown'} · ${p.address || 'No address'}</div>
-        <div style="margin-top:4px;">${beds}</div>
-        ${delivLabel ? `<div style="font-size:11px;color:var(--ink3);margin-top:3px;">${delivLabel}</div>` : ''}
+    return `<div class="prop-card-new">
+      <div class="prop-card-top">
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
+            <div class="prop-name" style="font-size:16px;">${p.name}</div>
+            <span class="platform-badge ${platClass}">${platformLabels[p.platform] || p.platform}</span>
+            ${(p.ical || p.ical_url) ? '<span style="font-size:11px;color:var(--green);font-weight:600;">✓ iCal</span>' : '<span style="font-size:11px;color:var(--amber);">No iCal</span>'}
+          </div>
+          <div style="font-size:12px;color:var(--ink3);margin-bottom:8px;">${c?.name || 'Unknown'} · ${p.address || 'No address'}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">${beds}</div>
+          ${delivLabel ? `<div style="font-size:11px;color:var(--ink3);margin-top:6px;">📦 ${delivLabel}</div>` : ''}
+        </div>
       </div>
-      <span class="platform-badge ${platClass}">${platformLabels[p.platform] || p.platform}</span>
-      <div style="font-size:11px;text-align:right;">
-        ${(p.ical || p.ical_url) ? '<span style="color:var(--green);font-weight:600;">✓ iCal connected</span>' : '<span style="color:var(--amber);">No iCal</span>'}
-      </div>
-      <div style="display:flex;gap:6px;">
+      <div class="prop-card-actions">
         <button class="btn btn-outline btn-sm" onclick="editProperty('${p.id}')">Edit</button>
         <button class="btn btn-outline btn-sm" style="color:var(--red);" onclick="deleteProperty('${p.id}')">Remove</button>
       </div>
@@ -1874,7 +1880,8 @@ async function saveProperty() {
       showToast('Property saved ✓');
     }
     closeModal('modal-add-prop');
-    renderProperties();
+    try { renderProperties(); } catch(e) { console.error('renderProperties error:', e); }
+    try { if (document.getElementById('page-pricing').classList.contains('active')) updatePropertyCost(); } catch(e) {}
   } catch(e) {
     showToast('Error: ' + e.message);
     console.error('saveProperty error:', e);
@@ -2389,10 +2396,24 @@ function updatePropertyCost() {
     return { b, cost };
   });
 
-  const bathmats   = Math.ceil(totalBeds/2) * RATES.bathmat;
-  const teaTowels  = 2 * RATES.teaTowel;
-  const totalCost  = linenCost + bathmats + teaTowels;
-  const yourCharge = p.beds.reduce((s,b) => s + bedLinenCostCharge(b), 0) + MY_PRICES.serviceCharge;
+  // Extras from property manual config
+  const extras = p.extras || {};
+  const extrasCost =
+    (extras.bathTowels  || 0) * RATES.bathTowel +
+    (extras.handTowels  || 0) * RATES.handTowel +
+    (extras.pillowCases || 0) * RATES.pillowcase +
+    (extras.bathmats    || 0) * RATES.bathmat +
+    (extras.teaTowels   || 0) * RATES.teaTowel;
+
+  const extrasCharge =
+    (extras.bathTowels  || 0) * MY_PRICES.bathTowel +
+    (extras.handTowels  || 0) * MY_PRICES.handTowel +
+    (extras.pillowCases || 0) * MY_PRICES.pillowcase +
+    (extras.bathmats    || 0) * MY_PRICES.bathmat +
+    (extras.teaTowels   || 0) * MY_PRICES.teaTowel;
+
+  const totalCost  = linenCost + extrasCost;
+  const yourCharge = p.beds.reduce((s,b) => s + bedLinenCostCharge(b), 0) + extrasCharge + MY_PRICES.serviceCharge;
   const profit     = yourCharge - totalCost;
 
   container.innerHTML = `
@@ -2415,10 +2436,17 @@ function updatePropertyCost() {
           </div>
           <span style="font-weight:700;font-size:13px;">$${cost.toFixed(2)}</span>
         </div>`).join('')}
+      ${extrasCost > 0 ? `
       <div style="padding:10px 16px;border-bottom:1px solid var(--border2);display:flex;justify-content:space-between;font-size:13px;color:var(--ink3);">
-        <span>${Math.ceil(totalBeds/2)} bathmat${Math.ceil(totalBeds/2)!==1?'s':''}, 2 tea towels</span>
-        <span>$${(bathmats+teaTowels).toFixed(2)}</span>
-      </div>
+        <span>Extras: ${[
+          extras.bathTowels  ? extras.bathTowels  + ' bath towel' + (extras.bathTowels>1?'s':'')  : '',
+          extras.handTowels  ? extras.handTowels  + ' hand towel' + (extras.handTowels>1?'s':'')  : '',
+          extras.pillowCases ? extras.pillowCases + ' pillow case' + (extras.pillowCases>1?'s':'') : '',
+          extras.bathmats    ? extras.bathmats    + ' bathmat' + (extras.bathmats>1?'s':'')        : '',
+          extras.teaTowels   ? extras.teaTowels   + ' tea towel' + (extras.teaTowels>1?'s':'')    : '',
+        ].filter(Boolean).join(', ')}</span>
+        <span>$${extrasCost.toFixed(2)}</span>
+      </div>` : ''}
       <div style="padding:12px 16px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;background:var(--bg);">
         <div style="text-align:center;">
           <div style="font-size:11px;color:var(--ink3);margin-bottom:2px;">Hire cost</div>
